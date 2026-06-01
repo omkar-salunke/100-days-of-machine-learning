@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor, troubleshoot and optimize workloads in Azure Databricks</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Monitor, troubleshoot and optimize workloads in Azure Databricks</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/1-introduction">https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/1-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Running data workloads in Azure Databricks at scale requires more than setting up clusters and writing pipelines—it demands continuous attention to resource consumption, job health, and performance optimization. When compute costs climb unexpectedly, jobs fail without clear explanations, or queries that once ran quickly now take hours, you need systematic approaches to identify problems and apply targeted fixes.</p>
+<p>Azure Databricks provides comprehensive tools for monitoring and troubleshooting across all compute types. <strong>Cluster metrics</strong> reveal CPU, memory, and network utilization patterns that help you right-size resources. <strong>The Spark UI</strong> exposes job execution details, stage-level metrics, and task distributions that pinpoint bottlenecks. <strong>System tables</strong> enable you to query billing data and usage patterns directly, supporting cost attribution and chargeback processes.</p>
+<p>Performance issues often trace back to common patterns: <strong>data skew</strong> that overloads a few tasks while others sit idle, <strong>memory spill</strong> that forces expensive disk operations, <strong>excessive shuffle</strong> that moves data unnecessarily across the network, or <strong>caching problems</strong> that cause repeated reads from remote storage. Understanding how to investigate these issues using the DAG visualization, Spark UI metrics, and query profiles helps you restore performance efficiently.</p>
+<p>For enterprise-scale environments, <strong>log streaming to Azure Log Analytics</strong> centralizes diagnostic and audit data from across your Azure Databricks workspaces. This integration enables powerful KQL queries for troubleshooting, proactive alerting for critical events, and comprehensive visibility into platform operations.</p>
+<p>Throughout this module, you explore cluster consumption monitoring, Lakeflow Jobs troubleshooting, Spark job diagnostics, performance optimization techniques, and log streaming configuration to build the skills needed to keep your Azure Databricks workloads running reliably and cost-effectively.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Monitor and manage cluster consumption</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/2-monitor-manage-cluster-consumption">https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/2-monitor-manage-cluster-consumption</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Monitor and manage cluster consumption</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When clusters run longer than needed or consume more resources than necessary, costs can escalate quickly. As a data engineer, you're responsible for <strong>monitoring cluster usage</strong> and taking action to balance <strong>performance requirements</strong> with <strong>cost efficiency</strong>.</p>
+<h2 id="understand-the-impact-of-cluster-consumption">Understand the impact of cluster consumption</h2>
+<p>Unmonitored clusters present real financial risks. A single <strong>idle cluster</strong> running overnight or over a weekend can generate significant unexpected charges. These costs compound when multiple teams work across shared workspaces without visibility into resource usage patterns.</p>
+<p>At the same time, <strong>under-provisioned clusters</strong> create their own problems. Jobs take longer to complete, users experience delays, and critical workflows miss their deadlines. The goal isn't simply to minimize costs—it's to <strong>match resources precisely to workload requirements</strong>.</p>
+<p><a data-linktype="relative-path" href="media/2-understand-impact-cluster-consumption.png#lightbox">
+<img alt="Diagram explaining the impact of cluster consumption." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/2-understand-impact-cluster-consumption.png"/>
+</a>
+</p>
+<p>Monitoring cluster consumption helps you <strong>identify waste</strong> before it impacts budgets and <strong>spot performance bottlenecks</strong> before they affect business operations. Regular monitoring also establishes <strong>baselines</strong> that help you plan capacity and justify infrastructure decisions.</p>
+<h2 id="monitor-compute-metrics">Monitor compute metrics</h2>
+<p>Azure Databricks provides a <strong>native metrics interface</strong> for all-purpose and job compute resources. You access these metrics by selecting <strong>Compute</strong> in the sidebar, choosing your compute resource, and selecting the <strong>Metrics</strong> tab.</p>
+<p>The metrics interface displays three categories of data:</p>
+<p><strong>Hardware metrics</strong> show how physical resources are used. <strong>CPU utilization</strong> reveals whether your cluster is working hard or sitting idle. <strong>Memory utilization</strong> indicates whether you need to scale up or can reduce instance sizes. <strong>Network throughput</strong> helps identify data transfer bottlenecks.</p>
+<p><strong>Spark metrics</strong> focus on job execution patterns. <strong>Active tasks</strong> show current parallelism levels. Failed and completed task counts reveal job health. <strong>Shuffle read and write metrics</strong> expose data movement between stages that can indicate performance issues.</p>
+<p><strong>GPU metrics</strong> (available on Databricks Runtime ML 13.3 and later) track specialized compute utilization when running machine learning workloads.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/2-cluster-metrics.png#lightbox">
+<img alt="Screenshot of Azure Databricks cluster metrics." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/2-cluster-metrics.png"/>
+</a>
+</span>
+</p>
+<p>You can filter metrics by time range using the date picker, viewing data from the past 30 days. Select individual nodes from the Compute dropdown to investigate specific worker performance, or view aggregated metrics across all nodes to understand overall cluster behavior.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Serverless compute for notebooks and jobs uses query insights instead of the metrics UI. The monitoring approach differs, but the goal remains the same: understanding resource consumption.</p>
+</div>
+<h2 id="monitor-sql-warehouse-performance">Monitor SQL warehouse performance</h2>
+<p>SQL warehouses have their own monitoring interface optimized for query analytics. Select a SQL warehouse and then select the <strong>Monitoring</strong> tab to view performance data.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/2-warehouse-monitoring-tab.png#lightbox">
+<img alt="Screenshot of the Azure Databricks SQL warehouse monitoring tab." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/2-warehouse-monitoring-tab.png"/>
+</a>
+</span>
+</p>
+<p><strong>Live statistics</strong> at the top of the page show warehouse status, running queries, queued queries, and current cluster count. These metrics update in real-time and help you quickly assess whether the warehouse is keeping up with demand.</p>
+<p>The <strong>peak query count</strong> chart displays the maximum number of concurrent queries—both running and queued—during your selected time frame. Spikes in this chart often indicate periods where the warehouse struggled to keep up with demand.</p>
+<p>The <strong>running clusters</strong> chart shows how many clusters were allocated over time. If you've enabled <strong>autoscaling</strong>, you'll see this number fluctuate based on query load. Clusters that remain at maximum capacity for extended periods suggest you might need to increase the maximum cluster count.</p>
+<p>The <strong>query history</strong> table lists individual queries with their start time, duration, and the user who ran them. Use filters to find <strong>long-running queries</strong> or identify users whose queries consume disproportionate resources.</p>
+<h2 id="configure-auto-termination-and-autoscaling">Configure auto-termination and autoscaling</h2>
+<p>Monitoring reveals patterns; configuration changes act on those patterns. Two key settings help you manage cluster consumption automatically.</p>
+<p><strong>Auto-termination</strong> shuts down idle clusters after a specified period of inactivity. For development environments, <strong>30-60 minutes</strong> is typically appropriate. The cluster terminates when no commands have run for the specified duration, preventing costs from accumulating overnight or over weekends.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/2-configure-auto-termination-autoscaling.png#lightbox">
+<img alt="Screenshot showing cluster auto-termination and autoscaling settings." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/2-configure-auto-termination-autoscaling.png"/>
+</a>
+</span>
+</p>
+<p>To configure auto-termination, enable the setting during cluster creation or edit an existing cluster. Enter the number of minutes of inactivity before termination. Keep in mind that a cluster is considered inactive only when all commands—including Spark jobs, Structured Streaming, and JDBC calls—have finished executing.</p>
+<p><strong>Autoscaling</strong> dynamically adjusts the number of worker nodes based on workload demand. Configure <strong>minimum and maximum node counts</strong> based on your workload analysis. The cluster adds workers during intensive processing and removes them during lighter periods, reducing costs by <strong>20-40%</strong> compared to fixed-size clusters.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Auto-termination doesn't monitor DStreams activity. If you run DStream workloads, either disable auto-termination or migrate to Structured Streaming.</p>
+</div>
+<h2 id="track-costs-with-budgets-and-system-tables">Track costs with budgets and system tables</h2>
+<p>Beyond real-time monitoring, you need visibility into actual spending. Azure Databricks provides several tools for cost tracking.</p>
+<p><strong>Budgets</strong> let you set financial targets and track spending across your account. Configure <strong>email notifications</strong> when spending approaches or exceeds your budget limits. You can apply filters to track spending by team, project, or workspace.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/2-create-budget.png#lightbox">
+<img alt="Screenshot showing the account console &gt; usage &gt; create budget." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/2-create-budget.png"/>
+</a>
+</span>
+</p>
+<p><strong>System tables</strong>, specifically <code>system.billing.usage</code>, provide detailed usage data you can query directly. Join this table with <code>compute.clusters</code> to identify which cluster owners consume the most <strong>Databricks Units (DBUs)</strong>. Use <strong>custom tags</strong> to attribute costs to specific business units or projects.</p>
+<p><strong>Tags</strong> propagate from clusters and workspaces to billing records, enabling accurate <strong>chargeback</strong>. Apply tags consistently from the start—you can't add tags retroactively to historical usage. Common tags include business unit, project, and environment (development, staging, production).</p>
+<div class="NOTE">
+<p>Note</p>
+<p>You need <strong>account admin permissions</strong> to create and manage budgets. Workspace admins can view budgets but typically cannot create them.</p>
+</div>
+<p>The following example queries help you analyze usage patterns:</p>
+<p><strong>Daily DBU consumption trend</strong> - See how your compute usage changes day by day. This helps you spot unusual spikes or identify patterns like higher usage on certain weekdays.</p>
+<pre><code class="lang-sql">SELECT
+  usage_date,
+  sum(usage_quantity) as DBUs_Consumed
+FROM system.billing.usage
+WHERE sku_name = "STANDARD_ALL_PURPOSE_COMPUTE"
+GROUP BY usage_date
+ORDER BY usage_date ASC
+</code></pre>
+<p><strong>Which jobs consumed the most DBUs</strong> - Find out which scheduled jobs are your biggest cost drivers. Use this to prioritize optimization efforts on the most expensive workloads.</p>
+<pre><code class="lang-sql">SELECT
+  usage_metadata.job_id as job_id,
+  sum(usage_quantity) as total_dbus
+FROM system.billing.usage
+WHERE usage_metadata.job_id IS NOT NULL
+GROUP BY job_id
+ORDER BY total_dbus DESC
+</code></pre>
+<p><strong>Attribute costs to cluster owners</strong> - Identify which team members or service accounts are responsible for the most resource consumption. This supports chargeback discussions and helps teams understand their footprint.</p>
+<pre><code class="lang-sql">SELECT
+  c.owned_by,
+  sum(u.usage_quantity) as total_dbus
+FROM system.billing.usage u
+JOIN system.compute.clusters c
+  ON u.usage_metadata.cluster_id = c.cluster_id
+WHERE u.usage_metadata.cluster_id IS NOT NULL
+GROUP BY c.owned_by
+ORDER BY total_dbus DESC
+</code></pre>
+<p><strong>Usage by custom tag</strong> - Break down costs by project, department, or any other tag you've applied to your resources. This is essential for accurate cost allocation across business units.</p>
+<pre><code class="lang-sql">SELECT
+  sku_name,
+  usage_unit,
+  sum(usage_quantity) as total_usage
+FROM system.billing.usage
+WHERE custom_tags['project'] = 'sales-analytics'
+GROUP BY sku_name, usage_unit
+</code></pre>
+<p>Reviewing monthly cost reports helps you catch anomalies early. Investigate unexpected increases before they become significant budget problems.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Serverless compute for notebooks and jobs uses a different cost model. In <code>system.billing.usage</code>, filter by <code>product_features.is_serverless = true</code> to isolate serverless usage. The <code>identity_metadata.run_as</code> column identifies which user or service principal ran the workload. Because of the distributed architecture, multiple billing records can appear for a single serverless job run—always use <code>SUM()</code> rather than expecting a single row per run.</p>
+</div>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Troubleshoot and repair Lakeflow Jobs</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/3-troubleshoot-repair-lakeflow-jobs">https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/3-troubleshoot-repair-lakeflow-jobs</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Troubleshoot and repair Lakeflow Jobs</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When a Lakeflow Job fails, you must quickly identify the problem, understand the root cause, and take corrective action. Navigating failures efficiently keeps your pipelines running and your downstream consumers satisfied.</p>
+<h2 id="understand-job-failure-states">Understand job failure states</h2>
+<p>Before you can fix a problem, you need to recognize the different ways a job run can end unsuccessfully. Azure Databricks determines job run status based on the outcome of <em>leaf tasks</em>—tasks with no downstream dependencies.</p>
+<p>A job run can result in several states:</p>
+<ul>
+<li><strong>Failed</strong>: One or more leaf tasks didn't complete successfully.</li>
+<li><strong>Succeeded with failures</strong>: Some tasks failed, but all leaf tasks completed successfully.</li>
+<li><strong>Skipped</strong>: The job didn't run because it exceeded maximum concurrent runs for the job or workspace.</li>
+<li><strong>Timed Out</strong>: The job exceeded its configured maximum duration.</li>
+<li><strong>Canceled</strong>: A user or automated process stopped the run.</li>
+</ul>
+<p>Individual tasks can also show a <strong>Disabled</strong> status. A task is disabled when you explicitly disable it in the job settings, or when Lakeflow Jobs automatically disables it because an upstream dependency task is disabled. Disabled tasks appear with a circle-off icon in the DAG view. During a repair run, the run state—not the disabled state—determines what gets re-run; you can force a disabled task to run by including it explicitly in the repair request.</p>
+<p>Understanding these states helps you prioritize your response. A failed leaf task requires immediate attention, while a skipped run might indicate a scheduling conflict that resolves itself.</p>
+<h2 id="identify-the-cause-of-failure">Identify the cause of failure</h2>
+<p>The Lakeflow Jobs UI provides tools to pinpoint exactly where and why a job failed. The matrix view in the <strong>Runs</strong> tab displays a visual history of runs, with each cell representing a task's status across multiple runs.</p>
+<p>To investigate a failed job:</p>
+<ol>
+<li>Select <strong>Jobs &amp; Pipelines</strong> in the sidebar.</li>
+<li>Select the job name to open its details.</li>
+<li>In the <strong>Runs</strong> tab, hover over a failed task (shown in red) to see metadata including start time, end time, status, duration, and error messages.</li>
+<li>Select the failed task to open the <strong>Task run details</strong> page with complete output and logs.</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/3-identify-cause-failure.png#lightbox">
+<img alt="Screenshot showing a failed task." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/3-identify-cause-failure.png"/>
+</a>
+</span>
+</p>
+<p>The matrix view helps you identify patterns. If the same task fails repeatedly, the issue likely relates to that task's code or configuration. If failures appear random across different tasks, you might have a cluster or resource problem.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Use the <strong>Diagnose Error</strong> button in the Jobs UI to get help from Genie Code. This feature analyzes error messages and provides suggestions for common issues.</p>
+</div>
+<h2 id="fix-common-failure-causes">Fix common failure causes</h2>
+<p>Once you identify the failing task, you can address the underlying problem. Common causes and their solutions include:</p>
+<p><strong>Configuration issues</strong>: If the failure relates to task settings, select <strong>Edit task</strong> to modify the configuration. You can update notebook paths, change parameters, or adjust timeout values.</p>
+<p><strong>Insufficient compute resources</strong>: Resource-related failures might require cluster changes. You can modify the cluster configuration to add workers, change instance types, or switch to a shared all-purpose cluster. If your workspace has resource quotas, you might need an administrator to increase limits.</p>
+<p><strong>Maximum concurrent runs exceeded</strong>: When jobs queue up behind other runs, you have two options. Wait for existing runs to complete, or increase the <strong>Maximum concurrent runs</strong> setting in the job configuration.</p>
+<p><strong>External dependencies</strong>: Sometimes failures originate outside your job—an unavailable data source, a network issue, or an upstream process that hasn't completed. After the external issue resolves, you can use the repair feature to re-run the job without starting from scratch.</p>
+<h2 id="repair-failed-job-runs">Repair failed job runs</h2>
+<p>The repair feature allows you to re-run only the unsuccessful tasks and their dependents, saving time and compute resources compared to restarting the entire job.</p>
+<p>To repair a failed run:</p>
+<ol>
+<li>Select the failed run in the <strong>Start time</strong> column or from the matrix view.</li>
+<li>Select <strong>Repair run</strong> to open the repair dialog.</li>
+<li>Review the list of tasks that will re-run—this includes all failed tasks plus any dependent tasks.</li>
+<li>Optionally, modify task parameters in the dialog. These values override the original settings for this repair run only.</li>
+<li>Select <strong>Repair run</strong> to start.</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/3-repair-failed-task.png#lightbox">
+<img alt="Screenshot of the failed task." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/3-repair-failed-task.png"/>
+</a>
+</span>
+</p>
+<p>After the repair completes, the matrix view adds a new column showing the repaired run results. Tasks that were red (failed) should now appear green (successful).</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Repair is available only for jobs with two or more tasks. If tasks share a job cluster, the repair creates a new cluster instance (for example, <code>my_job_cluster_v1</code>) so you can compare settings between the original and repaired runs.</p>
+</div>
+<h2 id="stop-and-restart-job-runs">Stop and restart job runs</h2>
+<p>Sometimes you need to halt a running job or restart one that's stuck. The Jobs UI provides controls for both actions.</p>
+<p><strong>To stop an active run</strong>: From the <strong>Runs</strong> tab, active runs display a stop button. Select this button to cancel the specific run. You can also select <strong>Cancel runs</strong> or <strong>Cancel all queued runs</strong> from the dropdown menu to stop multiple runs at once.</p>
+<p><strong>To restart continuous jobs</strong>: Continuous jobs that fail repeatedly enter an exponential backoff state, where Azure Databricks waits progressively longer between retry attempts. The <strong>Job details</strong> panel shows the number of consecutive failures and the time until the next retry. Select <strong>Restart run</strong> to cancel the active run, reset the retry period, and immediately start a new run.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/3-stop-run.png#lightbox">
+<img alt="Screenshot showing how to stop an active run." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/3-stop-run.png"/>
+</a>
+</span>
+</p>
+<p>Use the stop function when a job consumes excessive resources, processes incorrect data, or needs immediate intervention. Use restart when you've fixed an underlying issue and want to bypass the exponential backoff waiting period.</p>
+<h2 id="monitor-job-health-proactively">Monitor job health proactively</h2>
+<p>Reactive troubleshooting works, but proactive monitoring prevents many failures from impacting your workflows. Consider these practices:</p>
+<ul>
+<li><strong>Configure notifications</strong>: Set up email, Slack, or webhook alerts for job failures so you learn about issues immediately.</li>
+<li><strong>Review run history regularly</strong>: The matrix view reveals patterns over time. Frequent failures in specific tasks indicate areas needing attention.</li>
+<li><strong>Use system tables</strong>: Query the <code>system.lakeflow</code> schema to analyze job performance across your account and identify trends before they become critical issues.</li>
+</ul>
+<p>Combining proactive monitoring with efficient troubleshooting skills helps you maintain reliable data pipelines that your organization can depend on.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Troubleshoot Spark jobs and notebooks</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/4-troubleshoot-repair-spark-jobs-notebooks">https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/4-troubleshoot-repair-spark-jobs-notebooks</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Troubleshoot Spark jobs and notebooks</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When a Spark job fails or runs slower than expected, your ability to quickly diagnose and resolve the issue directly impacts business operations. As a data engineer, you need a systematic approach to investigate problems, identify root causes, and take corrective action.</p>
+<h2 id="understand-common-causes-of-spark-job-failures">Understand common causes of Spark job failures</h2>
+<p>Spark jobs can fail for various reasons, and understanding these patterns helps you focus your investigation. The most frequent causes fall into three categories: code errors, resource constraints, and environmental issues.</p>
+<p><a data-linktype="relative-path" href="media/4-understand-common-causes-failures.png#lightbox">
+<img alt="Diagram explaining the common causes of Spark job failures." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/4-understand-common-causes-failures.png"/>
+</a>
+</p>
+<p><strong>Code-related failures</strong> include syntax errors in notebooks, incorrect transformations, or data quality issues like schema mismatches. These failures typically produce error messages that point directly to the problematic code.</p>
+<p><strong>Resource bottlenecks</strong> occur when jobs consume more CPU, memory, or disk than available. You might see out-of-memory (OOM) errors, slow shuffle operations, or tasks that fail repeatedly. These issues often require adjusting cluster configuration or optimizing your code.</p>
+<p><strong>Environmental issues</strong> involve cluster startup failures, network problems, or external data source unavailability. A cluster might fail to acquire cloud instances due to account limits or spot instance reclamation.</p>
+<h2 id="use-the-spark-ui-to-diagnose-issues">Use the Spark UI to diagnose issues</h2>
+<p>The Spark UI provides detailed visibility into job execution and is your primary diagnostic tool. To access it, navigate to your cluster's page and select the <strong>Spark UI</strong> tab.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/4-use-spark-user-interface.png#lightbox">
+<img alt="Screenshot of the Spark user interface." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/4-use-spark-user-interface.png"/>
+</a>
+</span>
+</p>
+<p>Start your investigation with the <strong>Jobs Timeline</strong>, which shows the execution sequence of all Spark jobs. Look for three key patterns:</p>
+<p><strong>Failing jobs</strong> appear with a red status indicator. Select any failed job to view the failed stage and specific failure reason. The error description often contains links to more detailed information about task-level failures.</p>
+<p><strong>Long-running jobs</strong> dominate the timeline with extended execution times. A single job taking significantly longer than others is a prime target for investigation. Select the job to examine its stages and identify bottlenecks.</p>
+<p><strong>Gaps in execution</strong> represent periods where no Spark work occurred. Short gaps are normal as the driver coordinates tasks, but gaps longer than a minute in the middle of a pipeline suggest the driver might be overloaded or a cluster malfunction occurred.</p>
+<p>After identifying a problematic job, drill into its longest stage to examine task-level metrics. Look at the <strong>Input</strong>, <strong>Output</strong>, <strong>Shuffle Read</strong>, and <strong>Shuffle Write</strong> columns to understand data movement patterns.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>The number of tasks in a stage provides important diagnostic information. A stage with only one task often indicates insufficient parallelism, while uneven task durations suggest data skew.</p>
+</div>
+<h2 id="identify-and-resolve-resource-bottlenecks">Identify and resolve resource bottlenecks</h2>
+<p>Resource bottlenecks manifest differently depending on which resource is constrained. The compute metrics interface helps you identify these patterns by showing CPU, memory, and network utilization across nodes.</p>
+<p><a data-linktype="relative-path" href="media/4-identify-resolve-resource-bottlenecks.png#lightbox">
+<img alt="Diagram explaining how to identify and resolve resource bottlenecks." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/4-identify-resolve-resource-bottlenecks.png"/>
+</a>
+</p>
+<p><strong>Memory pressure</strong> appears as high memory utilization across workers or the driver. In the Spark UI, look for spill indicators showing data being written to disk because memory is insufficient. You can address memory issues by increasing worker instance sizes, reducing partition counts, or optimizing transformations to minimize data held in memory.</p>
+<p><strong>CPU constraints</strong> show as high CPU utilization with long task execution times despite adequate I/O throughput. Consider enabling Photon acceleration for compatible workloads or scaling out with additional worker nodes.</p>
+<p><strong>Network bottlenecks</strong> appear as high shuffle read/write volumes with slow execution. Reduce network overhead by filtering data earlier in your pipeline, using broadcast joins for small tables, or repartitioning data to minimize cross-node transfers.</p>
+<p>To access compute metrics, select your cluster from the <strong>Compute</strong> page and select the <strong>Metrics</strong> tab. The <strong>Server load distribution</strong> visualization uses color coding—red indicates heavily loaded nodes, while blue shows idle resources. If the driver node appears red while workers are blue, the driver is overloaded and may need a larger instance type.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/4-server-metrics.png#lightbox">
+<img alt="Screenshot of the compute metrics tab." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/4-server-metrics.png"/>
+</a>
+</span>
+</p>
+<h2 id="restart-clusters-to-resolve-environmental-issues">Restart clusters to resolve environmental issues</h2>
+<p>Sometimes a cluster encounters problems that require a restart to resolve. Resource exhaustion, malfunctioning executors, or stale container images can all necessitate a fresh cluster start.</p>
+<p>Before restarting, determine whether a restart is appropriate. Check the <strong>Event log</strong> tab on the cluster details page for lifecycle events that might explain the problem. Look for messages about instance acquisition failures, spot instance reclamation, or executor terminations.</p>
+<p>To restart a cluster using the UI, select your cluster from the <strong>Compute</strong> page and select <strong>Restart</strong>.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/4-restart-cluster.png#lightbox">
+<img alt="Screenshot showing how to restart a cluster." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/4-restart-cluster.png"/>
+</a>
+</span>
+</p>
+<p>You can also restart programmatically using the Databricks CLI:</p>
+<pre><code class="lang-bash">databricks clusters restart CLUSTER_ID
+</code></pre>
+<p>Replace <code>CLUSTER_ID</code> with your cluster's identifier, which you can find on the cluster configuration page or by running <code>databricks clusters list</code>.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Restarting a cluster terminates any running jobs and resets the Spark UI history. Save any diagnostic information you need before restarting. For long-running clusters processing streaming data, consider scheduling regular restarts during maintenance windows to ensure the cluster runs on current images.</p>
+</div>
+<p>After making changes—whether adjusting cluster configuration, fixing code, or resolving external dependencies—validate your fix by monitoring the next job run. Check that execution times return to expected levels and that no new errors appear in the Spark UI or job output.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Investigate caching, skewing, spilling, shuffle</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/5-resolve-cache-skew-spill-shuffle">https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/5-resolve-cache-skew-spill-shuffle</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Investigate caching, skewing, spilling, shuffle</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>A query that ran fine yesterday now takes three times longer. A job that processed millions of records suddenly fails with memory errors. These situations often trace back to four common performance issues: <strong>caching problems</strong>, <strong>data skew</strong>, <strong>memory spill</strong>, and <strong>excessive shuffle</strong>. Knowing how to investigate these issues using Azure Databricks diagnostic tools helps you restore performance quickly.</p>
+<h2 id="use-diagnostic-tools-to-identify-issues">Use diagnostic tools to identify issues</h2>
+<p>Azure Databricks provides three primary tools for investigating performance problems. Each offers a different perspective on what's happening during query execution.</p>
+<p>The <strong>Directed Acyclic Graph (DAG)</strong> visualizes your query's execution plan. It shows how data flows through operators and where transformations occur. By examining the DAG, you identify where bottlenecks happen and understand the sequence of operations Spark performs.</p>
+<p>The <strong>Spark UI</strong> provides detailed metrics about job execution, including stages, tasks, and resource consumption. You access it by navigating to your cluster's page and selecting <strong>Spark UI</strong>. The Jobs page shows timeline views, stage durations, and task distributions that reveal problems with skew, spill, and shuffle.</p>
+<p>The <strong>query profile</strong> offers a breakdown of query execution for SQL warehouse workloads. It highlights slow operations and shows metrics like time spent, rows processed, and memory consumption for each operator. Access it through <strong>Query History</strong> in the sidebar, then select a query and choose <strong>See query profile</strong>.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Start your investigation with the DAG to understand the overall execution flow. Then use the Spark UI or query profile to drill into specific stages where time is spent.</p>
+</div>
+<h2 id="investigate-caching-issues">Investigate caching issues</h2>
+<p>Caching keeps frequently accessed data in memory or on local disks, avoiding repeated reads from remote storage. Azure Databricks uses <strong>disk cache</strong> (formerly called Delta cache) to automatically cache Parquet data files on worker nodes. This caching happens transparently when you read data.</p>
+<p>To check if disk cache is enabled, run:</p>
+<pre><code class="lang-python">spark.conf.get("spark.databricks.io.cache.enabled")
+</code></pre>
+<p>When investigating caching problems, consider these scenarios:</p>
+<p><a data-linktype="relative-path" href="media/5-investigate-cache-issues.png#lightbox">
+<img alt="Diagram showing how to investigate caching issues." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/5-investigate-cache-issues.png"/>
+</a>
+</p>
+<p><strong>Under-caching</strong> means data is read repeatedly from remote storage when it could be served from cache. The Spark UI shows high <strong>Input</strong> values for stages that read the same data multiple times. Enable disk cache and use worker nodes with SSD storage for better performance.</p>
+<p><strong>Over-caching</strong> consumes memory that Spark needs for processing. If you see memory pressure or out-of-memory errors, review whether cached data is actually being reused. Spark cache (using <code>.cache()</code> or <code>.persist()</code>) requires explicit management, unlike automatic disk caching.</p>
+<p>Unlike automatic disk cache, Spark cache requires you to call <code>.unpersist()</code> when you no longer need the cached data:</p>
+<pre><code class="lang-python">df.unpersist()
+</code></pre>
+<h2 id="investigate-data-skew">Investigate data skew</h2>
+<p>Data skew occurs when some partitions contain significantly more data than others. This imbalance causes a few tasks to run much longer than the rest, leaving most cluster resources idle while waiting for slow tasks to complete.</p>
+<p><a data-linktype="relative-path" href="media/5-investigate-data-skew.png#lightbox">
+<img alt="Diagram showing how to investigate data skew." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/5-investigate-data-skew.png"/>
+</a>
+</p>
+<p>To identify skew in the Spark UI, navigate to the stage's page and scroll to <strong>Summary Metrics</strong>. Compare the <strong>Max</strong> duration to the <strong>75th percentile</strong>. If the Max is more than 50% higher than the 75th percentile, you likely have skew.</p>
+<p>Common causes of skew include:</p>
+<ul>
+<li><strong>Uneven key distribution</strong> in joins or aggregations (for example, a single customer ID appearing in 90% of records)</li>
+<li><strong>Null values</strong> that all route to the same partition</li>
+<li><strong>Time-based partitioning</strong> where recent dates have far more data</li>
+</ul>
+<p>To resolve skew:</p>
+<ul>
+<li><strong>Enable Adaptive Query Execution (AQE)</strong>, which dynamically handles skewed joins. Verify it's enabled:</li>
+</ul>
+<pre><code class="lang-python">spark.conf.get("spark.databricks.optimizer.adaptive.enabled")
+</code></pre>
+<ul>
+<li><p><strong>Salt skewed keys</strong> by adding a random component to distribute data more evenly across partitions.</p>
+</li>
+<li><p><strong>Broadcast smaller tables</strong> for joins where one table fits in memory to avoid shuffle-based skew.</p>
+</li>
+</ul>
+<h2 id="investigate-memory-spill">Investigate memory spill</h2>
+<p>Spill happens when Spark runs out of memory during processing and writes intermediate data to disk. This disk I/O significantly slows down operations. Spill commonly occurs during shuffle operations, aggregations, or when partitions are too large.</p>
+<p><a data-linktype="relative-path" href="media/5-investigate-memory-spill.png#lightbox">
+<img alt="Diagram explaining memory spill." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/5-investigate-memory-spill.png"/>
+</a>
+</p>
+<p>The Spark UI shows spill metrics at the top of each stage's page. Look for <strong>Shuffle Spill (Memory)</strong> and <strong>Shuffle Spill (Disk)</strong> values. Any non-zero spill indicates memory pressure.</p>
+<p>To reduce spill:</p>
+<ul>
+<li><strong>Increase partition count</strong> to reduce data per partition. Set shuffle partitions to <code>auto</code> for dynamic optimization:</li>
+</ul>
+<pre><code class="lang-python">spark.conf.set("spark.sql.shuffle.partitions", "auto")
+</code></pre>
+<ul>
+<li><p><strong>Add more memory</strong> by choosing worker nodes with higher memory-to-core ratios or increasing the number of workers.</p>
+</li>
+<li><p><strong>Optimize data size</strong> by selecting only needed columns and filtering early in your pipeline. Reducing the data processed at each stage lowers memory requirements.</p>
+</li>
+</ul>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Spill often accompanies skew. When a single partition grows too large for memory, it spills to disk. Address skew first, and spill problems often resolve as a side effect.</p>
+</div>
+<h2 id="investigate-shuffle-issues">Investigate shuffle issues</h2>
+<p>Shuffle moves data between nodes during operations like joins, aggregations, and repartitioning. While sometimes necessary, excessive shuffle is expensive because it involves serializing data, writing to disk, transferring across the network, and deserializing.</p>
+<p><a data-linktype="relative-path" href="media/5-investigate-shuffle-issues.png#lightbox">
+<img alt="Diagram explaining how to investigate shuffle issues." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/5-investigate-shuffle-issues.png"/>
+</a>
+</p>
+<p>In the Spark UI, check the <strong>Shuffle Read</strong> and <strong>Shuffle Write</strong> columns for each stage. Large shuffle values indicate significant data movement. The DAG shows where shuffle operations occur as exchange nodes.</p>
+<p>Reduce unnecessary shuffle with these approaches:</p>
+<ul>
+<li><p><strong>Filter data early</strong> before joins or aggregations to reduce the data that must be shuffled.</p>
+</li>
+<li><p><strong>Use broadcast joins</strong> when one table is small (under 30 MB by default). AQE can automatically convert sort-merge joins to broadcast joins when it detects a small table at runtime.</p>
+</li>
+<li><p><strong>Avoid unnecessary repartitioning</strong>. Each call to <code>repartition()</code> triggers a full shuffle.</p>
+</li>
+<li><p><strong>Colocate related data</strong>. If you frequently join two tables on the same key, consider bucketing or partitioning them similarly to minimize shuffle at query time.</p>
+</li>
+</ul>
+<p>The query profile in SQL warehouses visualizes shuffle as <strong>Exchange</strong> nodes in the DAG. Select these nodes to see metrics like data size and number of partitions exchanged.</p>
+<p>By systematically checking for skew and spill in the Spark UI, reviewing shuffle metrics, and understanding your caching behavior, you can diagnose most performance issues and apply targeted fixes.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Implement log streaming with Azure Log Analytics</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/6-implement-log-streaming-azure-analytics">https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/6-implement-log-streaming-azure-analytics</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Implement log streaming with Azure Log Analytics</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When your Azure Databricks environment grows beyond a single workspace, tracking what happens across clusters, jobs, and users becomes a challenge. <strong>Log streaming to Azure Log Analytics</strong> solves this by centralizing all your diagnostic and audit logs in one place, enabling powerful queries, alerts, and dashboards.</p>
+<p>In this unit, you learn how log streaming works, how to query Databricks logs in Azure Log Analytics, and how to create alerts for proactive monitoring.</p>
+<h2 id="understand-the-log-streaming-architecture">Understand the log streaming architecture</h2>
+<p>Log streaming sends <strong>diagnostic data</strong> from Azure Databricks to Azure Log Analytics in <strong>near real-time</strong>. This integration uses <strong>Azure diagnostic settings</strong>, which capture events from your Azure Databricks workspace and route them to a Log Analytics workspace.</p>
+<p>Consider a typical scenario: Your organization runs multiple Azure Databricks workspaces across different teams. Without <strong>centralized logging</strong>, investigating a failed job requires connecting to each workspace individually and searching through scattered logs. With log streaming configured, you query all events from a <strong>single interface</strong>.</p>
+<p>The data flow works as follows:</p>
+<ol>
+<li>Azure Databricks generates audit and diagnostic events for actions like cluster creation, job runs, notebook execution, and permission changes.</li>
+<li>Azure diagnostic settings capture these events and stream them to your configured destination.</li>
+<li>Log Analytics ingests the events into <strong>service-specific tables</strong>.</li>
+<li>You query, visualize, and alert on this data using <strong>Kusto Query Language (KQL)</strong>.</li>
+</ol>
+<p><a data-linktype="relative-path" href="media/6-understand-log-streaming.png#lightbox">
+<img alt="Diagram explaining log streaming architecture." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/media/6-understand-log-streaming.png"/>
+</a>
+</p>
+<p>Platform administrators typically configure the diagnostic settings through the Azure portal. As a data engineer, you focus on using the logs for monitoring and troubleshooting.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Diagnostic logs require the <strong>Azure Databricks Premium plan</strong>. Logs typically become available in Log Analytics within <strong>15 minutes</strong> of the event occurring.</p>
+</div>
+<div class="NOTE">
+<p>Note</p>
+<p>For querying audit logs within Azure Databricks itself, Databricks recommends using the <code>system.access.audit</code> system table. Log streaming to Azure Log Analytics is the preferred approach when you need cross-service centralized monitoring, KQL-based alerting, or integration with Azure Monitor and other Azure services.</p>
+</div>
+<h2 id="explore-the-azure-databricks-log-tables">Explore the Azure Databricks log tables</h2>
+<p>Azure Log Analytics organizes Azure Databricks logs into <strong>purpose-specific tables</strong>. Each table captures events from a particular service or feature, making it easier to focus your queries.</p>
+<p>The most commonly used tables include:</p>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DatabricksClusters</code></td>
+<td>Cluster creation, termination, resizing, and configuration changes</td>
+</tr>
+<tr>
+<td><code>DatabricksJobs</code></td>
+<td>Job creation, runs, failures, and schedule modifications</td>
+</tr>
+<tr>
+<td><code>DatabricksNotebook</code></td>
+<td>Notebook execution, creation, and modification events</td>
+</tr>
+<tr>
+<td><code>DatabricksSQL</code></td>
+<td>SQL warehouse operations and query-related events</td>
+</tr>
+<tr>
+<td><code>DatabricksTables</code></td>
+<td>Table creation, deletion, access, and permission change events</td>
+</tr>
+<tr>
+<td><code>DatabricksWorkspace</code></td>
+<td>Workspace-level operations and administrative actions</td>
+</tr>
+<tr>
+<td><code>DatabricksSecrets</code></td>
+<td>Secret scope and secret access events</td>
+</tr>
+</tbody>
+</table>
+<p>Each table contains <strong>standard columns</strong> for event tracking:</p>
+<ul>
+<li><code>TimeGenerated</code> - When the event occurred</li>
+<li><code>OperationName</code> - The action performed</li>
+<li><code>Identity</code> - The user or service principal that initiated the action</li>
+<li><code>SourceIPAddress</code> - Where the request originated</li>
+<li><code>RequestParams</code> - Details about the request</li>
+<li><code>Response</code> - The outcome including status codes</li>
+</ul>
+<p>Understanding these tables helps you target your queries efficiently. For job-related issues, start with <code>DatabricksJobs</code>. For security investigations, focus on <code>DatabricksSecrets</code> and <code>DatabricksTables</code>.</p>
+<h2 id="query-logs-with-kusto-query-language">Query logs with Kusto Query Language</h2>
+<p><strong>Kusto Query Language (KQL)</strong> enables you to search, filter, and analyze your Azure Databricks logs. You access Log Analytics by navigating to your workspace in the Azure portal and selecting <strong>Logs</strong> from the sidebar.</p>
+<p>Start with a simple query to explore recent job events:</p>
+<pre><code class="lang-kusto">DatabricksJobs
+| where TimeGenerated &gt; ago(24h)
+| project TimeGenerated, OperationName, Identity, SourceIPAddress
+| order by TimeGenerated desc
+| take 100
+</code></pre>
+<p>This query retrieves the most recent 100 job-related events from the past 24 hours, displaying the timestamp, operation, user, and source IP.</p>
+<h3 id="investigate-failed-job-runs">Investigate failed job runs</h3>
+<p>When jobs fail, you need to <strong>identify patterns</strong>. The following query finds all job failures and groups them by operation:</p>
+<pre><code class="lang-kusto">DatabricksJobs
+| where TimeGenerated &gt; ago(7d)
+| where Response contains "error" or Response contains "failed"
+| summarize FailureCount = count() by OperationName, bin(TimeGenerated, 1h)
+| order by FailureCount desc
+</code></pre>
+<p>This query reveals which operations fail most frequently and when failures cluster together, helping you spot <strong>systemic issues</strong>.</p>
+<h3 id="track-cluster-usage-patterns">Track cluster usage patterns</h3>
+<p>Understanding cluster behavior helps optimize costs. This query shows cluster events by type:</p>
+<pre><code class="lang-kusto">DatabricksClusters
+| where TimeGenerated &gt; ago(7d)
+| summarize EventCount = count() by OperationName
+| order by EventCount desc
+</code></pre>
+<h3 id="monitor-table-access-patterns">Monitor table access patterns</h3>
+<p>For security and compliance, track who is creating, modifying, or deleting tables across your workspaces:</p>
+<pre><code class="lang-kusto">DatabricksTables
+| where TimeGenerated &gt; ago(24h)
+| where OperationName has "create" or OperationName has "delete" or OperationName has "update"
+| project TimeGenerated, Identity, OperationName, RequestParams
+| order by TimeGenerated desc
+</code></pre>
+<div class="TIP">
+<p>Tip</p>
+<p>Save frequently used queries to the <strong>Query explorer</strong> in Log Analytics. You can organize queries into folders and share them with your team.</p>
+</div>
+<h2 id="create-alerts-for-proactive-monitoring">Create alerts for proactive monitoring</h2>
+<p>Queries help you investigate past events. <strong>Alerts</strong> notify you when specific conditions occur, enabling <strong>proactive response</strong>.</p>
+<p>To create an alert from a query:</p>
+<ol>
+<li>Run your query in Log Analytics.</li>
+<li>Select <strong>New alert rule</strong> from the toolbar.</li>
+<li>Configure the <strong>Condition</strong> with thresholds that match your requirements.</li>
+<li>Define an <strong>Action group</strong> to specify who receives notifications and how.</li>
+</ol>
+<p>Consider setting up alerts for these common scenarios:</p>
+<p><strong>Job failures exceed threshold</strong>: Alert when more than five job failures occur within an hour.</p>
+<pre><code class="lang-kusto">DatabricksJobs
+| where TimeGenerated &gt; ago(1h)
+| where Response contains "error" or Response contains "failed"
+| summarize FailureCount = count()
+| where FailureCount &gt; 5
+</code></pre>
+<p><strong>Unusual table operations</strong>: Alert when table create or delete operations occur outside business hours, which might indicate unauthorized data modification.</p>
+<pre><code class="lang-kusto">DatabricksTables
+| where TimeGenerated &gt; ago(1h)
+| where hourofday(TimeGenerated) &lt; 6 or hourofday(TimeGenerated) &gt; 20
+| where OperationName has "create" or OperationName has "delete"
+| summarize OperationCount = count() by Identity
+| where OperationCount &gt; 5
+</code></pre>
+<p><strong>Cluster creation spikes</strong>: Alert when cluster creation events exceed normal patterns, which might indicate runaway automation or unauthorized activity.</p>
+<p><strong>Action groups</strong> support multiple notification methods including email, SMS, Azure mobile app, and integration with IT service management tools.</p>
+<h2 id="apply-log-analysis-for-troubleshooting">Apply log analysis for troubleshooting</h2>
+<p>Log streaming transforms troubleshooting from <strong>reactive investigation</strong> to <strong>systematic analysis</strong>. Here are practical approaches for common scenarios:</p>
+<p><strong>Diagnosing job failures</strong>: Start with the <code>DatabricksJobs</code> table to find the failed run. Cross-reference with <code>DatabricksClusters</code> to check if the underlying cluster had issues. Review <code>DatabricksNotebook</code> logs if the job runs notebook code.</p>
+<p><strong>Investigating performance issues</strong>: Query cluster events to identify scaling patterns. Look for frequent autoscaling events that might indicate undersized initial configurations.</p>
+<p><strong>Security incident response</strong>: Use <code>DatabricksTables</code> and <code>DatabricksSecrets</code> tables to trace data access. Correlate with <code>SourceIPAddress</code> to identify unusual access locations.</p>
+<p><strong>Cost attribution</strong>: Combine cluster and job logs with Azure cost data to understand which teams or projects drive consumption.</p>
+<p>With logs centralized in Azure Log Analytics, you build comprehensive views of your Azure Databricks environment. This visibility supports both day-to-day operations and long-term planning decisions.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>7. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/9-summary">https://learn.microsoft.com/en-us/training/modules/monitor-troubleshoot-optimize-workloads-azure-databricks/9-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Monitoring, troubleshooting, and optimizing workloads ensures your Azure Databricks environment runs reliably while controlling costs. Throughout this module, you explored <strong>cluster consumption monitoring</strong> with metrics, auto-termination, and budgets, <strong>Lakeflow Jobs troubleshooting</strong> using the matrix view and repair run feature, <strong>Spark job diagnostics</strong> through the Spark UI and compute metrics, and <strong>performance optimization</strong> by investigating caching, skew, spill, and shuffle issues.</p>
+<p>Understanding how to read cluster metrics and configure auto-termination prevents idle resources from driving up costs, while autoscaling automatically adjusts worker counts to match workload demands. The <strong>system.billing.usage</strong> table enables you to query consumption data directly, supporting cost attribution and chargeback across teams and projects.</p>
+<p>When jobs fail, the Jobs UI provides tools to identify failure causes quickly—from the matrix view showing patterns across runs to the repair run feature that re-executes only failed tasks and their dependents. For Spark performance issues, the <strong>DAG visualization</strong>, <strong>Spark UI metrics</strong>, and <strong>query profile</strong> help you pinpoint bottlenecks caused by data skew, memory spill, or excessive shuffle operations.</p>
+<p>Centralizing logs through <strong>Azure Log Analytics</strong> transforms troubleshooting from reactive investigation to systematic analysis. KQL queries across DatabricksClusters, DatabricksJobs, and DatabricksUnityCatalog tables provide visibility into platform operations, while alerts notify you proactively when conditions require attention. Apply these monitoring and optimization practices to maintain performant, cost-effective data engineering solutions in Azure Databricks.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>

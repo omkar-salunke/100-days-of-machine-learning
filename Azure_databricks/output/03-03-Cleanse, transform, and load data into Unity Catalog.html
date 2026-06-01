@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleanse, transform, and load data into Unity Catalog</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Cleanse, transform, and load data into Unity Catalog</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/1-introduction">https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/1-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Raw data rarely arrives in a format ready for analysis. Missing values, duplicate records, inconsistent data types, and poorly structured datasets are common challenges that data engineers must address before data can deliver business value. Without proper cleansing and transformation, analytics results become unreliable and downstream processes fail. <strong>Unity Catalog</strong> in Azure Databricks provides the governance foundation for managing transformed data assets throughout this process.</p>
+<p>Azure Databricks offers a comprehensive toolkit for data quality and transformation work. <strong>Data profiling</strong> generates summary statistics that reveal issues like null percentages, unexpected value distributions, and data drift. <strong>Type selection</strong> ensures columns use appropriate data types for storage efficiency and query performance. <strong>Duplicate and null handling</strong> techniques let you identify and resolve common data quality problems using SQL or PySpark. <strong>Transformation operations</strong> including filtering, grouping, aggregation, joins, and set operators reshape data to meet analytical requirements.</p>
+<p>Beyond basic transformations, you'll work with advanced reshaping techniques. <strong>Denormalization</strong> flattens related tables for faster query performance. <strong>Pivoting</strong> rotates row values into columns for cross-tabular analysis, while <strong>unpivoting</strong> reverses this process for normalized data structures. Finally, <strong>loading strategies</strong> like append, overwrite, and merge ensure transformed data lands correctly in target tables—whether you're adding new records, replacing existing data, or synchronizing changes through upsert operations.</p>
+<p>By the end of this module, you'll understand how to assess data quality through profiling, apply cleansing techniques to resolve common issues, transform data using SQL and PySpark operations, and load the results into Unity Catalog tables with the appropriate strategy for each scenario.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Profile data</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/2-profile-data-summary-statistics">https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/2-profile-data-summary-statistics</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Profile data</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Before you cleanse or transform data, you need to understand what's in your tables. <strong>Profiling data</strong> means examining your datasets to generate summary statistics—counts, averages, value distributions, and null percentages—that reveal the quality and structure of your data. This foundation helps you identify issues like missing values, outliers, and unexpected patterns before they cause problems downstream.</p>
+<p>In this unit, you learn how to generate summary statistics using SQL commands and the data profiling feature in Azure Databricks.</p>
+<h2 id="generate-summary-statistics-using-sql">Generate summary statistics using SQL</h2>
+<p>Azure Databricks provides SQL commands that collect and display statistics about your tables. These statistics help the query optimizer choose efficient execution plans and give you insight into your data's characteristics.</p>
+<p><a data-linktype="relative-path" href="media/2-generate-summary-statistics-using-sql.png#lightbox"><img alt="Diagram explains generating summary statistics using SQL." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/2-generate-summary-statistics-using-sql.png"/></a></p>
+<h3 id="collect-statistics-with-analyze-table">Collect statistics with ANALYZE TABLE</h3>
+<p>The <code>ANALYZE TABLE</code> command computes statistics for a table or specific columns. These statistics include row counts, column-level metrics like minimum and maximum values, null counts, and distinct value counts.</p>
+<pre><code class="lang-sql">-- Collect basic table statistics (row count and size)
+ANALYZE TABLE sales.transactions COMPUTE STATISTICS;
+
+-- Collect statistics for specific columns
+ANALYZE TABLE sales.transactions COMPUTE STATISTICS FOR COLUMNS 
+    transaction_id, amount, customer_id;
+
+-- Collect statistics for all columns
+ANALYZE TABLE sales.transactions COMPUTE STATISTICS FOR ALL COLUMNS;
+</code></pre>
+<p>When you analyze a specific column, you get detailed metrics:</p>
+<pre><code class="lang-sql">-- View column-level statistics
+DESC EXTENDED sales.transactions amount;
+</code></pre>
+<p>This returns metrics including minimum value, maximum value, number of nulls, distinct count, average column length, and maximum column length.</p>
+<h3 id="view-statistics-with-describe-table">View statistics with DESCRIBE TABLE</h3>
+<p>The <code>DESCRIBE TABLE EXTENDED</code> command displays collected statistics alongside table metadata:</p>
+<pre><code class="lang-sql">DESCRIBE TABLE EXTENDED sales.transactions;
+</code></pre>
+<p>You can also use PySpark to retrieve table metadata and generate summary statistics:</p>
+<pre><code class="lang-python"># Generate summary statistics for numeric columns using the DataFrame API
+df = spark.table("sales.transactions")
+df.describe().show()
+</code></pre>
+<p>The <code>describe()</code> method returns count, mean, standard deviation, min, and max for numeric columns.</p>
+<p>The output shows the table's size in bytes and row count, confirming that profiling has been performed. For Unity Catalog managed tables, predictive optimization automatically runs <code>ANALYZE</code> to keep statistics current.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Run <code>ANALYZE TABLE</code> after bulk data loads or significant changes to ensure the query optimizer has accurate statistics for planning efficient queries.</p>
+</div>
+<h2 id="use-data-profiling-in-unity-catalog">Use data profiling in Unity Catalog</h2>
+<p>Beyond SQL commands, Azure Databricks provides <strong>data quality monitoring</strong> in Unity Catalog—an umbrella that covers two distinct capabilities:</p>
+<ul>
+<li><strong>Anomaly detection</strong> monitors all tables in a schema automatically. It analyzes historical patterns to evaluate each table's freshness (how recently it was updated) and completeness (whether the expected number of rows arrived). You enable it once at the schema level in Catalog Explorer, and Azure Databricks handles the rest using intelligent scanning. Use anomaly detection for broad, automated coverage across all your tables without per-table configuration.</li>
+<li><strong>Data profiling</strong> provides deep per-table statistical analysis—tracking distributions, null percentages, drift metrics, and model performance over time. You configure it individually for each table. Use data profiling for your most critical tables where you need detailed historical trends.</li>
+</ul>
+<p>For data engineering work focused on cleansing and quality, you'll use both: anomaly detection as an early-warning system across all tables, and data profiling for in-depth monitoring of key tables.</p>
+<p><a data-linktype="relative-path" href="media/2-use-data-profiling-in-unity-catalog.png#lightbox"><img alt="Diagram explains how to use data profiling in Unity Catalog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/2-use-data-profiling-in-unity-catalog.png"/></a></p>
+<h3 id="understand-profile-types">Understand profile types</h3>
+<p>Data profiling supports three analysis types, each suited to different scenarios:</p>
+<table>
+<thead>
+<tr>
+<th>Profile type</th>
+<th>Use case</th>
+<th>Key characteristics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Snapshot</strong></td>
+<td>General-purpose tables</td>
+<td>Computes metrics over the entire table with each refresh</td>
+</tr>
+<tr>
+<td><strong>Time series</strong></td>
+<td>Tables with timestamp columns</td>
+<td>Tracks metrics across time windows to detect trends</td>
+</tr>
+<tr>
+<td><strong>Inference</strong></td>
+<td>ML model inference tables</td>
+<td>Monitors model inputs, predictions, and accuracy over time</td>
+</tr>
+</tbody>
+</table>
+<p>For data engineering tasks focused on data quality, the snapshot and time series profiles are most relevant.</p>
+<h3 id="create-a-profile-using-the-ui">Create a profile using the UI</h3>
+<p>To create a profile in Catalog Explorer:</p>
+<ol>
+<li>Navigate to your table in Catalog Explorer.</li>
+<li>Select the <strong>Quality</strong> tab.</li>
+<li>If anomaly detection is <strong>not</strong> enabled for the schema, select <strong>Enable</strong>. If anomaly detection is already enabled, select <strong>Configure</strong>.</li>
+<li>In the <strong>Data Quality Monitoring</strong> dialog, in the <strong>Data profiling</strong> field, select <strong>Configure</strong>.</li>
+<li>Choose your profile type and configure options like granularity and scheduling.</li>
+</ol>
+<p>The profile generates two metric tables: a profile metrics table with summary statistics and a drift metrics table tracking distribution changes over time.</p>
+<h3 id="create-a-profile-using-the-api">Create a profile using the API</h3>
+<p>For programmatic access, use the Databricks SDK. Install or upgrade the SDK to get the current API:</p>
+<pre><code class="lang-python">%pip install "databricks-sdk&gt;=0.68.0"
+</code></pre>
+<p>Then create a snapshot profile for a table:</p>
+<pre><code class="lang-python">from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.dataquality import Monitor, DataProfilingConfig, SnapshotConfig
+
+w = WorkspaceClient()
+
+# Retrieve the table ID and schema ID required by the API
+table = w.tables.get(full_name="main.sales.transactions")
+schema = w.schemas.get(full_name="main.sales")
+
+w.data_quality.create_monitor(
+    monitor=Monitor(
+        object_type="table",
+        object_id=table.table_id,
+        data_profiling_config=DataProfilingConfig(
+            output_schema_id=schema.schema_id,
+            assets_dir="/Workspace/Users/user@example.com/monitoring",
+            snapshot=SnapshotConfig()
+        )
+    )
+)
+</code></pre>
+<p>To refresh the profile and update metrics:</p>
+<pre><code class="lang-python">from databricks.sdk.service.dataquality import Refresh
+
+w.data_quality.create_refresh(
+    object_type="table",
+    object_id=table.table_id,
+    refresh=Refresh(object_type="table", object_id=table.table_id)
+)
+</code></pre>
+<h2 id="interpret-profiling-results">Interpret profiling results</h2>
+<p>Profiling generates metrics that help you assess data quality and identify issues requiring attention.</p>
+<h3 id="key-metrics-to-examine">Key metrics to examine</h3>
+<p>The profile metrics table contains statistics for each column:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>What it reveals</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>count</code> and <code>num_nulls</code></td>
+<td>Data completeness—high null percentages might indicate ingestion issues</td>
+</tr>
+<tr>
+<td><code>distinct_count</code></td>
+<td>Cardinality—unexpected values might suggest data quality problems</td>
+</tr>
+<tr>
+<td><code>min</code>, <code>max</code>, <code>avg</code>, <code>stddev</code></td>
+<td>Distribution characteristics—outliers or skewed distributions</td>
+</tr>
+<tr>
+<td><code>frequent_items</code></td>
+<td>Most common values—helps identify dominant categories or duplicates</td>
+</tr>
+<tr>
+<td><code>quantiles</code></td>
+<td>Value distribution—useful for detecting skewness</td>
+</tr>
+</tbody>
+</table>
+<h3 id="detect-data-quality-issues">Detect data quality issues</h3>
+<p>When you examine profiling results, look for these common indicators:</p>
+<ul>
+<li><strong>High null percentages</strong> in columns that should have values</li>
+<li><strong>Unexpected distinct counts</strong>, such as unique identifiers that aren't unique</li>
+<li><strong>Value ranges outside expected bounds</strong>, like negative amounts where only positives are valid</li>
+<li><strong>Distribution changes over time</strong>, which can indicate data drift</li>
+</ul>
+<p>The drift metrics table calculates statistical tests like the Kolmogorov-Smirnov (KS) test for numeric columns and chi-squared test for categorical columns. These tests quantify how much distributions have changed.</p>
+<p>Understanding these patterns helps you design appropriate cleansing and validation rules for your data pipelines.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Choose column data types</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/3-choose-appropriate-column-data-types">https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/3-choose-appropriate-column-data-types</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Choose column data types</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Choosing the right data type for each column directly affects your data quality, storage efficiency, and query performance. When you select an inappropriate type, you risk losing precision, wasting storage space, or blocking operations that require specific type characteristics. In this unit, you learn how to evaluate your data and select the most appropriate column types in Azure Databricks.</p>
+<h2 id="understand-data-type-categories">Understand data type categories</h2>
+<p>Azure Databricks organizes data types into categories based on their characteristics and use cases. Understanding these categories helps you narrow down your options when choosing a type for a specific column.</p>
+<p><strong>Numeric types</strong> handle mathematical values and calculations. You have several options:</p>
+<table>
+<thead>
+<tr>
+<th>Type category</th>
+<th>Types</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Integral</td>
+<td><code>TINYINT</code>, <code>SMALLINT</code>, <code>INT</code>, <code>BIGINT</code></td>
+<td>Whole numbers of varying sizes</td>
+</tr>
+<tr>
+<td>Decimal</td>
+<td><code>DECIMAL(p,s)</code></td>
+<td>Exact precision for financial data</td>
+</tr>
+<tr>
+<td>Floating point</td>
+<td><code>FLOAT</code>, <code>DOUBLE</code></td>
+<td>Scientific calculations with approximation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Date-time types</strong> represent temporal data:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DATE</code></td>
+<td>Calendar dates without time components</td>
+</tr>
+<tr>
+<td><code>TIMESTAMP</code></td>
+<td>Date and time with session timezone</td>
+</tr>
+<tr>
+<td><code>TIMESTAMP_NTZ</code></td>
+<td>Date and time without timezone</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Text and binary types</strong> store character and byte sequences:</p>
+<ul>
+<li><code>STRING</code> for variable-length text</li>
+<li><code>BINARY</code> for raw byte sequences</li>
+</ul>
+<p><strong>Complex types</strong> organize nested or repeated data:</p>
+<ul>
+<li><code>ARRAY</code> for ordered sequences of elements</li>
+<li><code>MAP</code> for key-value pairs</li>
+<li><code>STRUCT</code> for records with named fields</li>
+</ul>
+<h2 id="select-the-right-numeric-type">Select the right numeric type</h2>
+<p>Numeric data requires careful type selection because different types have different precision, range, and storage characteristics. Your choice affects both data integrity and performance.</p>
+<p>For whole numbers, match the type to your value range:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Range</th>
+<th>Storage</th>
+<th>Common use cases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TINYINT</code></td>
+<td>-128 to 127</td>
+<td>1 byte</td>
+<td>Status codes, small counters</td>
+</tr>
+<tr>
+<td><code>SMALLINT</code></td>
+<td>-32,768 to 32,767</td>
+<td>2 bytes</td>
+<td>Year values, limited ranges</td>
+</tr>
+<tr>
+<td><code>INT</code></td>
+<td>-2.1 billion to 2.1 billion</td>
+<td>4 bytes</td>
+<td>Most identifiers, counts</td>
+</tr>
+<tr>
+<td><code>BIGINT</code></td>
+<td>-9.2 quintillion to 9.2 quintillion</td>
+<td>8 bytes</td>
+<td>Large IDs, row counts</td>
+</tr>
+</tbody>
+</table>
+<p>When creating tables, specify the appropriate type for each column:</p>
+<pre><code class="lang-sql">CREATE TABLE orders (
+    order_id INT,
+    status_code TINYINT,
+    total_items SMALLINT,
+    transaction_id BIGINT
+);
+</code></pre>
+<p>For decimal numbers, the choice between <code>DECIMAL</code> and floating point types depends on your precision requirements:</p>
+<pre><code class="lang-sql">-- DECIMAL(p,s): exact precision for financial calculations
+-- p = total digits, s = digits after decimal point
+CREATE TABLE transactions (
+    transaction_id INT,
+    amount DECIMAL(10,2),         -- Exact: up to 99,999,999.99
+    tax_rate DECIMAL(5,4)         -- Exact: up to 9.9999
+);
+
+-- DOUBLE: approximate, suitable for scientific calculations
+CREATE TABLE measurements (
+    sensor_id INT,
+    temperature DOUBLE,           -- Approximate, large range
+    pressure DOUBLE
+);
+</code></pre>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Use <code>DECIMAL</code> for financial data where exact precision matters. Floating point types (<code>FLOAT</code>, <code>DOUBLE</code>) use binary representation and can introduce rounding errors with base-10 values like currency.</p>
+</div>
+<h2 id="choose-temporal-types-correctly">Choose temporal types correctly</h2>
+<p>Temporal data type selection depends on whether you need timezone awareness and what level of precision your application requires.</p>
+<p>Use <code>DATE</code> when you only need calendar dates without time components:</p>
+<pre><code class="lang-sql">CREATE TABLE employees (
+    employee_id INT,
+    hire_date DATE,
+    birth_date DATE
+);
+</code></pre>
+<p>For timestamps, choose between timezone-aware and timezone-naive types:</p>
+<pre><code class="lang-sql">-- TIMESTAMP: normalizes to UTC internally, applies session timezone on read
+-- Use when tracking events across time zones
+CREATE TABLE audit_log (
+    log_id BIGINT,
+    event_time TIMESTAMP,
+    user_id INT
+);
+
+-- TIMESTAMP_NTZ: no timezone conversion
+-- Use when the time should remain as entered
+CREATE TABLE schedules (
+    schedule_id INT,
+    local_meeting_time TIMESTAMP_NTZ
+);
+</code></pre>
+<p>The <code>TIMESTAMP</code> type converts values to UTC for storage and applies the session timezone when retrieving values. This behavior ensures consistent ordering across time zones but can cause confusion if you expect values to remain unchanged.</p>
+<p><a data-linktype="relative-path" href="media/3-choose-temporal-types-correctly.png#lightbox"><img alt="Diagram explains choosing temporal types correctly." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/3-choose-temporal-types-correctly.png"/></a></p>
+<h2 id="work-with-complex-types">Work with complex types</h2>
+<p>Complex types let you store structured, nested, or repeated data within a single column. They're useful when your data doesn't fit a flat relational model.</p>
+<p><a data-linktype="relative-path" href="media/3-work-with-complex-types.png#lightbox"><img alt="Diagram explains working with complex types." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/3-work-with-complex-types.png"/></a></p>
+<p>Use <code>ARRAY</code> when you have multiple values of the same type:</p>
+<pre><code class="lang-sql">-- Store a list of tags for each product
+CREATE TABLE products (
+    product_id INT,
+    name STRING,
+    tags ARRAY&lt;STRING&gt;
+);
+
+-- Query array elements
+SELECT product_id, tags[0] AS primary_tag FROM products;
+</code></pre>
+<p>Use <code>MAP</code> for key-value pairs with dynamic keys:</p>
+<pre><code class="lang-sql">-- Store flexible attributes as key-value pairs
+CREATE TABLE devices (
+    device_id INT,
+    properties MAP&lt;STRING, STRING&gt;
+);
+
+-- Access map values by key
+SELECT device_id, properties['firmware_version'] AS firmware FROM devices;
+</code></pre>
+<p>Use <code>STRUCT</code> when you have a fixed set of named fields:</p>
+<pre><code class="lang-sql">-- Store address as a structured type
+CREATE TABLE customers (
+    customer_id INT,
+    address STRUCT&lt;street: STRING, city: STRING, postal_code: STRING&gt;
+);
+
+-- Access struct fields
+SELECT customer_id, address.city FROM customers;
+</code></pre>
+<div class="TIP">
+<p>Tip</p>
+<p>Complex types reduce the need for additional tables and joins, but they also make some operations more difficult. Consider your query patterns before choosing between normalized tables and complex types.</p>
+</div>
+<h2 id="apply-type-selection-best-practices">Apply type selection best practices</h2>
+<p>When evaluating data for type selection, consider these practical guidelines:</p>
+<p><a data-linktype="relative-path" href="media/3-apply-type-selection-best-practices.png#lightbox"><img alt="Diagram explaining best practices for type selection." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/3-apply-type-selection-best-practices.png"/></a></p>
+<p><strong>Match the type to the data's nature and range.</strong> Don't use <code>BIGINT</code> for values that never exceed a few thousand. The extra bytes multiply across millions of rows.</p>
+<p><strong>Consider nullability.</strong> If a column should never contain null values, document this constraint. While data types don't enforce nullability by default, you can add <code>NOT NULL</code> constraints to table definitions.</p>
+<p><strong>Validate types during ingestion.</strong> Cast incoming data to the target type early in your pipeline to catch type mismatches before they propagate:</p>
+<pre><code class="lang-sql">-- Cast during data loading
+INSERT INTO target_table
+SELECT 
+    CAST(raw_id AS INT) AS id,
+    CAST(raw_amount AS DECIMAL(10,2)) AS amount,
+    CAST(raw_date AS DATE) AS transaction_date
+FROM staging_table;
+</code></pre>
+<p><strong>Use explicit casts when converting types.</strong> Implicit conversions can succeed silently even when data is lost. Explicit casts make your intentions clear and help identify problems during testing.</p>
+<p>These practices help you build pipelines where data types serve as a form of documentation and validation, catching errors early rather than letting them affect downstream analytics.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Resolve duplicates and nulls</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/4-resolve-duplicate-missing-null-values">https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/4-resolve-duplicate-missing-null-values</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Resolve duplicates and nulls</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data quality issues like duplicate records and null values can compromise your analytics and downstream processes. Whether duplicates arise from concurrent data loads or nulls appear due to incomplete source data, addressing these issues is a core responsibility for data engineers working in Azure Databricks.</p>
+<p>In this unit, you learn how to identify and resolve duplicate, missing, and null values using both SQL and PySpark approaches.</p>
+<h2 id="identify-duplicate-records">Identify duplicate records</h2>
+<p>Before you can remove duplicates, you need to find them. Duplicates typically occur when the same record appears multiple times in a table, often due to data integration issues, repeated ingestion, or concurrent write operations.</p>
+<p><a data-linktype="relative-path" href="media/4-identify-duplicate-records.png#lightbox"><img alt="Diagram explaining how to identify duplicate records." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/4-identify-duplicate-records.png"/></a></p>
+<h3 id="use-group-by-and-having-to-find-duplicates">Use GROUP BY and HAVING to find duplicates</h3>
+<p>The most straightforward way to identify duplicates is by grouping records and counting occurrences. The <code>HAVING</code> clause filters the grouped results to show only values that appear more than once.</p>
+<pre><code class="lang-sql">SELECT 
+    customer_id, 
+    email, 
+    COUNT(*) AS occurrence_count
+FROM sales.customers
+GROUP BY customer_id, email
+HAVING COUNT(*) &gt; 1
+ORDER BY occurrence_count DESC;
+</code></pre>
+<p>This query returns all combinations of <code>customer_id</code> and <code>email</code> that appear multiple times in the table, helping you understand the scope of duplication.</p>
+<h3 id="use-qualify-with-window-functions">Use QUALIFY with window functions</h3>
+<p>The <code>QUALIFY</code> clause provides a more elegant approach by filtering the results of window functions directly, without requiring subqueries. This approach is particularly useful when you need to see the actual duplicate rows, not just counts.</p>
+<pre><code class="lang-sql">SELECT *
+FROM sales.customers
+QUALIFY COUNT(*) OVER (PARTITION BY customer_id, email) &gt; 1;
+</code></pre>
+<p>This query might return results like:</p>
+<table>
+<thead>
+<tr>
+<th>customer_id</th>
+<th>email</th>
+<th>name</th>
+<th>created_at</th>
+<th>status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1001</td>
+<td>jane@contoso.com</td>
+<td>Jane Doe</td>
+<td>2024-01-15</td>
+<td>Active</td>
+</tr>
+<tr>
+<td>1001</td>
+<td>jane@contoso.com</td>
+<td>Jane D.</td>
+<td>2024-03-20</td>
+<td>Active</td>
+</tr>
+<tr>
+<td>1002</td>
+<td>bob@fabrikam.com</td>
+<td>Bob Smith</td>
+<td>2024-02-10</td>
+<td>Pending</td>
+</tr>
+<tr>
+<td>1002</td>
+<td>bob@fabrikam.com</td>
+<td>Robert Smith</td>
+<td>2024-02-11</td>
+<td>Active</td>
+</tr>
+</tbody>
+</table>
+<p>With this pattern, you get all columns from the duplicate rows, making it easier to investigate the source of duplication.</p>
+<h3 id="find-duplicates-using-pyspark">Find duplicates using PySpark</h3>
+<p>In PySpark, you can use window functions combined with filtering to identify duplicate records:</p>
+<pre><code class="lang-python">from pyspark.sql.functions import count
+from pyspark.sql.window import Window
+
+window_spec = Window.partitionBy("customer_id", "email")
+
+duplicates_df = (
+    df.withColumn("row_count", count("*").over(window_spec))
+    .filter("row_count &gt; 1")
+    .drop("row_count")
+)
+
+display(duplicates_df)
+</code></pre>
+<p>Alternatively, use the <code>exceptAll()</code> method to compare the original DataFrame against a deduplicated version:</p>
+<pre><code class="lang-python">df_duplicates = df.exceptAll(df.dropDuplicates(["customer_id", "email"]))
+display(df_duplicates)
+</code></pre>
+<p>The <code>exceptAll()</code> method performs a set difference that preserves duplicates. It returns all rows from the first DataFrame that aren't in the second DataFrame, keeping duplicate occurrences. Here's how it works:</p>
+<ol>
+<li><code>df.dropDuplicates(["customer_id", "email"])</code> creates a DataFrame with one row per unique combination</li>
+<li><code>exceptAll()</code> compares the original DataFrame against this deduplicated version</li>
+<li>For each unique combination, one occurrence is "matched" and removed, leaving only the extra duplicates</li>
+</ol>
+<p>For example, if customer 1001 appears three times in the original DataFrame and once in the deduplicated version, <code>exceptAll()</code> returns two rows (the extra occurrences).</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Unlike <code>except()</code>, which removes all matching rows and returns distinct results, <code>exceptAll()</code> preserves the duplicate structure. If you have three identical rows in the original and one in the deduplicated set, <code>exceptAll()</code> returns exactly two rows.</p>
+</div>
+<h2 id="remove-duplicate-records">Remove duplicate records</h2>
+<p>Once you've identified duplicates, you can choose a resolution strategy based on your data requirements.</p>
+<p><a data-linktype="relative-path" href="media/4-remove-duplicate-records.png#lightbox"><img alt="Diagram explaining how to remove duplicate records." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/4-remove-duplicate-records.png"/></a></p>
+<h3 id="remove-duplicates-in-pyspark">Remove duplicates in PySpark</h3>
+<p>The <code>dropDuplicates()</code> method removes duplicate rows based on specified columns, keeping only the first occurrence:</p>
+<pre><code class="lang-python">df_clean = df.dropDuplicates(["customer_id", "email"])
+</code></pre>
+<p>For complete row deduplication across all columns, use <code>distinct()</code>:</p>
+<pre><code class="lang-python">df_unique = df.distinct()
+</code></pre>
+<h3 id="keep-specific-rows-using-row_number">Keep specific rows using ROW_NUMBER</h3>
+<p>When you need control over which duplicate to keep, use <code>ROW_NUMBER()</code> with <code>QUALIFY</code> to select records based on criteria like the most recent update:</p>
+<pre><code class="lang-sql">SELECT *
+FROM sales.customers
+QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY customer_id 
+    ORDER BY updated_at DESC
+) = 1;
+</code></pre>
+<p>This query partitions records by <code>customer_id</code>, orders them by <code>updated_at</code> in descending order, and keeps only the most recently updated record for each customer.</p>
+<h2 id="handle-null-and-missing-values">Handle null and missing values</h2>
+<p>Null values represent missing or unknown data. Depending on your analysis requirements, you might need to remove rows with nulls, replace them with default values, or use statistical imputation.</p>
+<p><a data-linktype="relative-path" href="media/4-handle-null-and-missing-values.png#lightbox"><img alt="Diagram explaining how to handle null and missing values." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/4-handle-null-and-missing-values.png"/></a></p>
+<h3 id="identify-null-values">Identify null values</h3>
+<p>Use the <code>isnull()</code> function or <code>IS NULL</code> operator to find records with missing values:</p>
+<pre><code class="lang-sql">SELECT *
+FROM sales.transactions
+WHERE amount IS NULL 
+   OR customer_id IS NULL;
+</code></pre>
+<p>To count null occurrences per column:</p>
+<pre><code class="lang-sql">SELECT 
+    COUNT(*) AS total_rows,
+    COUNT(*) - COUNT(amount) AS null_amount_count,
+    COUNT(*) - COUNT(customer_id) AS null_customer_count
+FROM sales.transactions;
+</code></pre>
+<h3 id="drop-rows-with-null-values">Drop rows with null values</h3>
+<p>In PySpark, the <code>dropna()</code> method removes rows containing null values:</p>
+<pre><code class="lang-python"># Drop rows where any column is null
+df_clean = df.dropna()
+
+# Drop rows where all columns are null
+df_clean = df.dropna(how="all")
+
+# Drop rows where specific columns are null
+df_clean = df.dropna(subset=["customer_id", "amount"])
+</code></pre>
+<p>The <code>how</code> parameter controls the behavior: <code>"any"</code> drops rows with at least one null (default), while <code>"all"</code> drops rows only when all specified columns are null.</p>
+<h3 id="fill-null-values-with-defaults">Fill null values with defaults</h3>
+<p>The <code>fillna()</code> method replaces null values with specified defaults:</p>
+<pre><code class="lang-python"># Fill all null values with a single value
+df_filled = df.fillna(0)
+
+# Fill specific columns with different values
+df_filled = df.fillna({
+    "amount": 0,
+    "status": "Unknown",
+    "quantity": 1
+})
+</code></pre>
+<p>In SQL, use the <code>COALESCE</code> function to provide default values:</p>
+<pre><code class="lang-sql">SELECT 
+    customer_id,
+    COALESCE(amount, 0) AS amount,
+    COALESCE(status, 'Unknown') AS status
+FROM sales.transactions;
+</code></pre>
+<h3 id="choose-the-right-strategy">Choose the right strategy</h3>
+<p>The appropriate null handling strategy depends on your data context:</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Recommended approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nulls in required fields like identifiers</td>
+<td>Drop the rows</td>
+</tr>
+<tr>
+<td>Nulls in numeric fields for aggregation</td>
+<td>Fill with zero or mean</td>
+</tr>
+<tr>
+<td>Nulls in optional categorical fields</td>
+<td>Fill with placeholder like "Unknown"</td>
+</tr>
+<tr>
+<td>Nulls that would skew analysis</td>
+<td>Drop or fill based on domain knowledge</td>
+</tr>
+</tbody>
+</table>
+<div class="TIP">
+<p>Tip</p>
+<p>Document your null handling decisions. Future analysts need to understand why certain values were replaced or removed to correctly interpret query results.</p>
+</div>
+<p>Understanding how to identify and resolve these data quality issues prepares you to build more reliable data pipelines. With clean data, your downstream transformations and analytics produce trustworthy results.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Transform data with filters and aggregations</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/5-transform-data-filter-group-aggregate">https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/5-transform-data-filter-group-aggregate</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Transform data with filters and aggregations</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data transformation turns raw data into formats suitable for analysis and reporting. <strong>Filtering</strong>, <strong>grouping</strong>, and <strong>aggregating</strong> are fundamental operations you use to shape data—selecting relevant records, organizing them into meaningful categories, and calculating summary statistics. These operations form the foundation of most data engineering pipelines.</p>
+<p>In this unit, you learn how to filter rows based on conditions, group data by one or more columns, and apply aggregate functions to calculate summary values.</p>
+<h2 id="filter-data-to-select-relevant-rows">Filter data to select relevant rows</h2>
+<p>Filtering removes rows that don't meet your criteria, reducing dataset size and focusing on the data that matters. In Azure Databricks, you can filter data using PySpark's DataFrame API or SQL.</p>
+<p><img alt="Diagram explaining filter data to select relevant rows." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/5-filter-data.png"/></p>
+<h3 id="filter-with-pyspark">Filter with PySpark</h3>
+<p>The <code>filter()</code> and <code>where()</code> methods work identically—use whichever you prefer for readability. The <code>col()</code> function references column names in your expressions.</p>
+<pre><code class="lang-python">from pyspark.sql.functions import col
+
+# Filter customers with account balance greater than 1000
+df_filtered = df_customer.filter(col("c_acctbal") &gt; 1000)
+display(df_filtered)
+</code></pre>
+<p>For multiple conditions, combine them with logical operators. Use <code>&amp;</code> for AND and <code>|</code> for OR, wrapping each condition in parentheses:</p>
+<pre><code class="lang-python"># Filter customers in nation 20 with balance over 1000
+df_filtered = df_customer.filter(
+    (col("c_nationkey") == 20) &amp; (col("c_acctbal") &gt; 1000)
+)
+
+# Filter customers matching either of two IDs
+df_filtered = df_customer.filter(
+    (col("c_custkey") == 412446) | (col("c_custkey") == 412447)
+)
+</code></pre>
+<h3 id="filter-with-sql">Filter with SQL</h3>
+<p>SQL's <code>WHERE</code> clause provides the same filtering capability with familiar syntax:</p>
+<pre><code class="lang-sql">-- Filter orders with status 'F' and total price above 50000
+SELECT *
+FROM orders
+WHERE o_orderstatus = 'F'
+  AND o_totalprice &gt; 50000;
+</code></pre>
+<p>You can filter directly when reading from a table in PySpark using <code>spark.sql()</code>:</p>
+<pre><code class="lang-python">df_filtered = spark.sql("""
+    SELECT *
+    FROM sales.transactions
+    WHERE amount &gt; 100
+      AND transaction_date &gt;= '2024-01-01'
+""")
+</code></pre>
+<h3 id="filter-null-values">Filter null values</h3>
+<p>Filtering null values requires special handling in Spark DataFrames. Use the <code>isNull()</code> and <code>isNotNull()</code> functions to identify or exclude null values:</p>
+<pre><code class="lang-python"># Filter rows where order_amount is not null
+df_valid_orders = df.filter(col("order_amount").isNotNull())
+
+# Filter rows where order_amount is null
+df_null_orders = df.filter(col("order_amount").isNull())
+
+# Alternative syntax using column object directly
+df_valid_orders = df.filter(df.order_amount.isNotNull())
+</code></pre>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Using Python's <code>None</code> with inequality operators like <code>!= None</code> doesn't reliably filter null values in Spark DataFrames. Null comparisons in SQL semantics don't evaluate to true or false—they return null. Always use <code>isNull()</code> or <code>isNotNull()</code> for correct null handling.</p>
+</div>
+<p>In SQL, use the <code>IS NULL</code> or <code>IS NOT NULL</code> operators:</p>
+<pre><code class="lang-sql">-- Filter orders with non-null amounts
+SELECT *
+FROM orders
+WHERE order_amount IS NOT NULL;
+</code></pre>
+<p>For comprehensive null handling that removes entire rows containing null values, use the <code>dropna()</code> method covered in the unit on resolving duplicate and missing values:</p>
+<pre><code class="lang-python"># Remove rows where order_amount is null
+df_clean = df.dropna(subset=["order_amount"])
+</code></pre>
+<h2 id="group-data-to-organize-records">Group data to organize records</h2>
+<p>Grouping organizes rows that share common values into categories. This prepares data for aggregation—once grouped, you can calculate statistics for each category.</p>
+<p><img alt="Diagram explaining group data to organize records." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/5-group-data.png"/></p>
+<h3 id="group-with-pyspark">Group with PySpark</h3>
+<p>Use the <code>groupBy()</code> method to specify one or more columns for grouping:</p>
+<pre><code class="lang-python"># Group by a single column
+df_grouped = df_customer.groupBy("c_mktsegment")
+
+# Group by multiple columns
+df_grouped = df_customer.groupBy("c_mktsegment", "c_nationkey")
+</code></pre>
+<p>Grouping alone returns a <code>GroupedData</code> object. To see results, you must apply an aggregation.</p>
+<h3 id="group-with-sql">Group with SQL</h3>
+<p>SQL uses the <code>GROUP BY</code> clause to organize rows:</p>
+<pre><code class="lang-sql">-- Group sales by region
+SELECT region, COUNT(*) as order_count
+FROM sales
+GROUP BY region;
+</code></pre>
+<p>When grouping, every column in your <code>SELECT</code> statement must either appear in the <code>GROUP BY</code> clause or be wrapped in an aggregate function.</p>
+<h2 id="aggregate-data-to-calculate-summary-statistics">Aggregate data to calculate summary statistics</h2>
+<p>Aggregation calculates summary values—counts, sums, averages, and extremes—for each group. Common aggregate functions include:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+<th>Example use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>count()</code></td>
+<td>Counts rows in each group</td>
+<td>Number of orders per customer</td>
+</tr>
+<tr>
+<td><code>sum()</code></td>
+<td>Adds values in a column</td>
+<td>Total revenue by product</td>
+</tr>
+<tr>
+<td><code>avg()</code></td>
+<td>Calculates the mean</td>
+<td>Average order value by region</td>
+</tr>
+<tr>
+<td><code>min()</code></td>
+<td>Finds the smallest value</td>
+<td>Earliest order date per customer</td>
+</tr>
+<tr>
+<td><code>max()</code></td>
+<td>Finds the largest value</td>
+<td>Highest transaction amount</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Diagram showing aggregate data to calculate summary statistics." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/5-aggregate-data.png"/></p>
+<h3 id="aggregate-with-pyspark">Aggregate with PySpark</h3>
+<p>Use the <code>agg()</code> method to apply aggregate functions after grouping. Import functions from <code>pyspark.sql.functions</code>:</p>
+<pre><code class="lang-python">from pyspark.sql.functions import avg, sum, count, min, max
+
+# Calculate average balance by market segment
+df_segment_avg = df_customer.groupBy("c_mktsegment").agg(
+    avg("c_acctbal").alias("avg_balance")
+)
+display(df_segment_avg)
+</code></pre>
+<p>Apply multiple aggregations in a single statement:</p>
+<pre><code class="lang-python"># Multiple aggregations per group
+df_order_stats = df_order.groupBy("o_orderpriority").agg(
+    count("o_orderkey").alias("order_count"),
+    sum("o_totalprice").alias("total_revenue"),
+    avg("o_totalprice").alias("avg_order_value"),
+    max("o_totalprice").alias("max_order")
+)
+display(df_order_stats)
+</code></pre>
+<h3 id="aggregate-with-sql">Aggregate with SQL</h3>
+<p>SQL aggregations work directly in <code>SELECT</code> statements:</p>
+<pre><code class="lang-sql">-- Calculate statistics by dealership
+SELECT id,
+       COUNT(*) AS total_orders,
+       SUM(quantity) AS total_quantity,
+       AVG(quantity) AS avg_quantity,
+       MAX(quantity) AS max_quantity
+FROM dealer
+GROUP BY id
+ORDER BY total_quantity DESC;
+</code></pre>
+<p>Use <code>HAVING</code> to filter groups after aggregation:</p>
+<pre><code class="lang-sql">-- Find high-volume dealers only
+SELECT id, SUM(quantity) AS total_quantity
+FROM dealer
+GROUP BY id
+HAVING SUM(quantity) &gt; 20;
+</code></pre>
+<h2 id="chain-transformations-for-readable-pipelines">Chain transformations for readable pipelines</h2>
+<p>Spark's lazy evaluation lets you chain multiple transformations into a single, readable pipeline. The operations execute only when you call an action like <code>display()</code> or <code>show()</code>.</p>
+<pre><code class="lang-python">from pyspark.sql.functions import col, count
+
+# Chain filter, group, aggregate, and sort
+df_result = (
+    df_order
+    .filter(col("o_orderstatus") == "F")
+    .groupBy("o_orderpriority")
+    .agg(count("o_orderkey").alias("n_orders"))
+    .sort(col("n_orders").desc())
+)
+display(df_result)
+</code></pre>
+<p>This approach improves readability and lets Spark optimize the entire operation sequence before execution. Each transformation builds on the previous one, creating a clear data flow from source to result.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>When chaining transformations, place filters early in the pipeline to reduce the data volume that subsequent operations must process.</p>
+</div>
+<p>Understanding filtering, grouping, and aggregating prepares you to build efficient transformation pipelines. These operations combine naturally with joins and other transformations to create comprehensive data processing workflows.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Transform data with joins and set operators</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/6-transform-data-join-union-intersect-except">https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/6-transform-data-join-union-intersect-except</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Transform data with joins and set operators</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data engineering workflows often require combining information from multiple datasets. <strong>Joins</strong> combine tables horizontally by matching rows on related columns, while <strong>set operators</strong> combine tables vertically by appending, intersecting, or excluding rows. Understanding when to use each approach helps you build efficient transformation pipelines.</p>
+<p>In this unit, you learn how to join tables based on relationships and apply set operators to combine datasets with matching schemas.</p>
+<h2 id="combine-tables-with-joins">Combine tables with joins</h2>
+<p>Joins merge rows from two tables based on a related column. The join type determines which rows appear in the result and how unmatched rows are handled.</p>
+<p><img alt="Diagram explaining combining tables with joins." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/6-combine-tables-with-joins.png"/></p>
+<h3 id="understand-join-types">Understand join types</h3>
+<p>Each join type serves a specific purpose in data transformation:</p>
+<p><img alt="Diagram showing the different join types." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/6-understand-join-types.png"/></p>
+<table>
+<thead>
+<tr>
+<th>Join type</th>
+<th>Description</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>INNER</code></td>
+<td>Returns only matching rows from both tables</td>
+<td>Link orders with valid customers</td>
+</tr>
+<tr>
+<td><code>LEFT</code></td>
+<td>Returns all left table rows; adds NULLs for right table when no match</td>
+<td>Include all customers, even without orders</td>
+</tr>
+<tr>
+<td><code>RIGHT</code></td>
+<td>Returns all right table rows; adds NULLs for left table when no match</td>
+<td>Include all departments, even without employees</td>
+</tr>
+<tr>
+<td><code>FULL</code></td>
+<td>Returns all rows from both tables; adds NULLs for non-matches</td>
+<td>Combine datasets to find gaps on either side</td>
+</tr>
+<tr>
+<td><code>SEMI</code></td>
+<td>Returns left table rows that have matches in the right table</td>
+<td>Filter customers who placed orders</td>
+</tr>
+<tr>
+<td><code>ANTI</code></td>
+<td>Returns left table rows that have no match in the right table</td>
+<td>Find customers who never placed orders</td>
+</tr>
+<tr>
+<td><code>CROSS</code></td>
+<td>Returns Cartesian product of all rows</td>
+<td>Generate all possible combinations</td>
+</tr>
+</tbody>
+</table>
+<h3 id="join-tables-with-sql">Join tables with SQL</h3>
+<p>The <code>JOIN</code> clause combines tables based on a condition specified with <code>ON</code> or <code>USING</code>. Consider employee and department tables where you want to match employees to their departments:</p>
+<pre><code class="lang-sql">-- Inner join: only employees with matching departments
+SELECT e.id, e.name, e.deptno, d.deptname
+FROM employee e
+INNER JOIN department d ON e.deptno = d.deptno;
+</code></pre>
+<p>An inner join returns only three rows—employees whose department numbers exist in the department table. Employees in departments 4, 5, and 6 don't appear because those departments aren't in the department table.</p>
+<p>When you need to include all employees regardless of department matches, use a left join:</p>
+<pre><code class="lang-sql">-- Left join: all employees, NULL for missing departments
+SELECT e.id, e.name, e.deptno, d.deptname
+FROM employee e
+LEFT JOIN department d ON e.deptno = d.deptno;
+</code></pre>
+<p>This returns all six employees. Those without matching departments show NULL in the <code>deptname</code> column.</p>
+<h3 id="join-dataframes-with-pyspark">Join DataFrames with PySpark</h3>
+<p>PySpark's <code>join()</code> method provides the same functionality. The <code>how</code> parameter specifies the join type:</p>
+<pre><code class="lang-python">df_employee = spark.table("employee")
+df_department = spark.table("department")
+
+# Inner join
+df_inner = df_employee.join(
+    df_department,
+    on=df_employee.deptno == df_department.deptno,
+    how="inner"
+)
+display(df_inner)
+</code></pre>
+<p>For left, right, or full outer joins, change the <code>how</code> parameter:</p>
+<pre><code class="lang-python"># Left join: keep all employees
+df_left = df_employee.join(
+    df_department,
+    on="deptno",
+    how="left"
+)
+
+# Full outer join: keep all rows from both tables
+df_full = df_employee.join(
+    df_department,
+    on="deptno",
+    how="full"
+)
+</code></pre>
+<p>When the join column has the same name in both DataFrames, pass the column name as a string. This approach avoids duplicate columns in the result.</p>
+<h3 id="filter-data-with-semi-and-anti-joins">Filter data with semi and anti joins</h3>
+<p>Semi and anti joins are powerful for filtering data based on existence in another table. A semi join returns rows from the left table that have matches, without including columns from the right table:</p>
+<pre><code class="lang-sql">-- Find employees who belong to listed departments
+SELECT *
+FROM employee
+LEFT SEMI JOIN department ON employee.deptno = department.deptno;
+</code></pre>
+<p>An anti join returns the opposite—rows without matches:</p>
+<pre><code class="lang-sql">-- Find employees in departments not listed
+SELECT *
+FROM employee
+LEFT ANTI JOIN department ON employee.deptno = department.deptno;
+</code></pre>
+<p>In PySpark, use <code>how="semi"</code> or <code>how="anti"</code>:</p>
+<pre><code class="lang-python"># Employees with matching departments
+df_semi = df_employee.join(df_department, on="deptno", how="semi")
+
+# Employees without matching departments
+df_anti = df_employee.join(df_department, on="deptno", how="anti")
+</code></pre>
+<h2 id="combine-rows-with-set-operators">Combine rows with set operators</h2>
+<p>Set operators work vertically, combining rows from queries with the same column structure. Unlike joins, set operators don't match on conditions—they stack or compare entire result sets.</p>
+<p><img alt="Diagram explaining how to combine rows with set operators." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/6-combine-rows-with-set-operators.png"/></p>
+<h3 id="understand-set-operators">Understand set operators</h3>
+<p>Azure Databricks supports three set operators:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Description</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>UNION</code></td>
+<td>Combines rows from both queries</td>
+<td>Removes duplicates by default; use <code>ALL</code> to keep them</td>
+</tr>
+<tr>
+<td><code>INTERSECT</code></td>
+<td>Returns rows that exist in both queries</td>
+<td>Only matching rows appear</td>
+</tr>
+<tr>
+<td><code>EXCEPT</code></td>
+<td>Returns rows from the first query not in the second</td>
+<td>Removes duplicates by default</td>
+</tr>
+</tbody>
+</table>
+<p>Both queries must have the same number of columns with compatible data types.</p>
+<h3 id="merge-datasets-with-union">Merge datasets with UNION</h3>
+<p><code>UNION</code> appends rows from one query to another. By default, it removes duplicates:</p>
+<pre><code class="lang-sql">-- Combine active and archived customers (no duplicates)
+SELECT customer_id, name, email FROM active_customers
+UNION
+SELECT customer_id, name, email FROM archived_customers;
+</code></pre>
+<p>To preserve all rows including duplicates, use <code>UNION ALL</code>:</p>
+<pre><code class="lang-sql">-- Combine all rows, keeping duplicates
+SELECT customer_id, name, email FROM active_customers
+UNION ALL
+SELECT customer_id, name, email FROM archived_customers;
+</code></pre>
+<p>Use <code>UNION ALL</code> when you know there are no duplicates or when duplicates are meaningful. It performs better because it skips the deduplication step.</p>
+<p>In PySpark, use <code>union()</code> for combining DataFrames. Note that PySpark's <code>union()</code> behaves like <code>UNION ALL</code>—it keeps duplicates:</p>
+<pre><code class="lang-python">df_active = spark.table("active_customers")
+df_archived = spark.table("archived_customers")
+
+# Combine both tables (keeps duplicates)
+df_combined = df_active.union(df_archived)
+
+# Remove duplicates if needed
+df_distinct = df_active.union(df_archived).distinct()
+</code></pre>
+<h3 id="find-common-rows-with-intersect">Find common rows with INTERSECT</h3>
+<p><code>INTERSECT</code> returns only rows that appear in both queries. This helps identify overlapping data:</p>
+<pre><code class="lang-sql">-- Find customers in both active and archived tables
+SELECT customer_id FROM active_customers
+INTERSECT
+SELECT customer_id FROM archived_customers;
+</code></pre>
+<p>This query identifies customers who somehow appear in both tables—useful for data quality checks or identifying records that need reconciliation.</p>
+<h3 id="exclude-rows-with-except">Exclude rows with EXCEPT</h3>
+<p><code>EXCEPT</code> returns rows from the first query that don't exist in the second. This helps identify gaps or unique records:</p>
+<pre><code class="lang-sql">-- Find active customers not in the archived table
+SELECT customer_id FROM active_customers
+EXCEPT
+SELECT customer_id FROM archived_customers;
+</code></pre>
+<p>You can also use <code>MINUS</code> as a synonym for <code>EXCEPT</code>:</p>
+<pre><code class="lang-sql">-- Same result using MINUS syntax
+SELECT customer_id FROM active_customers
+MINUS
+SELECT customer_id FROM archived_customers;
+</code></pre>
+<p>Like <code>UNION</code>, both <code>INTERSECT</code> and <code>EXCEPT</code> remove duplicates by default. Add <code>ALL</code> to preserve duplicates when needed.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>When chaining set operations, remember that <code>INTERSECT</code> has higher precedence than <code>UNION</code> and <code>EXCEPT</code>. Use parentheses to control evaluation order.</p>
+</div>
+<h2 id="choose-between-joins-and-set-operators">Choose between joins and set operators</h2>
+<p>The choice between joins and set operators depends on your transformation goal. Joins combine columns from related tables horizontally, while set operators combine rows vertically.</p>
+<p>Use <strong>joins</strong> when you need to:</p>
+<ul>
+<li>Enrich records by adding columns from related tables</li>
+<li>Match records based on key relationships</li>
+<li>Filter data based on existence in another table (semi/anti joins)</li>
+</ul>
+<p>Use <strong>set operators</strong> when you need to:</p>
+<ul>
+<li>Append records from multiple sources with identical schemas</li>
+<li>Find common records across datasets</li>
+<li>Identify records unique to one dataset</li>
+</ul>
+<p>Both approaches form the foundation of effective data transformation pipelines. In the next unit, you explore how to load transformed data into target tables within Unity Catalog.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>7. Transform data with denormalization and pivots</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/7-transform-data-flatten-pivot-unpivot">https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/7-transform-data-flatten-pivot-unpivot</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Transform data with denormalization and pivots</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Reshaping data structure is a key part of building effective analytics solutions. <strong>Denormalization</strong>, <strong>pivoting</strong>, and <strong>unpivoting</strong> are transformation techniques that help you reorganize data between normalized and aggregated formats—each serving different analytical and modeling needs.</p>
+<p>In this unit, you learn how to flatten normalized tables for faster queries, rotate rows into columns for cross-tabular analysis, and reverse that process when you need to normalize wide datasets.</p>
+<h2 id="understand-denormalization">Understand denormalization</h2>
+<p>Normalized databases reduce data redundancy by splitting information across multiple related tables. While this design works well for transactional systems, it creates challenges for analytics. Queries must join many tables, which slows performance and increases complexity.</p>
+<p>Denormalization addresses these challenges by flattening related tables into fewer, wider tables. You combine data from dimension tables directly into fact tables, eliminating the need for joins at query time.</p>
+<p><img alt="Diagram explaining what denormalization is." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/7-understand-flatten.png"/></p>
+<p>Consider a sales database with separate tables for orders, customers, and products. A normalized query requires multiple joins:</p>
+<pre><code class="lang-sql">-- Normalized query with multiple joins
+SELECT o.order_id,
+       o.order_date,
+       c.customer_name,
+       c.region,
+       p.product_name,
+       p.category,
+       o.quantity,
+       o.total_price
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN products p ON o.product_id = p.product_id;
+</code></pre>
+<p>A denormalized table stores this information together:</p>
+<pre><code class="lang-sql">-- Create a denormalized orders table
+CREATE OR REPLACE TABLE sales.orders_denormalized AS
+SELECT o.order_id,
+       o.order_date,
+       c.customer_name,
+       c.region,
+       p.product_name,
+       p.category,
+       o.quantity,
+       o.total_price
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN products p ON o.product_id = p.product_id;
+</code></pre>
+<p>Queries against the denormalized table run faster because no joins are required. This approach is common when building star schemas and data marts for business intelligence tools. The tradeoff is increased storage and the need to refresh denormalized tables when source data changes.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Denormalize data in your gold layer tables when query performance matters more than storage efficiency. Keep normalized structures in bronze and silver layers for flexibility.</p>
+</div>
+<h2 id="pivot-rows-into-columns">Pivot rows into columns</h2>
+<p>Pivoting transforms unique values from a column into separate columns, converting a "long" table format into a "wide" one. This transformation is particularly useful when preparing data for cross-tabular reports or dashboards.</p>
+<p><img alt="Diagram explaining what pivoting (rows to columns) is." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/7-pivot-rows-into-columns.png"/></p>
+<p>The <code>PIVOT</code> clause requires an aggregate function because multiple source rows might map to the same cell in the pivoted result. You specify which column values become new column names using the <code>FOR</code> and <code>IN</code> clauses.</p>
+<p>Consider quarterly sales data stored in a long format:</p>
+<pre><code class="lang-sql">-- Create sample sales data
+CREATE OR REPLACE TEMP VIEW quarterly_sales(year, quarter, region, revenue) AS
+VALUES (2024, 1, 'East', 150000),
+       (2024, 2, 'East', 175000),
+       (2024, 3, 'East', 160000),
+       (2024, 4, 'East', 200000),
+       (2024, 1, 'West', 180000),
+       (2024, 2, 'West', 165000),
+       (2024, 3, 'West', 190000),
+       (2024, 4, 'West', 210000),
+       (2025, 1, 'East', 165000),
+       (2025, 2, 'East', 185000);
+
+-- View data in long format
+SELECT * FROM quarterly_sales;
+</code></pre>
+<p>This query returns revenue as separate rows for each quarter. To compare quarters side by side, pivot the data:</p>
+<pre><code class="lang-sql">-- Pivot quarters into columns
+SELECT year, region, Q1, Q2, Q3, Q4
+FROM quarterly_sales
+PIVOT (
+  SUM(revenue)
+  FOR quarter IN (1 AS Q1, 2 AS Q2, 3 AS Q3, 4 AS Q4)
+);
+</code></pre>
+<p>The result shows each region's quarterly revenue as columns, making year-over-year comparisons straightforward:</p>
+<table>
+<thead>
+<tr>
+<th>year</th>
+<th>region</th>
+<th>Q1</th>
+<th>Q2</th>
+<th>Q3</th>
+<th>Q4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2024</td>
+<td>East</td>
+<td>150000</td>
+<td>175000</td>
+<td>160000</td>
+<td>200000</td>
+</tr>
+<tr>
+<td>2024</td>
+<td>West</td>
+<td>180000</td>
+<td>165000</td>
+<td>190000</td>
+<td>210000</td>
+</tr>
+<tr>
+<td>2025</td>
+<td>East</td>
+<td>165000</td>
+<td>185000</td>
+<td>null</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+<p>You can apply multiple aggregate functions in a single pivot operation:</p>
+<pre><code class="lang-sql">-- Pivot with multiple aggregations
+SELECT year, Q1_total, Q1_avg, Q2_total, Q2_avg
+FROM (SELECT year, quarter, revenue FROM quarterly_sales)
+PIVOT (
+  SUM(revenue) AS total,
+  AVG(revenue) AS avg
+  FOR quarter IN (1 AS Q1, 2 AS Q2)
+);
+</code></pre>
+<p>This creates columns for both the sum and average of each quarter's revenue.</p>
+<h2 id="unpivot-columns-into-rows">Unpivot columns into rows</h2>
+<p>Unpivoting performs the reverse transformation—it converts columns back into rows. Use unpivoting when you receive wide-format data that needs normalization for analysis or when preparing data for systems that expect a long format.</p>
+<p><img alt="Diagram explaing the process of unpivoting coluns into rows." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/7-unpivot-columns-into-rows.png"/></p>
+<p>The <code>UNPIVOT</code> clause transforms specified columns into value-name pairs. You define a column to hold the values and another to hold the original column names.</p>
+<pre><code class="lang-sql">-- Create wide-format data
+CREATE OR REPLACE TEMP VIEW regional_targets(region, jan, feb, mar, apr) AS
+VALUES ('North', 50000, 55000, 52000, 58000),
+       ('South', 45000, 48000, 51000, 53000),
+       ('East',  60000, 62000, 65000, 68000);
+
+-- Unpivot monthly columns into rows
+SELECT *
+FROM regional_targets
+UNPIVOT (
+  target_amount FOR month IN (jan, feb, mar, apr)
+);
+</code></pre>
+<p>The result converts each month column into rows:</p>
+<table>
+<thead>
+<tr>
+<th>region</th>
+<th>month</th>
+<th>target_amount</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>North</td>
+<td>jan</td>
+<td>50000</td>
+</tr>
+<tr>
+<td>North</td>
+<td>feb</td>
+<td>55000</td>
+</tr>
+<tr>
+<td>North</td>
+<td>mar</td>
+<td>52000</td>
+</tr>
+<tr>
+<td>North</td>
+<td>apr</td>
+<td>58000</td>
+</tr>
+<tr>
+<td>South</td>
+<td>jan</td>
+<td>45000</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>By default, <code>UNPIVOT</code> excludes null values. To include them, specify <code>INCLUDE NULLS</code>:</p>
+<pre><code class="lang-sql">-- Unpivot while keeping null values
+SELECT *
+FROM regional_targets
+UNPIVOT INCLUDE NULLS (
+  target_amount FOR month IN (jan, feb, mar, apr)
+);
+</code></pre>
+<p>You can also assign custom aliases to the unpivoted column names:</p>
+<pre><code class="lang-sql">-- Unpivot with custom month labels
+SELECT *
+FROM regional_targets
+UNPIVOT (
+  target_amount FOR month IN (
+    jan AS `January`,
+    feb AS `February`,
+    mar AS `March`,
+    apr AS `April`
+  )
+);
+</code></pre>
+<div class="NOTE">
+<p>Note</p>
+<p>The <code>UNPIVOT</code> clause requires Databricks Runtime 12.2 LTS or later.</p>
+</div>
+<h2 id="choose-the-right-transformation">Choose the right transformation</h2>
+<p>Each transformation serves specific analytical needs. Use denormalization when you need fast query performance for dashboards and reports. Choose pivot when analysts need side-by-side comparisons across categories. Apply unpivot when you need to normalize wide data for aggregation or machine learning pipelines.</p>
+<p>These transformations often work together in data pipelines. You might unpivot source data to standardize its format, apply transformations, and then pivot results for final presentation—or denormalize the output into optimized tables for downstream consumers.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>8. Load data with merge, insert, and append</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/8-load-data-merge-insert-append">https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/8-load-data-merge-insert-append</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Load data with merge, insert, and append</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>After you transform and cleanse data, the final step in your pipeline is loading it into target tables. Azure Databricks provides three core loading strategies: <strong>append</strong>, <strong>overwrite</strong>, and <strong>merge</strong>. Each strategy serves different use cases, and choosing the right one depends on how your source data relates to existing records.</p>
+<p><img alt="Diagram explaining the difference between INSERT INTO, OVERWRITE and MERGE." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/media/8-load-data-merge-insert-append.png"/></p>
+<p>In this unit, you learn how to append new rows with INSERT, replace data with overwrite operations, and synchronize changes using MERGE for upsert scenarios.</p>
+<h2 id="append-data-with-insert-into">Append data with INSERT INTO</h2>
+<p>The most straightforward loading operation adds new rows to an existing table without modifying current data. Use INSERT INTO when you're loading fresh batches of data that don't overlap with existing records—such as daily transaction logs, new event streams, or incremental data extracts.</p>
+<p>INSERT INTO works with both SQL and PySpark. The following examples show how to add rows to a sales table.</p>
+<pre><code class="lang-sql">-- Append new records using VALUES
+INSERT INTO sales.transactions (transaction_id, amount, transaction_date)
+VALUES 
+    ('TXN001', 150.00, '2026-01-15'),
+    ('TXN002', 275.50, '2026-01-15');
+
+-- Append from a staging table or query
+INSERT INTO sales.transactions
+SELECT * FROM staging.daily_transactions
+WHERE transaction_date = current_date();
+</code></pre>
+<p>In PySpark, you append data by writing a DataFrame with <code>append</code> mode:</p>
+<pre><code class="lang-python"># Append DataFrame to existing table
+df_new_transactions.write.mode("append").saveAsTable("sales.transactions")
+
+# Or use insertInto for existing tables
+df_new_transactions.write.insertInto("sales.transactions")
+</code></pre>
+<div class="TIP">
+<p>Tip</p>
+<p>When appending data, ensure your source data is deduplicated before loading. INSERT INTO doesn't check for duplicates—if you load the same batch twice, you get duplicate rows.</p>
+</div>
+<h2 id="replace-data-with-insert-overwrite">Replace data with INSERT OVERWRITE</h2>
+<p>Sometimes you need to replace existing data rather than add to it. INSERT OVERWRITE truncates the target table or partition before inserting new rows. This approach works well for reprocessing failed batches, refreshing lookup tables, or rebuilding aggregations.</p>
+<pre><code class="lang-sql">-- Replace entire table contents
+INSERT OVERWRITE sales.daily_summary
+SELECT 
+    region,
+    SUM(amount) as total_sales,
+    COUNT(*) as transaction_count
+FROM sales.transactions
+WHERE transaction_date = current_date()
+GROUP BY region;
+</code></pre>
+<p>For partitioned tables, you can overwrite specific partitions while leaving others intact:</p>
+<pre><code class="lang-sql">-- Replace only January 2026 partition
+INSERT OVERWRITE sales.monthly_report
+PARTITION (report_month = '2026-01')
+SELECT region, product_category, SUM(amount) as revenue
+FROM sales.transactions
+WHERE transaction_date BETWEEN '2026-01-01' AND '2026-01-31'
+GROUP BY region, product_category;
+</code></pre>
+<p>Delta Lake also supports selective overwrites with the <code>REPLACE WHERE</code> clause, which deletes rows matching a condition before inserting:</p>
+<pre><code class="lang-sql">-- Replace transactions for a specific date range
+INSERT INTO sales.transactions
+REPLACE WHERE transaction_date BETWEEN '2026-01-01' AND '2026-01-07'
+SELECT * FROM staging.corrected_transactions;
+</code></pre>
+<p>In PySpark, use <code>overwrite</code> mode for full table replacement:</p>
+<pre><code class="lang-python"># Overwrite entire table
+df_refreshed.write.mode("overwrite").saveAsTable("sales.daily_summary")
+
+# Overwrite specific partition
+df_january.write.mode("overwrite").partitionBy("report_month").saveAsTable("sales.monthly_report")
+</code></pre>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>The SQL <code>INSERT OVERWRITE PARTITION</code> syntax combined with <code>partitionOverwriteMode=dynamic</code> is restricted to <strong>classic compute</strong> only—it doesn't work on Databricks SQL warehouses or serverless compute. Python and Scala DataFrame writes using <code>partitionOverwriteMode=dynamic</code> work on all compute types. For new pipelines, Databricks recommends <code>REPLACE USING</code> over partition overwrite because partition overwrite can use stale data when partitioning changes.</p>
+</div>
+<h3 id="dynamically-replace-data-with-replace-using">Dynamically replace data with REPLACE USING</h3>
+<p><code>REPLACE USING</code> is the recommended approach for dynamic data overwrites. It works across all compute types—including Databricks SQL warehouses and serverless compute—and doesn't require Spark session configuration. Unlike <code>partitionOverwriteMode</code>, <code>REPLACE USING</code> supports partitioned tables, unpartitioned tables, and tables with liquid clustering.</p>
+<pre><code class="lang-sql">-- Replace only the partitions touched by the incoming data
+INSERT INTO sales.monthly_report
+  REPLACE USING (report_month)
+  SELECT region, product_category, SUM(amount) AS revenue, report_month
+  FROM staging.corrected_transactions
+  GROUP BY region, product_category, report_month;
+</code></pre>
+<p>The <code>REPLACE USING</code> clause atomically deletes rows in <code>sales.monthly_report</code> that match incoming rows on <code>report_month</code>, then inserts the new rows. Rows that don't match the specified columns are left untouched. In Databricks Runtime 16.3–17.1, the <code>USING</code> columns must be the table's full set of partition columns (legacy behavior). In Databricks Runtime 17.2 and above, any columns on any table type—including unpartitioned tables and tables with liquid clustering—are supported.</p>
+<p>When you need more flexible matching—such as replacing rows based on a custom condition or treating NULL values as equal—use <code>REPLACE ON</code> instead:</p>
+<pre><code class="lang-sql">-- Replace rows matching a user-defined condition across source and target
+INSERT INTO sales.transactions
+  REPLACE ON (target.transaction_id = source.transaction_id)
+  SELECT * FROM staging.corrected_transactions AS source;
+</code></pre>
+<p><code>REPLACE ON</code> requires Databricks Runtime 17.1 and above. Use <code>REPLACE WHERE</code> (covered earlier) when you need condition-based replacement without a source table reference.</p>
+<h2 id="merge-data-for-upsert-operations">Merge data for upsert operations</h2>
+<p>Real-world data pipelines often need to update existing records while inserting new ones. The MERGE statement handles this pattern—commonly called an "upsert"—by matching source rows to target rows and applying different actions based on whether a match exists.</p>
+<p>MERGE is essential for slowly changing dimensions, synchronizing data from source systems, and processing change data capture (CDC) feeds.</p>
+<pre><code class="lang-sql">MERGE INTO customers AS target
+USING customer_updates AS source
+ON target.customer_id = source.customer_id
+WHEN MATCHED THEN
+    UPDATE SET 
+        target.email = source.email,
+        target.phone = source.phone,
+        target.last_updated = current_timestamp()
+WHEN NOT MATCHED THEN
+    INSERT (customer_id, name, email, phone, created_date, last_updated)
+    VALUES (source.customer_id, source.name, source.email, source.phone, 
+            current_timestamp(), current_timestamp());
+</code></pre>
+<p>This query updates email and phone for existing customers while inserting entirely new customer records. The ON clause defines the matching key—typically a primary key or business identifier.</p>
+<h3 id="merge-with-conditional-logic">Merge with conditional logic</h3>
+<p>Add conditions to WHEN clauses to handle more complex scenarios. For example, you might only update records that have actually changed:</p>
+<pre><code class="lang-sql">MERGE INTO products AS target
+USING product_feed AS source
+ON target.sku = source.sku
+WHEN MATCHED AND source.price &lt;&gt; target.price THEN
+    UPDATE SET target.price = source.price, target.updated_at = current_timestamp()
+WHEN MATCHED AND source.discontinued = true THEN
+    DELETE
+WHEN NOT MATCHED THEN
+    INSERT *;
+</code></pre>
+<p>The <code>INSERT *</code> syntax inserts all columns from the source when they match the target schema.</p>
+<h3 id="merge-with-pyspark">Merge with PySpark</h3>
+<p>For programmatic control, use the Delta Lake Python API:</p>
+<pre><code class="lang-python">from delta.tables import DeltaTable
+
+target_table = DeltaTable.forName(spark, "customers")
+
+target_table.alias("target").merge(
+    source_df.alias("source"),
+    "target.customer_id = source.customer_id"
+).whenMatchedUpdate(set={
+    "email": "source.email",
+    "phone": "source.phone",
+    "last_updated": "current_timestamp()"
+}).whenNotMatchedInsert(values={
+    "customer_id": "source.customer_id",
+    "name": "source.name",
+    "email": "source.email",
+    "phone": "source.phone",
+    "created_date": "current_timestamp()",
+    "last_updated": "current_timestamp()"
+}).execute()
+</code></pre>
+<p>For simpler cases where source and target schemas match, use the convenience methods:</p>
+<pre><code class="lang-python">target_table.alias("target").merge(
+    source_df.alias("source"),
+    "target.customer_id = source.customer_id"
+).whenMatchedUpdateAll(
+).whenNotMatchedInsertAll(
+).execute()
+</code></pre>
+<h2 id="choose-the-right-loading-strategy">Choose the right loading strategy</h2>
+<p>Your choice of loading operation depends on the relationship between source and target data:</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Operation</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New records only</td>
+<td>INSERT INTO / append</td>
+<td>Daily logs, event streams, incremental extracts</td>
+</tr>
+<tr>
+<td>Full refresh</td>
+<td>INSERT OVERWRITE</td>
+<td>Lookup tables, aggregations, failed batch reprocessing</td>
+</tr>
+<tr>
+<td>Mixed updates and inserts</td>
+<td>MERGE</td>
+<td>CDC feeds, dimension tables, data synchronization</td>
+</tr>
+<tr>
+<td>Selective replacement by predicate</td>
+<td>REPLACE WHERE</td>
+<td>Correcting specific date ranges or logical conditions</td>
+</tr>
+<tr>
+<td>Dynamic data overwrite (all compute types)</td>
+<td>REPLACE USING</td>
+<td>Recommended for row-level overwrites on any table type (partitioned, unpartitioned, liquid clustering)</td>
+</tr>
+<tr>
+<td>Custom-condition row replacement</td>
+<td>REPLACE ON</td>
+<td>Row-level overwrites with NULL-safe or complex matching conditions</td>
+</tr>
+</tbody>
+</table>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>MERGE operations require a unique match between source and target rows. If multiple source rows match the same target row, the operation fails. Deduplicate your source data before merging.</p>
+</div>
+<p>Understanding these loading patterns prepares you to build reliable data pipelines that maintain data integrity while efficiently processing both new and changed records.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>9. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/11-summary">https://learn.microsoft.com/en-us/training/modules/cleanse-transform-load-data-into-unity-catalog/11-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Throughout this module, you explored the complete data engineering workflow for cleansing, transforming, and loading data into <strong>Unity Catalog</strong> tables in Azure Databricks. From initial data profiling to final loading operations, each technique builds on the previous to deliver high-quality, well-structured data ready for analysis.</p>
+<p>You learned how <strong>data profiling</strong> using <code>ANALYZE TABLE</code> and Unity Catalog's monitoring features reveals data quality issues like null percentages, duplicate records, and distribution anomalies. You explored how selecting <strong>appropriate data types</strong> affects storage efficiency, query performance, and data integrity—particularly the importance of using <code>DECIMAL</code> for financial calculations. You practiced identifying and resolving <strong>duplicates and null values</strong> using techniques like <code>QUALIFY</code> with window functions, <code>dropDuplicates()</code>, and <code>fillna()</code> methods.</p>
+<p>For data transformation, you applied <strong>filtering, grouping, and aggregation</strong> operations to shape data for analytical requirements. You combined datasets using <strong>joins</strong> for horizontal merging and <strong>set operators</strong> like <code>UNION</code>, <code>INTERSECT</code>, and <code>EXCEPT</code> for vertical combinations. You reshaped data structures through <strong>denormalization</strong> for query performance, <strong>pivoting</strong> for cross-tabular analysis, and <strong>unpivoting</strong> to normalize wide datasets.</p>
+<p>Finally, you implemented <strong>loading strategies</strong> that match your data scenarios: <code>INSERT INTO</code> for appending new records, <code>INSERT OVERWRITE</code> for replacing data, and <code>MERGE INTO</code> for upsert operations that synchronize changes. As you build data pipelines, apply these techniques systematically—profile first to understand your data, cleanse to resolve quality issues, transform to meet analytical requirements, and load with the appropriate strategy to maintain data integrity in your lakehouse.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>

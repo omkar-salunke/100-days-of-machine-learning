@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understand Azure Databricks architecture</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Understand Azure Databricks architecture</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/1-introduction">https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/1-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>When you deploy Azure Databricks for data engineering workloads, understanding its architecture becomes essential for making informed decisions about data organization, security configurations, and resource management. The architecture determines where your data resides, how compute resources are allocated, and how different components interact to provide the unified analytics platform you rely on.</p>
+<p>Azure Databricks organizes resources through a hierarchical structure that spans from account-level governance down to individual data objects. At the foundation, the <strong>control plane</strong> manages orchestration and configuration while the <strong>compute plane</strong> processes your data—either in <strong>serverless</strong> environments fully managed by Azure Databricks or in <strong>classic compute</strong> running within your Azure subscription. This separation enables you to maintain security and governance while scaling workloads efficiently.</p>
+<p>Storage options in Azure Databricks have evolved to meet different organizational needs. <strong>Default storage</strong> simplifies getting started by providing fully managed storage in serverless workspaces without configuration overhead. <strong>External storage</strong> connects Unity Catalog to your existing cloud storage accounts, enabling you to work with data managed outside Azure Databricks while maintaining governance. <strong>Unity Catalog managed storage</strong> lets you define where Unity Catalog stores data at the catalog or schema level, providing fine-grained control over data placement while Unity Catalog handles the lifecycle.</p>
+<p>Throughout this module, you explore how these architectural components work together. You learn how the <strong>account hierarchy</strong> organizes resources across workspaces and metastores, how control and compute planes separate responsibilities, and how different storage patterns serve specific use cases. By understanding these fundamentals, you'll be equipped to configure Azure Databricks environments that align with your organization's security, governance, and operational requirements.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Understand Azure Databricks architecture</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/2-understand-azure-databricks-architecture">https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/2-understand-azure-databricks-architecture</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Understand Azure Databricks architecture</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>When you work with Azure Databricks as a data engineer, understanding its architecture helps you make informed decisions about how to organize your data, configure compute resources, and manage security. The architecture determines how your workloads run, where your data resides, and how different components interact.</p>
+<p>Azure Databricks uses a hierarchical structure that organizes resources from the account level down to individual data objects. This structure, combined with the separation between control and compute planes, provides flexibility and security for your data engineering workloads.</p>
+<h2 id="azure-databricks-account-hierarchy">Azure Databricks account hierarchy</h2>
+<p>Azure Databricks organizes resources in a hierarchical structure that starts at the account level. The <strong>account</strong> is the top-level construct you use to manage Azure Databricks across your organization. At this level, you manage identity and access, create and configure workspaces, attach Unity Catalog metastores, and oversee billing and policies.</p>
+<p>The <strong>metastore</strong> is the top-level container for metadata in Unity Catalog, registering information about your data and AI assets such as tables, views, volumes, models, and functions, along with the permissions that govern access to them. Each metastore is region-specific, and workspaces attached to the same metastore share a unified view of data, enabling centralized governance across your organization.</p>
+<p><strong>Unity Catalog</strong> organizes data using a three-level namespace structure: <code>&lt;catalog-name&gt;.&lt;schema-name&gt;.&lt;object-name&gt;</code>. Unlike the legacy Hive metastore that operates per workspace, Unity Catalog metastores operate at the account level, allowing you to define data access policies once and apply them consistently across all attached workspaces.</p>
+<p>Before Unity Catalog, Azure Databricks used the <strong>Hive metastore (legacy)</strong> as a workspace-level metadata store. When a workspace is enabled for Unity Catalog, the legacy Hive metastore becomes accessible as a catalog named <code>hive_metastore</code>, allowing you to query existing data using the format <code>hive_metastore.&lt;schema-name&gt;.&lt;table-name&gt;</code>. Databricks recommends migrating to Unity Catalog for enhanced security, centralized governance, and built-in auditing.</p>
+<p>You create multiple <strong>workspaces</strong> within an account. Workspaces are the collaboration environments where you and your team run compute workloads such as data ingestion, interactive exploration, scheduled jobs, and machine learning training. Each workspace provides an isolated environment for your projects while sharing the same account-level governance.</p>
+<p><a data-linktype="relative-path" href="media/databricks-account-hierarchy.png#lightbox">
+<img alt="Diagram showing the relationship between account, workspace and catalog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/media/databricks-account-hierarchy.png"/>
+</a>
+</p>
+<p>This hierarchical approach allows you to separate concerns: manage organization-wide policies at the account level, isolate projects in workspaces, and govern data centrally through Unity Catalog.</p>
+<h2 id="control-plane-and-compute-plane">Control plane and compute plane</h2>
+<p>Azure Databricks separates its architecture into two distinct planes: the control plane and the compute plane.</p>
+<p>The <strong>control plane</strong> includes the backend services that Azure Databricks manages in your Azure Databricks account. This plane hosts the web application you use to interact with Azure Databricks, manage configurations, and monitor your workloads. The control plane handles orchestration, job scheduling, and cluster management, but it doesn't process your data.</p>
+<p>The <strong>compute plane</strong> is where your data processing happens. Azure Databricks offers two types of compute planes, each designed for different use cases.</p>
+<p><a data-linktype="relative-path" href="media/databricks-architecture.png#lightbox">
+<img alt="Diagram showing part of the Azure Databricks architecture." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/media/databricks-architecture.png"/>
+</a>
+</p>
+<p>With <strong>serverless compute</strong>, your compute resources run in a serverless compute plane within your Azure Databricks account, not in your Azure subscription. Azure Databricks fully manages the infrastructure, automatically scaling resources based on your workload demands. The serverless compute plane includes network boundaries to isolate workspaces and additional security controls between clusters. This option simplifies operations because you don't need to manage virtual networks or compute resources yourself.</p>
+<p>With <strong>classic compute</strong>, your compute resources run in your own Azure subscription in what's called the classic compute plane. Azure Databricks creates new compute resources within each workspace's virtual network in your subscription. This approach provides natural isolation because resources run in your subscription, giving you more control over networking and security configurations.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Classic workspaces are referred to as <strong>Hybrid workspaces</strong> in the Azure portal.</p>
+</div>
+<p>The separation between control and compute planes allows Azure Databricks to manage orchestration centrally while processing your data in isolated, secure environments.</p>
+<h2 id="workspace-storage">Workspace storage</h2>
+<p>Workspace storage is handled differently depending on your workspace type. <strong>Classic workspaces</strong> have an associated <strong>workspace storage account</strong> that resides in your Azure subscription. <strong>Serverless workspaces</strong> use <strong>default storage</strong>—a fully managed storage location within your Azure Databricks account, not in your own Azure subscription. You'll explore default storage in detail in a later unit.</p>
+<p><a data-linktype="relative-path" href="media/workspace-storage.png#lightbox">
+<img alt="Diagram showing workspace storage." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/media/workspace-storage.png"/>
+</a>
+</p>
+<p>Regardless of workspace type, workspace storage contains two categories of data.</p>
+<p><strong>Workspace file system data</strong> includes the assets that you and your team create and manage through the Azure Databricks UI—notebooks, SQL queries and dashboards, alerts, repos, libraries, and other small files such as Python or YAML configuration files.</p>
+<p><strong>Workspace system data</strong> is generated internally by Azure Databricks features and includes SQL query results, job run results, notebook revisions, SQL query plans used for observability, and cluster logs.</p>
+<p>In classic workspaces, both categories reside in the workspace storage account in your Azure subscription. If your classic workspace was enabled for Unity Catalog automatically, the workspace storage account also contains the default <strong>workspace catalog</strong>. All users in your workspace can create data assets in the default schema within this catalog. Users access this data through Unity Catalog's governance layer and don't have direct access to the underlying storage, ensuring security and proper access control.</p>
+<p>The classic workspace storage account may also contain <strong>DBFS (Databricks File System)</strong>, which is a distributed file system accessible under the <code>dbfs:/</code> namespace. DBFS root and DBFS mounts are legacy features. Storing and accessing data using DBFS root or DBFS mounts is a deprecated pattern. Instead, you should use Unity Catalog-managed tables and volumes for better governance and security.</p>
+<p>Understanding where your data resides helps you implement appropriate security controls, such as enabling firewall support for your workspace storage account to limit access to authorized resources and networks only.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Understand Unity Catalog managed storage</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/3-understand-unity-catalog-managed-storage">https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/3-understand-unity-catalog-managed-storage</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Understand Unity Catalog managed storage</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Your organization likely has data governance policies that require specific types of data to reside in designated cloud storage locations. For example, you might need production data in one storage account and development data in another, or you might need to isolate sensitive customer data from operational data. <strong>Unity Catalog managed storage</strong> helps you meet these requirements while maintaining centralized governance and access control.</p>
+<h2 id="what-is-managed-storage">What is managed storage?</h2>
+<p><strong>Managed storage</strong> in Unity Catalog refers to cloud storage locations where Unity Catalog stores data and metadata files for <strong>managed tables</strong> and <strong>managed volumes</strong>. Tables store structured data in a tabular format, while <strong>volumes</strong> provide governance for nontabular data files such as images, audio files, logs, or any other unstructured data that doesn't fit into a table schema.</p>
+<p><a data-linktype="relative-path" href="media/what-is-managed-storage.png#lightbox">
+<img alt="Diagram explaining managed storage." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/media/what-is-managed-storage.png"/>
+</a>
+</p>
+<p>When you create a managed table or volume, Unity Catalog handles the complete lifecycle of the data—including where it's stored, how it's organized, and when it's deleted. This differs from <strong>external tables</strong> and volumes, where you manage the data lifecycle in your cloud storage, and Unity Catalog only governs access from Azure Databricks.</p>
+<p>With managed storage, you specify a cloud storage path, and Unity Catalog takes care of the rest. This simplifies data management because you don't need to worry about file layouts or cleanup operations. When you drop a managed table, Unity Catalog automatically marks the underlying data files for deletion after eight days, along with removing the metadata.</p>
+<p>Managed storage locations serve two key purposes. First, they provide <strong>physical data isolation</strong> by storing data in separate cloud storage containers or paths. Second, they align with your organizational structure and compliance requirements by letting you map catalogs and schemas to specific storage locations that meet regulatory or security policies.</p>
+<h2 id="how-managed-storage-relates-to-unity-catalog-hierarchy">How managed storage relates to Unity Catalog hierarchy</h2>
+<p>Unity Catalog organizes data using a <strong>three-level namespace</strong>: <strong>catalog</strong>, <strong>schema</strong>, and <strong>table</strong>. Managed storage locations can be defined at three corresponding levels in this hierarchy: the <strong>metastore level</strong>, the <strong>catalog level</strong>, and the <strong>schema level</strong>. Each level represents a different scope of data organization and isolation.</p>
+<p><a data-linktype="relative-path" href="media/data-storage-hierarchy.png#lightbox">
+<img alt="Diagram explaining the Azure Databricks Storage Hierarchy." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/media/data-storage-hierarchy.png"/>
+</a>
+</p>
+<p>At the <strong>metastore level</strong>, you can optionally define a default storage location that serves as a fallback for any catalog or schema that doesn't have its own managed storage location. However, new workspaces enabled for Unity Catalog don't automatically include metastore-level storage, and Databricks recommends using <strong>catalog-level storage</strong> instead for better data isolation.</p>
+<p>At the <strong>catalog level</strong>, you define storage locations that align with your organizational structure. Catalogs typically represent major organizational units, development lifecycle stages, or data classification categories. For example, you might create a catalog for production data with managed storage in a specific container, and another catalog for development data with storage in a different container. This catalog-level isolation is the recommended approach because it provides a clear boundary for data governance and access control.</p>
+<p>At the <strong>schema level</strong>, you can define even more granular storage locations within a catalog. Schemas organize data into logical categories that are more specific than catalogs—typically representing individual projects, use cases, or team sandboxes. By assigning managed storage at the schema level, you can achieve <strong>fine-grained data isolation</strong> when needed.</p>
+<h2 id="storage-location-resolution">Storage location resolution</h2>
+<p>When you create a managed table or volume, Unity Catalog determines where to store the data by following a <strong>resolution hierarchy</strong>. This hierarchy evaluates storage locations from the most specific (schema) to the most general (metastore).</p>
+<p>Unity Catalog first checks whether the containing <strong>schema</strong> has a managed storage location. If a schema-level location exists, the data is stored there. This provides the most granular level of control over where your data resides.</p>
+<p>If the schema doesn't have a managed storage location, Unity Catalog checks the containing <strong>catalog</strong>. If a catalog-level location exists, the data is stored in that catalog's managed storage location. This is the most common scenario and the recommended approach for most organizations.</p>
+<p>If neither the schema nor the catalog has a managed storage location, Unity Catalog falls back to the <strong>metastore-level</strong> storage location. If no metastore-level location exists either, you won't be able to create managed tables or volumes, and you'll need to configure a managed storage location at one of these levels first.</p>
+<p>This hierarchy gives you flexibility in how you organize and isolate data. You can start with catalog-level storage for most use cases and add schema-level storage when you need more granular control.</p>
+<h2 id="storage-root-and-storage-location">Storage root and storage location</h2>
+<p>When you define managed storage locations for catalogs or schemas, you specify a cloud storage path that Unity Catalog uses as the <strong>storage root</strong>. However, Unity Catalog doesn't store data directly in this path. Instead, it <strong>automatically adds hashed subdirectories</strong> to ensure each catalog and schema has a unique location, even if multiple objects share the same storage root.</p>
+<p><a data-linktype="relative-path" href="media/storage-root.png#lightbox">
+<img alt="Diagram explaining storage root and storage location." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/media/storage-root.png"/>
+</a>
+</p>
+<p>For catalogs, Unity Catalog appends subdirectories in the format <code>__unitystorage/catalogs/&lt;uuid&gt;</code>, where <code>&lt;uuid&gt;</code> is a unique identifier. For schemas, it uses <code>__unitystorage/schemas/&lt;uuid&gt;</code>. The complete path—the storage root plus these automatically generated subdirectories—becomes the <strong>storage location</strong> where managed tables and volumes actually store their data.</p>
+<p>This automatic path management provides important benefits. You can configure multiple catalogs or schemas with the same base storage root, and Unity Catalog ensures they won't conflict by creating distinct subdirectories for each. You don't need to manually organize or manage these paths—Unity Catalog handles this automatically while maintaining the data isolation and governance you need.</p>
+<p>Unity Catalog also enforces <strong>overlap prevention rules</strong> to maintain data governance integrity. When you create a catalog or schema with a managed storage location, Unity Catalog validates that the storage path doesn't overlap with other managed storage locations, external tables, or external volumes. This prevents conflicts and ensures clear boundaries between different data assets. If you attempt to create a managed storage location that overlaps with an existing location, Unity Catalog will reject the operation to protect your data governance model.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Understand external storage</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/4-understand-external-storage">https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/4-understand-external-storage</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Understand external storage</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>As a data engineer, you need to connect Azure Databricks to data stored in cloud storage locations like Azure Data Lake Storage containers. You might have production data in one storage account and development data in another, or you might need to work with data that's managed by teams outside of Databricks. <strong>External locations</strong> in Unity Catalog allow you to securely connect cloud storage to your workspaces while maintaining governance and access control.</p>
+<h2 id="what-are-external-locations">What are external locations?</h2>
+<p><strong>External locations</strong> are Unity Catalog objects that define secure connections to cloud storage. Each external location combines two components: a cloud storage path and a storage credential that authorizes access to that path.</p>
+<p>A <strong>storage credential</strong> represents an authentication mechanism, such as an Azure managed identity or service principal. The storage credential provides the authentication required to access your cloud storage. Storage credentials are defined once in Unity Catalog and reference the identity configured in your Azure tenant.</p>
+<p>An external location specifies which storage credential to use and which <strong>cloud storage path</strong> to access. This separation between credentials and locations allows one storage credential to be referenced by multiple external locations if they all access storage in the same security boundary.</p>
+<p><a data-linktype="relative-path" href="media/storage-location-mapping.png#lightbox">
+<img alt="Diagram explaining storage location and credential mapping." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/media/storage-location-mapping.png"/>
+</a>
+</p>
+<p>External locations can reference storage in Azure Data Lake Storage containers, AWS S3 buckets (read-only), or Cloudflare R2 buckets. For Azure Databricks workloads, you'll typically use Azure Data Lake Storage containers because they integrate natively with Unity Catalog and support both read and write operations.</p>
+<h2 id="why-do-we-need-external-locations">Why do we need external locations?</h2>
+<p>External locations serve two purposes in Unity Catalog: they enable you to work with external data assets, and they allow you to define managed storage locations at different levels of your data hierarchy.</p>
+<p><strong>External tables and volumes</strong> let you work with data that's stored and managed outside of Unity Catalog. When you create an external table, you're essentially registering existing data in cloud storage so that Unity Catalog can govern access to it. The data files remain in their original location, managed by your cloud provider or other data platforms. This approach is useful when you have large amounts of existing data, when other systems also need to access the data, or when you want to maintain control over the data lifecycle outside of Databricks.</p>
+<p><strong>Managed storage locations</strong> use external locations to define where Unity Catalog should store managed tables and volumes. Even though the data is managed by Unity Catalog, it still needs to reside in cloud storage that you own. An external location specifies the storage path, which is then assigned as the managed storage location for a catalog or schema. This allows you to determine where your data physically resides while Unity Catalog handles the data lifecycle.</p>
+<p>The key difference lies in who manages the data. With external tables and volumes, you manage the data files and Unity Catalog governs access. With managed storage locations, Unity Catalog manages both the data lifecycle and access control, but stores the data in a location you specify through an external location.</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>External Tables/Volumes</th>
+<th>Managed Storage Locations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data Management</strong></td>
+<td>You manage the data files</td>
+<td>Unity Catalog manages the data</td>
+</tr>
+<tr>
+<td><strong>Data Location</strong></td>
+<td>Data remains in original location</td>
+<td>Data stored in location you specify</td>
+</tr>
+<tr>
+<td><strong>Use Case</strong></td>
+<td>Existing or shared data</td>
+<td>New data managed by Unity Catalog</td>
+</tr>
+</tbody>
+</table>
+<h2 id="understand-storage-credentials">Understand storage credentials</h2>
+<p>Before you can create external locations, you need <strong>storage credentials</strong>—Unity Catalog securable objects that encapsulate the authentication mechanism for accessing cloud storage. Storage credentials centralize credential management. Instead of handling authentication in notebooks or queries, you define credentials once in Unity Catalog and reference them across multiple external locations.</p>
+<p><strong>Azure managed identities</strong> are the recommended authentication mechanism. A managed identity is an Azure resource that provides an identity for applications connecting to resources that support Microsoft Entra ID authentication. Azure automatically manages the credential lifecycle—no passwords, no secrets to rotate, and support for storage accounts protected by network firewalls.</p>
+<p><strong>Service principals</strong> are a legacy alternative. They require you to create an application identity in Microsoft Entra ID and manage client secrets manually, including periodic rotation. Managed identities are preferred for these reasons.</p>
+<p>Storage credentials are metastore-level objects available to all attached workspaces. Only users with appropriate privileges can use them to create external locations.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>A detailed walkthrough of creating and configuring external storage will be covered in a subsequent module.</p>
+</div>
+<h2 id="workspace-binding-for-external-locations">Workspace binding for external locations</h2>
+<p>By default, an external location is accessible from all workspaces attached to your metastore. This means that any user with appropriate privileges can use the external location from any workspace. However, you might want to restrict access to specific workspaces to align with your organization's security boundaries or data governance policies.</p>
+<p><strong>Workspace binding</strong> restricts an external location to designated workspaces. When enabled, users can only access the external location from assigned workspaces, regardless of their Unity Catalog privileges. This creates an additional layer of access control beyond user-level permissions.</p>
+<p><a data-linktype="relative-path" href="media/workspace-binding-external-locations.png#lightbox">
+<img alt="Diagram explaining workspace binding for external locations." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/media/workspace-binding-external-locations.png"/>
+</a>
+</p>
+<p>Workspace binding applies independently to both external locations and storage credentials. By default, a storage credential is also accessible from all workspaces attached to the metastore. You can bind a storage credential to specific workspaces so it can only be used to create external locations within designated workspaces—a common pattern for ensuring production credentials are used only in production workspaces.</p>
+<p>Workspace binding is relevant when workspaces represent different environments (production versus development) or when compliance requirements mandate that certain data remains accessible only from specific compute environments. For example, production data can be bound exclusively to production workspaces, preventing access from development environments even for privileged users.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Understand default storage</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/5-understand-default-storage">https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/5-understand-default-storage</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Understand default storage</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>When you deploy Azure Databricks workspaces, you typically need to configure cloud storage accounts, set up access credentials, and manage storage permissions. <strong>Default storage</strong> in Azure Databricks simplifies this process by providing ready-to-use, fully managed storage that's automatically available in serverless workspaces.</p>
+<h2 id="what-is-default-storage">What is default storage?</h2>
+<p>Default storage is a fully managed object storage platform built into Azure Databricks. It provides immediate storage capabilities without requiring you to configure external cloud storage accounts or manage access credentials.</p>
+<p>Default storage is used across <strong>both classic and serverless workspaces</strong> for internal Azure Databricks features. Capabilities such as Data Classification, Anomaly detection, Clean Rooms, and Knowledge Assistant all store their operational data in default storage regardless of workspace type.</p>
+<p>In <strong>serverless workspaces</strong>, default storage also serves as the primary storage for workspace system data and for the catalogs you create. When you create a serverless workspace, Azure Databricks automatically provisions a default catalog that uses default storage. You can also create additional catalogs that use either default storage or your own cloud object storage, giving you flexibility in how you organize your data.</p>
+<h2 id="where-is-default-storage-available">Where is default storage available?</h2>
+<p><strong>Creating new catalogs in default storage</strong> is available exclusively in serverless workspaces. Classic workspaces can access catalogs stored in default storage, but only when using serverless compute.</p>
+<p><a data-linktype="relative-path" href="media/default-storage.png#lightbox">
+<img alt="Screenshot showing configuration for default storage." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/media/default-storage.png"/>
+</a>
+</p>
+<p>Serverless workspaces use default storage for three key areas. First, they use it for internal workspace operations and workspace system data. Second, they store workspace-level files and artifacts there. Third, catalogs you create can use default storage to store managed tables and volumes.</p>
+<p>This means you can share data across workspace types while maintaining the requirement for serverless compute when accessing default storage catalogs.</p>
+<p><a data-linktype="relative-path" href="media/workspace-storage-access.png#lightbox">
+<img alt="Diagram explaining workspace storage access." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/media/workspace-storage-access.png"/>
+</a>
+</p>
+<h2 id="default-storage-benefits-and-considerations">Default storage benefits and considerations</h2>
+<p>The following table summarizes the key benefits and considerations when using default storage:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Benefits</th>
+<th>Considerations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Configuration and setup</strong></td>
+<td>No need to create separate cloud storage accounts, configure access credentials, or manage storage permissions. Azure Databricks handles infrastructure automatically, enabling immediate data access.</td>
+<td>Only available in serverless workspaces. Not suitable for organizations that require full control over storage infrastructure.</td>
+</tr>
+<tr>
+<td><strong>Compute requirements</strong></td>
+<td>Serverless compute provides instant, scalable resources without provisioning. Consistent compute model across all default storage access.</td>
+<td>All access requires serverless compute. Classic compute clusters cannot read from or write to catalogs on default storage. Existing classic compute workloads need migration.</td>
+</tr>
+<tr>
+<td><strong>Governance and security</strong></td>
+<td>Catalogs integrate with Unity Catalog's privilege model. Manage access using SQL GRANT statements instead of cloud storage RBAC (Role Based Access Control), creating a consistent security model across all data assets.</td>
+<td>Access control limited to Unity Catalog mechanisms. Organizations requiring cloud-native RBAC integration should use external storage.</td>
+</tr>
+<tr>
+<td><strong>Workspace isolation</strong></td>
+<td>Catalogs are only accessible from the workspace where they were created by default. Provides natural isolation for development, testing, and production environments.</td>
+<td>Cross-workspace access requires explicit catalog binding configuration. Plan workspace architecture carefully to ensure data accessibility where needed.</td>
+</tr>
+<tr>
+<td><strong>Data lifecycle management</strong></td>
+<td>Automatic cleanup of underlying data files when you drop managed tables or volumes. Prevents orphaned data and reduces storage costs over time.</td>
+<td>Only applies to managed tables and volumes. External tables must still manage their own storage lifecycle.</td>
+</tr>
+<tr>
+<td><strong>External access</strong></td>
+<td>BI tools like Power BI and Tableau can access data through Azure Databricks ODBC and JDBC drivers.</td>
+<td>External tools that directly read Delta Lake or Iceberg metadata files cannot access default storage. Direct file access not supported. External data pipelines that read files directly need external storage.</td>
+</tr>
+</tbody>
+</table>
+<p>Default storage works best for new serverless workloads, development environments, and features that specifically require it. For production workloads with external access requirements or those using classic compute, external storage provides more flexibility.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/7-summary">https://learn.microsoft.com/en-us/training/modules/understand-azure-databricks-architecture/7-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Azure Databricks architecture provides a flexible foundation for data engineering workloads through its hierarchical organization and separation of <strong>control and compute planes</strong>. Throughout this module, you explored how accounts organize resources across workspaces and metastores, how <strong>Unity Catalog</strong> governs data centrally, and how different compute models serve specific needs. The <strong>control plane</strong> handles orchestration while <strong>compute planes</strong>—whether <strong>serverless</strong> or <strong>classic</strong>—process your data in isolated, secure environments.</p>
+<p>Storage patterns in Azure Databricks have evolved to address different scenarios. <strong>Default storage</strong> simplifies development by providing fully managed storage in serverless workspaces without configuration overhead, though it requires serverless compute for access. <strong>External locations</strong> bridge Unity Catalog with your existing cloud storage, enabling governance over data managed outside Azure Databricks while maintaining security through storage credentials. <strong>Unity Catalog managed storage</strong> gives you control over data placement at catalog and schema levels while Unity Catalog handles the complete lifecycle, including automatic cleanup of managed tables and volumes.</p>
+<p>Understanding these architectural components helps you design Azure Databricks environments that align with organizational requirements. The <strong>account hierarchy</strong> provides clear governance boundaries, the separation of planes enables secure scaling, and the storage options let you balance convenience with control. As you implement Azure Databricks solutions, consider how each component serves your specific use cases, evaluate security implications of different storage patterns, and leverage Unity Catalog's governance capabilities to maintain data quality and access control across your organization.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Azure Databricks</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Explore Azure Databricks</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/01-introduction">https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/01-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Azure Databricks is a cloud-based data platform that brings together the best of <strong>data engineering, data science, and machine learning</strong> in a single, unified workspace. Built on top of <strong>Apache Spark</strong>, it allows organizations to easily process, analyze, and visualize massive amounts of data in real time.</p>
+<p><img alt="Diagram showing an Overview of Azure Databricks." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/databricks-overview.png"/></p>
+<p>By connecting to a wide range of <strong>data sources</strong>—from cloud providers like Azure SQL Database, Amazon S3 and Google Cloud Storage, to enterprise systems such as SAP and Oracle—Azure Databricks makes it easy to integrate and transform data from anywhere.</p>
+<p>Once data is ingested, teams across <strong>sales, marketing, operations, finance, HR, and sustainability</strong> can use Databricks for advanced analytics, machine learning, business intelligence, and AI-driven insights.</p>
+<p>At its core, Azure Databricks helps organizations:</p>
+<ul>
+<li><strong>Integrate</strong> data from multiple sources</li>
+<li><strong>Engineer</strong> and transform raw data into usable formats</li>
+<li><strong>Store and manage</strong> data efficiently with governance and security</li>
+<li><strong>Apply</strong> real-time analytics, machine learning, and AI models</li>
+<li><strong>Drive</strong> better business decisions and outcomes</li>
+</ul>
+<h2 id="data-lakehouse">Data Lakehouse</h2>
+
+<p>A <strong>data lakehouse</strong> is a data management approach that blends the strengths of both data lakes and data warehouses. It offers scalable storage and processing, allowing organizations to handle diverse workloads—such as machine learning and business intelligence—without relying on separate, disconnected systems. By centralizing data, a lakehouse supports a single source of truth, reduces duplicate costs, and ensures that information stays up to date.</p>
+<p>Many lakehouses follow a layered design pattern where data is gradually improved, enriched, and refined as it moves through different stages of processing. This layered approach—commonly called the <strong>medallion architecture</strong>—organizes data into stages that build on one another, making it easier to manage and use effectively.</p>
+<p>The Databricks lakehouse uses two key technologies:</p>
+<ul>
+<li><strong>Delta Lake</strong>: an optimized storage layer that supports ACID transactions and schema enforcement.</li>
+<li><strong>Unity Catalog</strong>: a unified, fine-grained governance solution for data and AI.</li>
+</ul>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Get started with Azure Databricks</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/02-azure-databricks">https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/02-azure-databricks</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Get started with Azure Databricks</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>To use Azure Databricks, you must create an Azure Databricks workspace in your Azure subscription. A workspace is an Azure Databricks deployment in a cloud service account. It provides a unified environment for working with Azure Databricks assets for a specified set of users.</p>
+<p>You can create an Azure Databricks workspace by:</p>
+<ul>
+<li>Using the Azure portal user interface.</li>
+<li>Using an Azure Resource Manager (ARM), Bicep or Terraform template.</li>
+<li>Using the New-AzDatabricksWorkspace Azure PowerShell cmdlet.</li>
+<li>Using the az databricks workspace create Azure command line interface (CLI) command.</li>
+</ul>
+<p>When you create a workspace, you must specify:</p>
+<ul>
+<li><p>A <strong>workspace name</strong>.</p>
+</li>
+<li><p>Select an available <strong>region</strong>. For available regions, see <a data-linktype="external" href="https://azure.microsoft.com/explore/global-infrastructure">Azure services available by region</a>.</p>
+</li>
+<li><p>A <strong>pricing tier</strong>:</p>
+<ul>
+<li><strong>Premium</strong> - Role-based access controls, Unity Catalog, SQL, Mosaic AI, serverless compute, Genie Code, and other enterprise-level features.</li>
+<li><strong>Trial</strong> - A 14-day free trial of a Premium-level workspace</li>
+</ul>
+<div class="NOTE">
+<p>Note</p>
+<p>The Standard tier is no longer available for new workspaces as of April 1, 2026. All new workspaces are created on the Premium tier.</p>
+</div>
+</li>
+<li><p><strong>Workspace type</strong>:</p>
+<ul>
+<li><strong>Serverless</strong> - Pre-configured with serverless compute and managed storage. Recommended for most use cases.</li>
+<li><strong>Hybrid</strong> (also called Classic) - Provisions compute and storage in your Azure subscription. Best for custom networking or on-premises connectivity.</li>
+</ul>
+</li>
+<li><p><strong>Managed Resource Group name</strong> (optional): an automatically created resource group where Azure provisions and manages the infrastructure resources needed for your Databricks workspace.</p>
+</li>
+</ul>
+<div class="TIP">
+<p>Tip</p>
+<p>A <strong>Free Edition</strong> is available for students and educators with no time limit and no payment required, though it has daily usage limits and no access to classic compute. See <a data-linktype="absolute-path" href="/en-us/azure/databricks/getting-started/free-trial-vs-free-edition">Sign up for Azure Databricks</a> for a comparison.</p>
+</div>
+<p><img alt="Screenshot of Azure Databricks in the Azure Portal." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/01-azure-databricks.png"/></p>
+<p>If you decide to create an Azure Databricks deployment using the Azure CLI, this would be the <a data-linktype="absolute-path" href="/en-us/cli/azure/ext/databricks/databricks/workspace">az databricks workspace</a> command to remember:</p>
+<pre><code>az databricks workspace create
+    --resource-group myresourcegroup \
+    --name mydatabricksws  \
+    --location westus2  \
+    --sku premium
+</code></pre>
+<p>The equivalent <a data-linktype="absolute-path" href="/en-us/powershell/module/az.databricks/new-azdatabricksworkspace">New-AzDatabricksWorkspace</a> PowerShell cmdlet:</p>
+<pre><code>New-AzDatabricksWorkspace -Name mydatabricksws -ResourceGroupName myresourcegroup -Location westus2 -ManagedResourceGroupName databricks-group -Sku premium
+</code></pre>
+<h2 id="navigating-the-azure-databricks-workspace-ui">Navigating the Azure Databricks Workspace UI</h2>
+<p>After you provision an Azure Databricks workspace, you can use the workspace UI to work with data and compute resources. The workspace UI is a web-based user interface where you can create and manage workspace resources, such as Spark clusters, and use notebooks and queries to work with data in files and tables.</p>
+<p><img alt="Screenshot of the Azure Databricks Workspace user interface." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/02-azure-databricks-portal.png"/></p>
+<p>The homepage provides shortcuts to common tasks and workspace objects to you help you get started. You can import data, create a notebook, create a query and configure an AutoML experiment.</p>
+<p>The sidebar shows common Databricks categories (Workspace, Recents, Catalog, Jobs &amp; Pipelines, Compute, Marketplace). It then breaks out by product area:</p>
+<ul>
+<li><strong>SQL</strong>: SQL Editor, Queries, Dashboards, Genie, Alerts, Query History, SQL Warehouses</li>
+<li><strong>Data Engineering</strong>: Job Runs, Data Ingestion</li>
+<li><strong>Machine Learning</strong>: Playground, Experiments, Features, Models, Serving</li>
+</ul>
+<p>Select <strong>+ New</strong> to:</p>
+<ul>
+<li><strong>Create workspace objects</strong> such as notebooks, queries, repos, dashboards, alerts, jobs, pipelines, experiments, models, and serving endpoints.</li>
+<li><strong>Create compute resources</strong> such as clusters, SQL warehouses, and ML endpoints.</li>
+</ul>
+<p>Use the top bar to <strong>search</strong> for workspace objects such as notebooks, queries, dashboards, alerts, files, folders, libraries, tables registered in Unity Catalog, jobs, and repos in a single place. You can also access recently viewed objects in the search bar.</p>
+<p>The workspace is available in <strong>multiple languages.</strong> To change the workspace language, select your username in the top navigation bar, select <strong>Settings</strong> and go to the <strong>Preferences</strong> tab.</p>
+<h2 id="get-help-from-genie-code">Get help from Genie Code</h2>
+
+<p><strong>Genie Code</strong> (formerly Databricks Assistant) is an AI-powered pair programmer and support tool that helps you work more efficiently in Databricks by generating, explaining, and fixing code or queries directly in notebooks, dashboards, and files.</p>
+<p><img alt="Screenshot of Genie Code in Azure Databricks." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/genie-code.png"/></p>
+<p>It can assist with a wide range of tasks, including identifying and correcting errors, creating data visualizations, diagnosing job issues, and filtering or analyzing data using natural language prompts. Genie Code can surface relevant guidance from the Azure Databricks documentation.</p>
+<p>Genie Code also includes <strong>Agent mode</strong>, which is generally available for data science, data engineering, and dashboard authoring. Agent mode extends Genie Code with agentic capabilities so it can autonomously plan and complete multi-step data tasks on your behalf.</p>
+<p>By using Unity Catalog metadata, it personalizes its responses based on your organization’s data assets—tables, columns, and descriptions—making it easier to explore and work with your data.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Identify Azure Databricks workloads</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/03-workloads">https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/03-workloads</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Identify Azure Databricks workloads</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Azure Databricks offers capabilities for various workloads including Machine Learning and Large Language Models (LLM), Data Science, Data Engineering, BI and Data Warehousing, and Streaming Processing.</p>
+<h2 id="data-engineering">Data Engineering</h2>
+
+<p>Azure Databricks provides capabilities for data scientists and engineers who need to collaborate on complex data processing tasks. It provides an integrated environment with Apache Spark for big data processing in a data lakehouse, and supports multiple languages including Python, R, Scala, and SQL. The platform facilitates data exploration, visualization, and the development of data pipelines.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/03-azure-databricks-data-science-engineering.png#lightbox">
+<img alt="Diagram of Databricks data ingestion &amp; data sources screen." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/03-azure-databricks-data-science-engineering.png"/>
+</a>
+</span>
+</p>
+<h2 id="machine-learning">Machine Learning</h2>
+
+<p>Azure Databricks supports building, training, and deploying machine learning models at scale. It includes MLflow, an open-source platform to manage the ML lifecycle, including experimentation, reproducibility, and deployment. It also supports various ML frameworks such as TensorFlow, PyTorch, and Scikit-learn, making it versatile for different ML tasks.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/04-azure-databricks-machine-learning.png#lightbox">
+<img alt="Diagram of Databricks Machine Learning screen." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/04-azure-databricks-machine-learning.png"/>
+</a>
+</span>
+</p>
+<h2 id="sql">SQL</h2>
+
+<p>Data analysts who primarily interact with data through SQL can use SQL warehouses in Azure Databricks. The Azure Databricks Workspace UI provides a familiar SQL editor, dashboards, and automatic visualization tools to analyze and visualize data directly within Azure Databricks. This workload is ideal for running quick ad-hoc queries and creating reports from large datasets.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/05-azure-databricks-sql.png#lightbox">
+<img alt="Diagram of DatabricksSQL Editor screen." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/05-azure-databricks-sql.png"/>
+</a>
+</span>
+</p>
+<div class="NOTE">
+<p>Note</p>
+<p>SQL warehouses require the Premium tier.</p>
+</div>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Understand key concepts</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/04-key-concepts">https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/04-key-concepts</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Understand key concepts</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Azure Databricks is a single service platform with multiple technologies that enable working with data at scale. When using Azure Databricks, there are some key concepts to understand.</p>
+<h2 id="workspaces">Workspaces</h2>
+
+<p>A <strong>workspace</strong> in Azure Databricks is a secure, collaborative environment where your can access and organize all Databricks assets, such as notebooks, clusters, jobs, libraries, dashboards, and experiments.</p>
+<p>You can open an Azure Databricks Workspace from the Azure portal, by selecting <strong>Launch Workspace</strong>.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/azure-databricks-portal-launch.png#lightbox">
+<img alt="Screenshot of the Azure portal showing the Azure Databricks Landing Page." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/azure-databricks-portal-launch.png"/>
+</a>
+</span>
+</p>
+<p>It provides a web-based <strong>user interface (UI)</strong> as well as REST APIs for managing resources and workflows. Workspaces can be structured into folders to organize projects, data pipelines, or team assets, and permissions can be applied at different levels to control access. They support <strong>collaboration</strong> by allowing multiple users—such as data engineers, analysts, and data scientists—to work together on shared notebooks, track experiments, and manage dependencies.</p>
+<p>In addition, workspaces are tied to <strong>Unity Catalog</strong> (when enabled) for centralized data governance, ensuring secure access to data across the organization. Each workspace is also linked to an <strong>underlying Azure resource group</strong> (including a managed resource group) that holds the compute, networking, and storage resources Databricks uses behind the scenes.</p>
+<h2 id="notebooks">Notebooks</h2>
+
+<p><strong>Databricks notebooks</strong> are interactive, web-based documents that combine <strong>runnable code, visualizations, and narrative text</strong> in a single environment. They support multiple languages—such as Python, R, Scala, and SQL—and allow users to switch between languages within the same notebook using <em>magic commands</em>. This flexibility makes notebooks well-suited for <strong>exploratory data analysis, data visualization, machine learning experiments, and building complex data pipelines</strong>.</p>
+<p>Notebooks are also designed for <strong>collaboration</strong>: multiple users can edit and run cells simultaneously, add comments, and share insights in real time. They integrate tightly with Databricks clusters, enabling users to process large datasets efficiently, and can connect to external data sources through <strong>Unity Catalog</strong> for governed data access. In addition, notebooks can be version-controlled, scheduled as jobs, or exported for sharing outside the platform, making them central to both <strong>ad-hoc exploration</strong> and <strong>production-grade workflows</strong>.</p>
+<p>Notebooks contain a collection of two types of cells: <strong>code cells</strong> and <strong>Markdown cells</strong>. Code cells contain runnable code. Markdown cells contain Markdown code that renders as text and graphics. You can <strong>run</strong> a single cell, a group of cells, or the whole notebook.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/notebook.png#lightbox">
+<img alt="Screenshot of an Azure Databricks Notebook." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/notebook.png"/>
+</a>
+</span>
+</p>
+<h2 id="clusters">Clusters</h2>
+
+<p>Azure Databricks leverages a two-layer architecture:</p>
+<ul>
+<li><strong>Control Plane</strong>: this internal layer, managed by Microsoft, handles backend services specific to your Azure Databricks account.</li>
+<li><strong>Compute plane</strong>: this is the external layer that processes the data and lives in your Azure Subscription.</li>
+</ul>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/high-level-azure-databricks-architecture.png#lightbox">
+<img alt="Diagram showing the Azure Databricks high level architecture." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/high-level-azure-databricks-architecture.png"/>
+</a>
+</span>
+</p>
+<p><strong>Clusters</strong> are the core computational engines in Azure Databricks. They provide the processing power required to run data engineering, data science, and analytics tasks. Each cluster consists of a <strong>driver node</strong>, which coordinates execution, and one or more <strong>worker nodes</strong>, which handle the distributed computations. Clusters can be created manually with fixed resources or set to <strong>auto-scale</strong>, allowing Databricks to add or remove worker nodes depending on workload demand. This flexibility ensures efficient resource use and cost control.</p>
+<p>Azure Databricks Compute offers a broad set of compute options available for different workload types:</p>
+<ul>
+<li><strong>Serverless compute</strong>: Fully managed, on-demand compute that automatically scales up or down to meet workload needs. Ideal for teams that want fast startup times, minimal management overhead, and elastic scaling.</li>
+<li><strong>Classic compute</strong>: User-provisioned and configured clusters that offer full control over compute settings, such as VM sizes, libraries, and runtime versions. Best for specialized workloads that require customization or consistent performance.</li>
+<li><strong>SQL warehouses</strong>: Compute resources optimized for SQL-based analytics and BI queries. SQL warehouses can be provisioned as either <strong>serverless</strong> (elastic, managed) or <strong>classic</strong> (user-configured) depending on governance and performance requirements.</li>
+</ul>
+<p>This allows you to tailor compute to specific needs—from exploratory analysis in notebooks, to large-scale ETL pipelines, to high-performance dashboards and reporting.</p>
+<h2 id="databricks-runtime">Databricks Runtime</h2>
+
+<p>The <strong>Databricks Runtime</strong> is a set of customized builds of <strong>Apache Spark</strong> that include performance improvements and additional libraries. These runtimes make it easier to handle tasks such as <strong>machine learning</strong>, <strong>graph processing</strong>, and <strong>genomics</strong>, while still supporting general data processing and analytics.</p>
+<p>Databricks provides multiple runtime versions, including <strong>long-term support (LTS)</strong> releases. Each release specifies the underlying Apache Spark version, its release date, and when support will end. Over time, older runtime versions follow a lifecycle:</p>
+<ul>
+<li><strong>Legacy</strong> – available but no longer recommended.</li>
+<li><strong>Deprecated</strong> – marked for removal in a future release.</li>
+<li><strong>End of Support (EoS)</strong> – no further patches or fixes are provided.</li>
+<li><strong>End of Life (EoL)</strong> – retired and no longer available.</li>
+</ul>
+<p>If a maintenance update is released for a runtime version you're using, you can apply it by <strong>restarting your cluster</strong>.</p>
+<h2 id="lakeflow-jobs">Lakeflow Jobs</h2>
+
+<p><strong>Lakeflow Jobs</strong> provide workflow automation and orchestration in Azure Databricks, making it possible to reliably schedule, coordinate, and run data processing tasks. Instead of running code manually, you can use jobs to automate repetitive or production-grade workloads such as ETL pipelines, machine learning training, or dashboard refreshes.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/jobs.png#lightbox">
+<img alt="Screenshot of an Azure Databricks Jobs landing page." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/jobs.png"/>
+</a>
+</span>
+</p>
+<p>A job in Databricks is essentially a container for one or more <strong>tasks</strong>. Tasks define the work to be done—for example, running a notebook, executing a Spark job, calling external code, ...</p>
+<p>Jobs can be triggered in different ways:</p>
+<ul>
+<li>On a schedule (for example, every night at midnight).</li>
+<li>In response to an event.</li>
+<li>Manually, when needed.</li>
+</ul>
+<p>Because they're repeatable and managed, jobs are critical for <strong>production workloads</strong>. They ensure that data pipelines run consistently, ML models are trained and deployed in a controlled manner, and downstream systems receive updated, accurate data.</p>
+<h2 id="delta-lake">Delta Lake</h2>
+
+<p><strong>Delta Lake</strong> is an open-source storage framework that improves the reliability and scalability of data lakes by adding transactional features on top of cloud object storage, such as <strong>Azure Data Lake Storage</strong>. Traditional data lakes can suffer from issues like inconsistent data, partial writes, or difficulties managing concurrent access. Delta Lake addresses these problems by supporting:</p>
+<ul>
+<li><strong>ACID transactions</strong> (atomicity, consistency, isolation, durability) for reliable reads and writes.</li>
+<li><strong>Scalable metadata handling</strong> so tables can grow to billions of files without performance loss.</li>
+<li><strong>Data versioning and rollback</strong>, enabling time travel queries and recovery of previous states.</li>
+<li><strong>Unified batch and streaming processing</strong>, so the same table can handle real-time ingestion and historical batch loads.</li>
+</ul>
+<p>On top of this foundation, <strong>Delta tables</strong> provide a familiar table abstraction that makes it easier to work with structured data using <strong>SQL queries</strong> or the <strong>DataFrame API</strong>. Delta tables are the <strong>default table format in Azure Databricks</strong>, ensuring that new data is stored with transactional guarantees by default.</p>
+<h2 id="databricks-sql">Databricks SQL</h2>
+
+<p><strong>Databricks SQL</strong> brings <strong>data warehousing capabilities</strong> to the Databricks Lakehouse, allowing analysts and business users to query and visualize data stored in open formats directly in the data lake. It supports <strong>ANSI SQL</strong>, so anyone familiar with SQL can run queries, build reports, and create dashboards without needing to learn new languages or tools.</p>
+<p>Databricks SQL is available only in the <strong>Premium tier</strong> of Azure Databricks. It includes:</p>
+<ul>
+<li>A <strong>SQL editor</strong> for writing and running queries.</li>
+<li><strong>Dashboards and visualization tools</strong> for sharing insights.</li>
+<li>Integration with external BI and analytics tools.</li>
+</ul>
+<h2 id="sql-warehouses">SQL Warehouses</h2>
+
+<p>All Databricks SQL queries run on <strong>SQL warehouses</strong> (formerly called SQL endpoints), which are scalable compute resources decoupled from storage. Different warehouse types are available depending on performance, cost, and management needs:</p>
+<ul>
+<li><p><strong>Serverless SQL Warehouses</strong></p>
+<ul>
+<li><strong>Instant and elastic compute</strong> with fast startup and autoscaling.</li>
+<li><strong>Low management overhead</strong> since Databricks handles capacity, patching, and optimization.</li>
+<li><strong>Cost efficiency</strong> by scaling automatically and avoiding idle resource costs.</li>
+</ul>
+</li>
+<li><p><strong>Pro SQL Warehouses</strong></p>
+<ul>
+<li>Supports Photon and Predictive IO, but not Intelligent Workload Management.</li>
+<li>Use when serverless is unavailable, or when custom networking is required (for example, federation or hybrid/on-premises connections).</li>
+</ul>
+</li>
+<li><p><strong>Classic SQL Warehouses</strong></p>
+<ul>
+<li>Compute resources run in your <strong>own Azure subscription</strong>, not in Databricks.</li>
+<li>Takes approximately 4 minutes to start and scales with less responsiveness than serverless.</li>
+<li>Supports only Photon; no Predictive IO or Intelligent Workload Management.</li>
+<li>Use only for basic interactive exploration when serverless or pro aren't options.</li>
+</ul>
+</li>
+</ul>
+<h2 id="mlflow">MLflow</h2>
+<p><strong>MLflow</strong> is an open-source platform designed to manage the <strong>end-to-end machine learning (ML) lifecycle</strong>. It helps data scientists and ML engineers track experiments, manage models, and streamline the process of moving models from development to production. MLflow also supports generative AI workflows and includes tools for evaluating and improving AI agents.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Data governance using Unity Catalog and Microsoft Purview</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/05-data-governance-using-unity-catalog-and-microsoft-purview">https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/05-data-governance-using-unity-catalog-and-microsoft-purview</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Data governance using Unity Catalog and Microsoft Purview</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data governance is critical for ensuring that data within an organization is managed securely, efficiently, and in compliance with regulations.</p>
+<p>In many organizations, data is distributed across databases, data warehouses, data lakes, and even multiple catalogs. It also exists in diverse formats like Parquet, CSV, and Delta Lake. Beyond structured data in tables, there’s also unstructured data in files, along with other assets such as machine learning models, notebooks, and dashboards that require management and governance. This fragmentation creates silos across sources, formats, and asset types.</p>
+<p>These governance challenges directly affect the value organizations can derive from data and AI:</p>
+<ul>
+<li><p>Fragmented governance increases compliance, security, and data quality risks, while also creating operational inefficiencies as teams struggle to maintain a consistent view of their data and AI environments.</p>
+</li>
+<li><p>Limited connectivity can result in vendor lock-in and make it harder to adopt new technologies as requirements change. Poor interoperability also complicates collaboration and scaling, often leading to higher costs from using multiple tools and duplicating data across systems.</p>
+</li>
+<li><p>A lack of built-in intelligence restricts broader use of data and AI platforms, particularly for nontechnical users. This slows down innovation, delays decision-making, and prevents organizations from fully realizing the benefits of their data and AI investments.</p>
+</li>
+</ul>
+<p>Azure Databricks, combined with Unity Catalog and Microsoft Purview, provides a robust solution for managing and governing data effectively.</p>
+<h2 id="unity-catalog">Unity Catalog</h2>
+
+<p>Unity Catalog provides a centralized way to manage access, discovery, lineage, audit logs, and quality monitoring across data and AI assets within Azure Databricks. It applies consistently across all workspaces in a region.</p>
+<p><img alt="Diagram of the Unity Catalog components." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/06-azure-databricks-with-unity-catalog.png"/></p>
+<p>The <strong>metastore</strong> is the top-level metadata container; it holds information about data assets and the permissions that govern them. You typically have one metastore per region, and multiple workspaces can share that metastore.</p>
+<p>Unity Catalog organizes data assets using a structured <strong>three-level hierarchy</strong>:</p>
+<pre><code class="lang-sql">catalog.schema.table_or_other_object
+</code></pre>
+<ul>
+<li><strong>Catalogs</strong> group assets typically aligned to teams or environments.</li>
+<li><strong>Schemas</strong> (also known as databases) are subdivisions within catalogs, organizing assets more granularly—for example by project or use case.</li>
+<li><strong>Objects</strong> in schemas include tables (managed or external), views, volumes, functions, and models.</li>
+</ul>
+<p>Tables can be either managed or external. With <strong>managed tables</strong>, Unity Catalog handles both governance and storage (always Delta Lake format). With <strong>external tables</strong>, Unity Catalog manages access from Databricks, but data lifecycle/storage is managed externally. This supports multiple formats (Delta, CSV, JSON, Parquet, etc.)</p>
+<p>Unity Catalog implements <strong>fine-grained access control</strong> via ANSI SQL commands across multiple levels—metastore, catalog, schema, down to rows and columns. For example, the following command gives the 'finance-team' user group the permission to create new tables in the 'myschema' within the 'mycatalog' database.</p>
+<pre><code class="lang-sql">GRANT CREATE TABLE ON SCHEMA mycatalog.myschema TO `finance-team`;
+</code></pre>
+<p>Exploring data assets in Unity Catalog is straightforward. You can use the <strong>Catalog Explorer</strong> and a search interface to find what you need. To help you, assets have tags, comments, and even AI-generated descriptions. Once you find a data asset, you can use features like <strong>lineage</strong>, table insights, and Entity Relationship diagrams to get a better understanding of it.</p>
+<p>Unity Catalog provides a complete picture of your data's history. It logs access, audit trails, and lineage—right down to the column level.</p>
+<p>In most accounts, Unity Catalog is enabled by default when you create a workspace. You can get started using Unity Catalog with the default settings. There are optional configurations that you might want to enable, however.</p>
+<h2 id="microsoft-purview">Microsoft Purview</h2>
+
+<p>Microsoft Purview is a data governance service that lets you manage and oversee data across on-premises systems, multiple clouds, and SaaS platforms. It includes features such as data discovery, classification, lineage tracking, and access governance.</p>
+<p>When integrated with Azure Databricks and Unity Catalog, Purview can discover Lakehouse data and ingest its metadata into the Data Map. This allows you to apply consistent governance across your entire data environment, while acting as a central catalog that brings together metadata from different sources.</p>
+<p>With this integration, you can:</p>
+<ul>
+<li><strong>Scan</strong> Azure Databricks in both public and private networks, powered by the fully managed Microsoft Purview integration runtime.</li>
+<li>Scan the entire <strong>Unity Catalog metastore</strong> or choose to scan only selective catalogs.</li>
+<li>Extract a comprehensive set of Unity Catalog metadata, including details of metastore, catalogs, schemas, tables/views, and columns, etc.</li>
+<li>Automatically <strong>classify</strong> the data based on built-in system classification rules or user-defined custom classification rules to identify sensitive data.</li>
+<li>Get detailed visibility into the <strong>data lineage</strong>, showing how data is transformed and moved across different systems and processes, including within Azure Databricks.</li>
+<li>Run the scan <strong>on-demand</strong> or on a daily/weekly/monthly recurring <strong>schedule</strong>.</li>
+</ul>
+<p><img alt="Screenshot of Microsoft Purview showing an Azure Databricks Table Metadata." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/media/purview-databricks.png"/></p>
+<p>In addition, Microsoft Purview can scan the workspace-level <strong>Hive metastore</strong> in Azure Databricks.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/08-summary">https://learn.microsoft.com/en-us/training/modules/explore-azure-databricks/08-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Azure Databricks is a cloud-based data analytics platform that provides a unified environment for data engineering, machine learning, and analytics. It's built on top of Apache Spark, which is a powerful, open-source processing engine built around speed, ease of use and sophisticated analytics. Azure Databricks integrates with other services provided by Microsoft Azure, offering a seamless experience for data preparation, building machine learning models, and data analysis.</p>
+<p>In this module, you learned how to:</p>
+<ul>
+<li>Provision an Azure Databricks workspace</li>
+<li>Identify core workloads for Azure Databricks</li>
+<li>Use Data Governance tools Unity Catalog and Microsoft Purview</li>
+<li>Describe key concepts of an Azure Databricks solution</li>
+</ul>
+<h2 id="learn-more">Learn more</h2>
+<ul>
+<li><a data-linktype="absolute-path" href="/en-us/azure/databricks/">Azure Databricks Documentation</a></li>
+<li><a data-linktype="absolute-path" href="/en-us/azure/databricks/getting-started/">Getting started with Azure Databricks</a></li>
+<li><a data-linktype="absolute-path" href="/en-us/purview/">Microsoft Purview Documentation</a></li>
+<li><a data-linktype="absolute-path" href="/en-us/azure/databricks/data-governance/unity-catalog/">Databricks Unity Catalog</a></li>
+</ul>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design and implement data pipelines with Azure Databricks</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Design and implement data pipelines with Azure Databricks</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/1-introduction">https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/1-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Building reliable data pipelines requires more than connecting data sources to destinations. You need to design workflows that handle failures gracefully, scale with growing data volumes, and remain maintainable as business requirements evolve. Azure Databricks provides multiple approaches for creating data pipelines—from flexible <strong>notebooks</strong> with procedural code to <strong>Lakeflow Spark Declarative Pipelines</strong> that automate orchestration and data quality enforcement.</p>
+<p>When you design data pipelines, you make decisions that affect every downstream consumer of your data. The order of operations determines whether transformations build on validated, well-structured data. Your choice between notebooks and declarative pipelines influences how much orchestration code you write versus how much the platform manages for you. <strong>Task dependencies</strong> in <strong>Lakeflow Jobs</strong> control execution flow and enable parallel processing that reduces pipeline runtime.</p>
+<p><strong>Error handling</strong> separates production-ready pipelines from fragile prototypes. Without proper error handling, invalid records corrupt downstream analytics, unnoticed failures accumulate technical debt, and problems surface hours or days after they occur. Azure Databricks provides built-in mechanisms for <strong>data quality expectations</strong>, <strong>retry policies</strong>, and <strong>conditional task flows</strong> that help you build resilient data workflows.</p>
+<p>This module guides you through designing and implementing data pipelines in Azure Databricks. You learn how to structure pipeline operations, choose the right approach for your use case, configure task logic in Lakeflow Jobs, and implement error handling strategies. You also create pipelines using both notebook-based and declarative approaches, gaining hands-on experience with the tools that power production data platforms.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Design order of operations for a pipeline</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/2-design-order-operations-pipeline">https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/2-design-order-operations-pipeline</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Design order of operations for a pipeline</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p><strong>Data pipelines</strong> move data from source systems through multiple processing stages before delivering it to consumers. Understanding the <strong>order of operations</strong> helps you design pipelines that are reliable, maintainable, and aligned with business requirements. Each stage in the pipeline serves a specific purpose, and the sequence you choose affects <strong>data quality</strong>, <strong>processing efficiency</strong>, and how quickly insights reach your users.</p>
+<p>When you design a data pipeline in Azure Databricks, you typically follow a pattern that mirrors the <strong>medallion architecture</strong>: raw data flows through progressively refined layers until it's ready for consumption. This approach ensures that each stage builds on validated, well-structured data from the previous stage.</p>
+<p><a data-linktype="relative-path" href="media/2-design-order-operations-pipeline.png#lightbox">
+<img alt="Diagram explaining the different stages of a medallion architecture." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/2-design-order-operations-pipeline.png"/>
+</a>
+</p>
+<h2 id="ingest-data-from-source-systems">Ingest data from source systems</h2>
+<p><strong>Data ingestion</strong> is the entry point of your pipeline. At this stage, you focus on capturing data from source systems and preserving it in its original form. The goal is <strong>reliability</strong> and <strong>completeness</strong>—you want to ensure that no data is lost during the transfer.</p>
+<p>During ingestion, consider the following factors:</p>
+<ul>
+<li><p><strong>Source characteristics</strong>: Different sources require different approaches. <strong>Streaming sources</strong> like message queues deliver data continuously, while <strong>batch sources</strong> like databases or file systems provide data at scheduled intervals.</p>
+</li>
+<li><p><strong>Data preservation</strong>: Store ingested data with minimal transformation. Keeping the <strong>raw state</strong> enables you to reprocess data if downstream requirements change.</p>
+</li>
+<li><p><strong>Incremental processing</strong>: Configure ingestion to process only new or changed data, reducing processing time and compute costs.</p>
+</li>
+</ul>
+<p>This stage corresponds to the <strong>bronze layer</strong> in the medallion architecture. Data engineers typically implement ingestion logic that runs on a schedule or triggers when new data arrives.</p>
+<h2 id="clean-and-validate-data">Clean and validate data</h2>
+<p>After ingestion, data enters the <strong>cleaning and validation</strong> stage. You transform raw data into a validated, consistent format that downstream processes can rely on. This stage is critical because <strong>data quality issues</strong> caught early prevent problems from propagating through the rest of your pipeline.</p>
+<p>Cleaning operations typically include:</p>
+<ul>
+<li><p><strong>Schema enforcement</strong>: Apply consistent data types and structures to ensure data conforms to expected formats.</p>
+</li>
+<li><p><strong>Null and missing value handling</strong>: Define rules for how your pipeline treats incomplete records—whether to fill defaults, drop records, or flag for review.</p>
+</li>
+<li><p><strong>Deduplication</strong>: Identify and remove duplicate records that might have entered through multiple ingestion paths or retry mechanisms.</p>
+</li>
+<li><p><strong>Data quality checks</strong>: Apply validation rules that verify business constraints, such as ensuring dates fall within valid ranges or required fields contain appropriate values.</p>
+</li>
+</ul>
+<p>This stage maps to the <strong>silver layer</strong>. By separating cleaning from ingestion, you maintain the raw data for <strong>auditing</strong> while providing a reliable foundation for transformation.</p>
+<h2 id="transform-data-for-consumption">Transform data for consumption</h2>
+<p><strong>Transformation</strong> shapes your validated data into structures that serve specific business needs. At this stage, you apply <strong>business logic</strong>, combine data from multiple sources, and create the datasets that analysts, data scientists, and applications use.</p>
+<p>Common transformation patterns include:</p>
+<ul>
+<li><p><strong>Joining datasets</strong>: Combine data from different sources to create unified views. For example, joining customer records with transaction data to create a complete customer activity dataset.</p>
+</li>
+<li><p><strong>Aggregation</strong>: Summarize data at different levels of granularity, such as calculating daily totals, monthly averages, or regional summaries.</p>
+</li>
+<li><p><strong>Denormalization</strong>: Flatten hierarchical or normalized data structures to optimize <strong>query performance</strong> for analytics workloads.</p>
+</li>
+<li><p><strong>Business logic application</strong>: Implement calculations, categorizations, and derived metrics that align with how your organization measures and reports on data.</p>
+</li>
+</ul>
+<p>Transformation logic should be <strong>clear and testable</strong>. When business requirements change, well-structured transformations are easier to modify without disrupting other parts of the pipeline.</p>
+<h2 id="load-data-to-target-destinations">Load data to target destinations</h2>
+<p><strong>Loading</strong> represents the handoff from data engineering to data consumption. At this stage, you write processed data to tables, views, or external systems where consumers access it.</p>
+<p>Key considerations for the load stage include:</p>
+<ul>
+<li><p><strong>Table design</strong>: Structure tables to support common query patterns. Consider <strong>partitioning strategies</strong> that align with how users filter data.</p>
+</li>
+<li><p><strong>Write patterns</strong>: Choose between <strong>full refresh</strong>, <strong>incremental append</strong>, or <strong>merge operations</strong> based on data volumes and freshness requirements.</p>
+</li>
+<li><p><strong>Schema evolution</strong>: Plan for how your tables handle changes to data structure over time without breaking dependent workloads.</p>
+</li>
+</ul>
+<p>Data loaded at this stage often corresponds to the <strong>gold layer</strong>—highly curated datasets optimized for analytics, reporting, and machine learning.</p>
+<h2 id="serve-data-to-consumers">Serve data to consumers</h2>
+<p>Once data reaches its target destination, the <strong>serving layer</strong> makes it accessible to different consumer groups. This stage focuses on providing appropriate <strong>access patterns</strong> and <strong>performance characteristics</strong> for each use case.</p>
+<p>Serving considerations include:</p>
+<ul>
+<li><p><strong>Views and access layers</strong>: Create views that present data in formats optimized for specific consumer needs, such as dashboards, reports, or analytical queries.</p>
+</li>
+<li><p><strong>Performance optimization</strong>: Configure <strong>compute resources</strong> and <strong>caching strategies</strong> that meet latency requirements for interactive queries.</p>
+</li>
+<li><p><strong>Access control</strong>: Implement <strong>security policies</strong> that ensure consumers see only the data they're authorized to access.</p>
+</li>
+</ul>
+<p>The serving layer bridges data engineering and data consumption. While data engineers build and maintain the underlying infrastructure, analysts and applications interact with the served data without needing to understand pipeline internals.</p>
+<h2 id="monitor-and-optimize-pipeline-performance">Monitor and optimize pipeline performance</h2>
+<p><strong>Pipeline monitoring</strong> ensures your data flows reliably and efficiently over time. Without ongoing observation, issues like <strong>data delays</strong>, <strong>quality degradation</strong>, or <strong>resource inefficiency</strong> can go unnoticed until they affect business decisions.</p>
+<p>Establish monitoring for:</p>
+<ul>
+<li><p><strong>Processing metrics</strong>: Track <strong>execution times</strong>, <strong>record counts</strong>, and <strong>resource utilization</strong> to identify bottlenecks or unexpected changes in data volumes.</p>
+</li>
+<li><p><strong>Data quality trends</strong>: Monitor validation results over time to detect gradual <strong>drift</strong> in data quality or sudden spikes in invalid records.</p>
+</li>
+<li><p><strong>Cost and performance</strong>: Review compute usage patterns to identify opportunities for <strong>optimization</strong>, such as adjusting cluster sizes or scheduling non-urgent workloads during off-peak hours.</p>
+</li>
+</ul>
+<p><strong>Optimization</strong> is an ongoing activity. As data volumes grow and business requirements evolve, revisit your pipeline design to ensure it continues to meet performance and cost objectives.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Choose notebook vs Lakeflow Pipelines</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/3-choose-notebook-lakeflow-pipelines">https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/3-choose-notebook-lakeflow-pipelines</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Choose notebook vs Lakeflow Pipelines</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When you build data pipelines in Azure Databricks, you have two primary approaches: <strong>notebooks</strong> with procedural code and <strong>Lakeflow Spark Declarative Pipelines</strong>. Each approach serves different needs, and understanding when to use each helps you deliver maintainable, efficient data solutions.</p>
+<h2 id="understand-the-two-approaches">Understand the two approaches</h2>
+<p>Notebooks execute code <strong>step by step</strong>. You control every aspect of data processing—from reading sources to writing outputs. This <strong>procedural approach</strong> gives you full control over execution flow, error handling, and optimization decisions.</p>
+<p>Lakeflow Spark Declarative Pipelines work differently. Instead of specifying <strong>how</strong> to process data, you define <strong>what</strong> you want as the end result. You declare your <strong>streaming tables</strong> and <strong>materialized views</strong>, and the pipeline engine handles <strong>orchestration</strong>, <strong>parallelization</strong>, and <strong>error recovery</strong> automatically.</p>
+<p>The foundational processing unit in SDP is a <strong>flow</strong> — a definition that reads data from a source, applies transformation logic, and writes the result to a streaming table, materialized view, or sink. When you define a streaming table or materialized view, SDP creates the underlying flow implicitly. Because SDP can analyze the relationships between flows, it determines the correct execution order and maximizes parallelism without any manual orchestration code.</p>
+<p><a data-linktype="relative-path" href="media/3-understand-notebook-pipeline-approach.png#lightbox">
+<img alt="Diagram explaining the two approaches when it comes to choosing notebooks or Lakeflow Spark Declarative Pipelines." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/3-understand-notebook-pipeline-approach.png"/>
+</a>
+</p>
+<p>Consider a scenario where you need to ingest sales data, join it with product information, and calculate regional aggregates. With a notebook, you write explicit read, join, and aggregation commands in sequence. With Lakeflow Spark Declarative Pipelines, you define the final tables and their relationships—the system determines the most efficient execution plan.</p>
+<h2 id="when-notebooks-fit-best">When notebooks fit best</h2>
+<p>Notebooks excel in scenarios requiring <strong>flexibility</strong> and <strong>detailed control</strong>. Choose notebooks when your pipeline involves:</p>
+<p><strong>Complex business logic</strong> that's difficult to express declaratively. Some transformations require <strong>conditional branching</strong>, <strong>loops over external APIs</strong>, or <strong>custom retry logic</strong> that doesn't fit a declarative model.</p>
+<p><strong>Rapid prototyping and exploration</strong>. When you're still discovering the data structure or testing transformation approaches, notebooks let you <strong>iterate cell by cell</strong>, inspect intermediate results, and adjust your logic interactively.</p>
+<p><strong>External library dependencies</strong>. If you need specialized machine learning libraries, custom connectors, or legacy code integration, notebooks provide the flexibility to install and use any <strong>Python</strong> or <strong>Scala</strong> package.</p>
+<p><strong>Fine-grained performance tuning</strong>. When you need to manually control <strong>partitioning</strong>, <strong>caching strategies</strong>, or specific <strong>Spark configurations</strong>, notebooks give you direct access to these optimizations.</p>
+<h2 id="when-lakeflow-spark-declarative-pipelines-fit-best">When Lakeflow Spark Declarative Pipelines fit best</h2>
+<p>Lakeflow Spark Declarative Pipelines simplify <strong>production data pipelines</strong> by handling operational complexity automatically. Choose this approach when your pipeline needs:</p>
+<p><strong>Standardized ETL patterns</strong>. For common ingestion and transformation workflows—reading from cloud storage, applying <strong>schema evolution</strong>, maintaining <strong>slowly changing dimensions</strong>—the declarative approach reduces thousands of lines of code to a few statements.</p>
+<p><strong>Built-in data quality enforcement</strong>. Declarative pipelines include <strong>expectations</strong> that validate data as it flows through. You define <strong>quality rules</strong> directly in your pipeline definition, and the system tracks violations and can halt processing when data quality degrades.</p>
+<p><strong>Automatic dependency management</strong>. The pipeline engine analyzes relationships between your tables and determines the correct <strong>execution order</strong>. When source data updates, the engine refreshes only the <strong>affected downstream tables</strong>.</p>
+<p><strong>Operational visibility</strong>. Lakeflow Spark Declarative Pipelines provide <strong>lineage tracking</strong>, <strong>execution graphs</strong>, and <strong>monitoring dashboards</strong> without additional configuration. Operations teams can trace data from source to target and troubleshoot issues faster.</p>
+<p><strong>External streaming targets</strong>. Beyond Unity Catalog tables, SDP supports <strong>sinks</strong> for streaming output to Apache Kafka topics, Azure Event Hubs, Delta tables, and custom Python data sources. This makes the declarative approach a natural fit for event-driven architectures where processed data needs to flow to downstream streaming consumers.</p>
+<h2 id="compare-the-approaches">Compare the approaches</h2>
+<p>Understanding the key differences helps you match the right tool to your requirements:</p>
+<table>
+<thead>
+<tr>
+<th>Criteria</th>
+<th>Notebook</th>
+<th>Lakeflow Declarative Pipeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Control level</td>
+<td>Full control over execution</td>
+<td>System manages execution</td>
+</tr>
+<tr>
+<td>Code complexity</td>
+<td>Can be verbose for standard patterns</td>
+<td>Concise for common ETL</td>
+</tr>
+<tr>
+<td>Error handling</td>
+<td>Custom implementation required</td>
+<td>Built-in retry logic</td>
+</tr>
+<tr>
+<td>Data quality</td>
+<td>Manual validation code</td>
+<td>Declarative expectations</td>
+</tr>
+<tr>
+<td>Lineage tracking</td>
+<td>Requires external tooling</td>
+<td>Automatic</td>
+</tr>
+<tr>
+<td>Team skillset</td>
+<td>Coding required</td>
+<td>SQL-friendly, lower barrier</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Custom logic, prototyping</td>
+<td>Production, repeatable pipelines</td>
+</tr>
+</tbody>
+</table>
+<h2 id="make-your-decision">Make your decision</h2>
+<p>Start by evaluating your specific requirements. Ask these questions:</p>
+<ul>
+<li>Does the transformation require <strong>procedural logic</strong> that's hard to express declaratively?</li>
+<li>Is this a <strong>one-time analysis</strong> or a <strong>recurring production workload</strong>?</li>
+<li>What level of <strong>operational monitoring</strong> does your team need?</li>
+<li>Who maintains this pipeline—<strong>seasoned developers</strong> or a broader team with varied skills?</li>
+</ul>
+<p>For production pipelines with standard ingestion and transformation patterns, Lakeflow Spark Declarative Pipelines <strong>reduce operational burden</strong> and <strong>improve maintainability</strong>. You spend less time writing orchestration code and more time defining business logic.</p>
+<p>For exploratory work, complex integrations, or pipelines requiring extensive customization, notebooks provide the <strong>flexibility</strong> you need. You can always refactor successful notebook prototypes into declarative pipelines once the logic stabilizes.</p>
+<p>Many teams use <strong>both approaches together</strong>. Notebooks handle custom preprocessing or machine learning model training, while Lakeflow Spark Declarative Pipelines manage the core ETL workflow. This <strong>hybrid approach</strong> lets you use each tool where it performs best.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Design Lakeflow job logic</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/4-design-task-logic-lakeflow-job">https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/4-design-task-logic-lakeflow-job</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Design Lakeflow job logic</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When you design task logic for a <strong>Lakeflow Job</strong>, you make decisions that affect how your workflow executes, scales, and responds to changing conditions. A well-designed job balances performance, cost, and maintainability while meeting business requirements.</p>
+<p>In this unit, you learn how to structure task dependencies, choose execution patterns, and configure parameters that make your jobs flexible and reusable.</p>
+<h2 id="understand-task-relationships-in-a-job">Understand task relationships in a job</h2>
+<p>Lakeflow Jobs represent tasks and their relationships as a <strong>Directed Acyclic Graph (DAG)</strong>. Each task in the DAG can depend on one or more upstream tasks, creating a visual map of your workflow's execution order.</p>
+<p><a data-linktype="relative-path" href="media/4-understand-task-relationships.png#lightbox">
+<img alt="Diagram explaining Directed Acyclic Graph in declarative pipelines and jobs." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/4-understand-task-relationships.png"/>
+</a>
+</p>
+<p>Consider a typical data processing workflow. You might have an ingestion task that loads raw data, followed by transformation tasks that clean and aggregate that data, and finally a task that publishes results. The dependencies between these tasks determine not just the order of execution, but also how failures propagate through your workflow.</p>
+<p>When you configure task dependencies, you choose from several dependency conditions:</p>
+<table>
+<thead>
+<tr>
+<th>Dependency condition</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All succeeded</td>
+<td>Runs only when all upstream tasks complete successfully</td>
+</tr>
+<tr>
+<td>At least one succeeded</td>
+<td>Runs when any upstream task succeeds</td>
+</tr>
+<tr>
+<td>None failed</td>
+<td>Runs when no upstream tasks failed, even if some are skipped</td>
+</tr>
+<tr>
+<td>All done</td>
+<td>Runs after all upstream tasks finish, regardless of outcome</td>
+</tr>
+<tr>
+<td>At least one failed</td>
+<td>Runs only when at least one upstream task fails</td>
+</tr>
+<tr>
+<td>All failed</td>
+<td>Runs only when all upstream tasks fail</td>
+</tr>
+</tbody>
+</table>
+<p>These conditions give you control over task execution beyond simple sequential ordering. For example, you might configure a cleanup task with <strong>All done</strong> to ensure temporary resources are released regardless of whether earlier tasks succeeded.</p>
+<p>When debugging a pipeline, you can <strong>disable individual tasks</strong> rather than deleting them. A disabled task is skipped at runtime but keeps its configuration, dependencies, and run history intact, so you can re-enable it without rebuilding the task. This is preferable to deletion when you might need the task again — for example, pausing a broken task so the rest of the job continues to run on schedule.</p>
+<h2 id="design-task-execution-patterns">Design task execution patterns</h2>
+<p>Your choice between <strong>serial</strong> and <strong>parallel execution</strong> affects both runtime performance and resource utilization. Tasks without dependencies on each other can run simultaneously, reducing total job duration.</p>
+<p>Consider a scenario where you need to process data from three independent sources. If you design these as sequential tasks, your job waits for each source to complete before starting the next. With parallel execution, all three tasks run simultaneously.</p>
+<p><a data-linktype="relative-path" href="media/4-design-task-execution-patterns.png#lightbox">
+<img alt="Diagram showing task execution patterns." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/4-design-task-execution-patterns.png"/>
+</a>
+</p>
+<p>However, parallel execution requires more compute resources. When designing your task graph, balance parallelism against the compute capacity available in your workspace. Azure Databricks limits concurrent task runs per workspace, so highly parallel jobs might experience queuing during peak usage.</p>
+<p>Tasks that share a compute resource run on the same cluster, which reduces startup latency but means they share available memory and CPU. Consider grouping related tasks on <strong>shared compute</strong> while keeping resource-intensive tasks on <strong>dedicated clusters</strong>.</p>
+<h2 id="add-conditional-logic-to-task-flows">Add conditional logic to task flows</h2>
+<p>Real-world workflows often require decisions based on data conditions or processing outcomes. Lakeflow Jobs provides two primary mechanisms for conditional execution.</p>
+<h3 id="ifelse-branching">If/else branching</h3>
+<p>Use <strong>If/else condition</strong> tasks when you need to choose between different processing paths based on values or state. The condition evaluates an expression using task values, job parameters, or dynamic references.</p>
+<p>For example, suppose your data quality check produces a count of invalid records. You can configure an If/else task to route execution:</p>
+<ul>
+<li>If invalid records exceed a threshold, run a remediation workflow</li>
+<li>Otherwise, proceed to the standard transformation pipeline</li>
+</ul>
+<p>The condition expression might look like: <code>{{tasks.quality_check.values.invalid_count}} &gt; 100</code></p>
+<p>When the condition evaluates to true, tasks configured to depend on the true outcome execute. When false, the alternative path runs instead.</p>
+<p><a data-linktype="relative-path" href="media/4-add-conditional-logic-task-flows.png#lightbox">
+<img alt="Screenshot of Azure Databricks tasks designer, highlighting if/else condition and Run if dependencies." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/4-add-conditional-logic-task-flows.png"/>
+</a>
+</p>
+<h3 id="run-if-conditions">Run if conditions</h3>
+<p>For tasks that should execute based on upstream task outcomes rather than data values, use <strong>Run if</strong> dependencies. This approach handles scenarios like:</p>
+<ul>
+<li>Running a notification task only when upstream tasks fail</li>
+<li>Executing cleanup logic regardless of success or failure</li>
+<li>Proceeding when at least one of several alternative data sources succeeds</li>
+</ul>
+<p>Run if conditions evaluate automatically based on task state, without requiring explicit value comparisons.</p>
+<h2 id="implement-iterative-processing-with-for-each">Implement iterative processing with For each</h2>
+<p>When you need to apply the same processing logic across multiple items, the <strong>For each</strong> task eliminates repetitive task definitions. You define a single nested task that executes once for each element in an input array.</p>
+<p>Common scenarios for For each tasks include:</p>
+<ul>
+<li>Processing files from a list of paths</li>
+<li>Transforming data for multiple regions or date ranges</li>
+<li>Running the same analysis across different product categories</li>
+</ul>
+<p>The input array can come from several sources. You might define it directly as JSON, reference a task value from a preceding task, or use a job parameter. Each iteration receives the corresponding array element as its input.</p>
+<pre><code class="lang-python"># A preceding task might set values like this:
+regions = ["us-east", "us-west", "eu-central"]
+dbutils.jobs.taskValues.set(key="regions_to_process", value=regions)
+</code></pre>
+<p>The <strong>For each</strong> task then references <code>{{tasks.get_regions.values.regions_to_process}}</code> and runs its nested task three times—once for each region.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/4-iterative-processing.png#lightbox">
+<img alt="Screenshot showing a For each task, referencing a task value from a preceding task." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/4-iterative-processing.png"/>
+</a>
+</span>
+</p>
+<p>You control concurrency by setting how many iterations can run in parallel. Higher concurrency processes items faster but requires more compute resources.</p>
+<h2 id="configure-parameters-for-flexibility">Configure parameters for flexibility</h2>
+<p>Well-designed jobs accept <strong>parameters</strong> that allow the same workflow to handle different scenarios without modification. Parameters can be defined at the job level and accessed by any task, or passed specifically to individual tasks.</p>
+<p>Consider designing your jobs with these parameter patterns:</p>
+<p><strong>Date and time parameters</strong>: Enable the same job to process different time periods. This supports both scheduled runs with current dates and backfill operations for historical data.</p>
+<p><strong>Environment parameters</strong>: Allow switching between development, staging, and production configurations. You might parameterize catalog names, storage paths, or connection settings.</p>
+<p><strong>Processing parameters</strong>: Control job behavior like batch sizes, filtering criteria, or output formats.</p>
+<p>To reference a job parameter within a task, use the syntax <code>{{job.parameters.&lt;parameter_name&gt;}}</code> in the task configuration. For example, if you define a job parameter called <code>target_catalog</code>, configure the notebook task to pass it as a base parameter with value <code>{{job.parameters.target_catalog}}</code>. Then access it in your notebook:</p>
+<pre><code class="lang-python"># Access the parameter passed to the notebook
+target_catalog = dbutils.widgets.get("target_catalog")
+spark.sql(f"USE CATALOG {target_catalog}")
+</code></pre>
+<p>Azure Databricks provides <strong>dynamic value references</strong> that inject runtime context into parameters. For scheduled jobs, <code>{{job.trigger.time.iso_date}}</code> provides the trigger date. For backfill runs, <code>{{backfill.iso_datetime}}</code> supplies the backfill timestamp.</p>
+<h2 id="select-compute-resources-for-tasks">Select compute resources for tasks</h2>
+<p>Each task type has recommended compute options that affect both capability and cost. Your task logic design should account for compute requirements:</p>
+<table>
+<thead>
+<tr>
+<th>Task type</th>
+<th>Recommended compute</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Notebooks, Python scripts</td>
+<td>Serverless jobs compute</td>
+</tr>
+<tr>
+<td>SQL queries and files</td>
+<td>Serverless SQL warehouse</td>
+</tr>
+<tr>
+<td>Lakeflow Spark Declarative Pipelines</td>
+<td>Serverless pipeline compute</td>
+</tr>
+<tr>
+<td>JAR and Spark Submit</td>
+<td>Classic jobs compute</td>
+</tr>
+</tbody>
+</table>
+<p>Tasks within the same job can use different compute resources. A common pattern assigns SQL tasks to a SQL warehouse while notebook-based transformations run on jobs compute.</p>
+<p>When multiple tasks share a cluster, the cluster remains active until all tasks complete. This reduces startup time but incurs cost during idle periods between task executions. Balance shared compute benefits against the resource isolation of dedicated clusters.</p>
+<p>For production jobs, <strong>serverless compute</strong> eliminates cluster management overhead and scales automatically. <strong>Classic compute</strong> provides more configuration control when you need specific Spark versions, custom libraries, or particular instance types.</p>
+<p>Your task logic design establishes the foundation for reliable, efficient data workflows. As you implement and test your jobs, you can refine dependencies, adjust parallelism, and tune parameters to match actual workload characteristics.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Design error handling in pipelines and jobs</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/5-design-error-handling-pipelines">https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/5-design-error-handling-pipelines</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Design error handling in pipelines and jobs</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When data pipelines fail, the consequences extend beyond immediate job errors. Invalid records can corrupt downstream analytics, unnoticed failures can accumulate technical debt, and without proper alerting, teams might discover problems hours or days after they occur. Designing robust <strong>error handling</strong> transforms your pipelines from fragile processes into resilient systems that protect data quality and enable rapid recovery.</p>
+<p>In this unit, you learn how to design error handling strategies for data pipelines, notebooks, and jobs in Azure Databricks.</p>
+<h2 id="understand-error-handling-responsibilities">Understand error handling responsibilities</h2>
+<p>Error handling in Azure Databricks operates at multiple levels, each addressing different failure scenarios. The platform handles <strong>infrastructure-level issues</strong> like cluster node failures automatically. Your responsibility as a data engineer focuses on <strong>data-level errors</strong> and <strong>application logic failures</strong>.</p>
+<p><a data-linktype="relative-path" href="media/5-understand-error-handling-responsibilities.png#lightbox">
+<img alt="Diagram explaining error handling responsibilities." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/5-understand-error-handling-responsibilities.png"/>
+</a>
+</p>
+<p>Consider a typical ETL pipeline processing customer transactions. Errors can occur when:</p>
+<ul>
+<li>Source data contains invalid formats or missing required fields</li>
+<li>Transformation logic encounters unexpected values</li>
+<li>External service connections time out</li>
+<li>Compute resources become unavailable</li>
+</ul>
+<p>Each scenario requires a different response. Some errors warrant immediate pipeline termination, while others should log the issue and continue processing valid records.</p>
+<h2 id="define-data-quality-expectations-in-declarative-pipelines">Define data quality expectations in declarative pipelines</h2>
+<p>Lakeflow Spark Declarative Pipelines provides built-in data quality constraints called <strong>expectations</strong>. These constraints validate records as data flows through your pipeline, giving you control over how to handle invalid data.</p>
+<p><a data-linktype="relative-path" href="media/5-define-data-quality-expectations.png#lightbox">
+<img alt="Screenshot of the declarative pipeline editor, highlighting expectations." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/5-define-data-quality-expectations.png"/>
+</a>
+</p>
+<p>When a record fails validation, three actions determine what happens:</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Behavior</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Warn</strong></td>
+<td>Invalid records written to target; metrics logged</td>
+<td>Monitoring data quality trends</td>
+</tr>
+<tr>
+<td><strong>Drop</strong></td>
+<td>Invalid records excluded from target</td>
+<td>Preventing bad data from propagating</td>
+</tr>
+<tr>
+<td><strong>Fail</strong></td>
+<td>Pipeline stops immediately</td>
+<td>Critical constraints that must never be violated</td>
+</tr>
+</tbody>
+</table>
+<div class="TIP">
+<p>Tip</p>
+<p>When a fail expectation triggers, only that specific flow stops. Other parallel flows in the same pipeline continue processing. This isolation prevents a single data quality issue from halting your entire data platform.</p>
+</div>
+<h2 id="configure-job-level-error-handling">Configure job-level error handling</h2>
+<p>Lakeflow Jobs provides several mechanisms to handle task failures and ensure pipeline reliability. These settings work together to create resilient workflows.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/5-configure-job-level-error-handling.png#lightbox">
+<img alt="Screenshot showing how to configure job-level error handling." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/5-configure-job-level-error-handling.png"/>
+</a>
+</span>
+</p>
+<h3 id="set-retry-policies">Set retry policies</h3>
+<p>Transient failures like network timeouts, temporary resource constraints, or brief service interruptions often resolve themselves. Configure <strong>retry policies</strong> to automatically attempt failed tasks again:</p>
+<ul>
+<li><strong>Retry count</strong>: Number of attempts before marking the task as failed (typically 1-3 retries)</li>
+<li><strong>Retry interval</strong>: Time between attempts, allowing systems to recover</li>
+</ul>
+<p>For continuous jobs, the platform automatically applies <strong>exponential backoff</strong>. Each consecutive failure increases the wait time before the next retry, preventing rapid repeated failures from overwhelming resources.</p>
+<h3 id="configure-timeouts">Configure timeouts</h3>
+<p>A task that hangs indefinitely consumes resources and blocks downstream processing. Set <strong>timeout thresholds</strong> to terminate unresponsive tasks:</p>
+<ul>
+<li><strong>Expected duration</strong>: Triggers a warning notification if exceeded</li>
+<li><strong>Maximum duration</strong>: Terminates the task if exceeded</li>
+</ul>
+<p>For streaming tasks, you can also configure <strong>streaming backlog metric thresholds</strong> under <strong>Metric thresholds</strong> in the task configuration panel. When a streaming source's backlog exceeds your defined threshold, a notification event fires — giving you early warning of processing lag before it compounds into a larger delay. This feature is currently in Public Preview.</p>
+<h3 id="add-notifications">Add notifications</h3>
+<p>Proactive alerting enables rapid response to failures. Configure <strong>notifications</strong> to reach your team through:</p>
+<ul>
+<li>Email addresses</li>
+<li>Slack channels</li>
+<li>Microsoft Teams</li>
+<li>PagerDuty</li>
+<li>Custom webhooks</li>
+</ul>
+<p>You can trigger notifications on job start, success, failure, or when duration thresholds are exceeded.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Task-level notifications fire on each retry attempt. To avoid notification fatigue, select <strong>Mute notifications until the last retry</strong> when configuring task notifications.</p>
+</div>
+<h3 id="design-conditional-task-flows">Design conditional task flows</h3>
+<p>Beyond simple retries, you can design jobs that respond intelligently to failures using <strong>conditional task dependencies</strong>:</p>
+<ul>
+<li><strong>All succeeded</strong>: Continue only when every upstream task completes successfully</li>
+<li><strong>At least one failed</strong>: Trigger error handling or cleanup tasks</li>
+<li><strong>All done</strong>: Execute regardless of upstream status (useful for cleanup operations)</li>
+</ul>
+<p>This approach enables patterns like running a notification task when processing fails, or executing cleanup logic before a retry.</p>
+<h2 id="implement-error-handling-in-notebooks">Implement error handling in notebooks</h2>
+<p>When building pipelines with notebooks, you implement error handling directly in your code. Python's <strong>exception handling</strong> provides granular control over failure responses.</p>
+<h3 id="catch-and-handle-exceptions">Catch and handle exceptions</h3>
+<p>Wrap operations that might fail in <strong>try-except blocks</strong>:</p>
+<pre><code class="lang-python">from pyspark.errors import PySparkException
+
+try:
+    df = spark.read.table("source_data")
+    transformed = df.filter("amount &gt; 0")
+    transformed.write.mode("append").saveAsTable("target_data")
+except PySparkException as e:
+    if e.getErrorClass() == "TABLE_OR_VIEW_NOT_FOUND":
+        # Handle missing source table
+        print(f"Source table not found: {e.getMessageParameters()['relationName']}")
+    else:
+        raise  # Re-raise unexpected errors
+</code></pre>
+<p>This example catches <code>PySparkException</code>, the base class for PySpark errors. The <code>getErrorClass()</code> method returns a standardized error code like <code>TABLE_OR_VIEW_NOT_FOUND</code>, allowing you to handle specific errors differently. The <code>getMessageParameters()</code> method provides context about the error, such as the name of the missing table. Errors you don't explicitly handle are re-raised to avoid silently ignoring unexpected issues.</p>
+<h3 id="implement-retry-logic">Implement retry logic</h3>
+<p>For operations prone to transient failures, implement retry with exponential backoff:</p>
+<pre><code class="lang-python">import time
+
+def run_with_retry(operation, max_retries=3, base_delay=10):
+    for attempt in range(max_retries + 1):
+        try:
+            return operation()
+        except Exception as e:
+            if attempt == max_retries:
+                raise
+            delay = base_delay * (2 ** attempt)
+            print(f"Attempt {attempt + 1} failed, retrying in {delay}s: {e}")
+            time.sleep(delay)
+</code></pre>
+<h3 id="signal-success-or-failure-to-jobs">Signal success or failure to jobs</h3>
+<p>When a notebook runs as a job task, use <code>dbutils.notebook.exit()</code> to communicate results:</p>
+<pre><code class="lang-python">try:
+    # Processing logic
+    records_processed = process_data()
+    dbutils.notebook.exit(f"SUCCESS: Processed {records_processed} records")
+except Exception as e:
+    dbutils.notebook.exit(f"FAILED: {str(e)}")
+</code></pre>
+<p>Downstream tasks can then use these values in conditional logic or for reporting.</p>
+<h2 id="apply-error-handling-best-practices">Apply error handling best practices</h2>
+<p>Effective error handling balances thoroughness with practicality. Consider these guidelines:</p>
+<p><strong>Fail fast for critical errors</strong>: When data integrity is at stake, stop processing immediately. Continuing with corrupt data creates larger problems downstream.</p>
+<p><strong>Log meaningful context</strong>: Include enough information to diagnose issues without exposing sensitive data. Record timestamps, record counts, and error classifications.</p>
+<p><strong>Plan for recovery</strong>: Design pipelines so failed runs can be repaired. Use idempotent operations where possible, and structure jobs so only failed tasks need re-running.</p>
+<p><strong>Monitor trends</strong>: Track data quality metrics over time. A gradual increase in dropped records might indicate upstream system changes that need attention.</p>
+<p><strong>Test failure scenarios</strong>: Validate that your error handling works as expected by deliberately introducing failures during development.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Create pipeline with notebook</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/6-create-pipeline-notebook-precedence">https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/6-create-pipeline-notebook-precedence</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Create pipeline with notebook</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Data pipelines often require multiple notebooks to run in a specific sequence. When you build a pipeline using notebooks in Azure Databricks, you configure <strong>task dependencies</strong> that control the execution order. These dependencies ensure that each step completes before dependent steps begin.</p>
+<h2 id="add-a-notebook-task-to-a-lakeflow-job">Add a notebook task to a Lakeflow Job</h2>
+<p>A <strong>notebook task</strong> runs a Databricks notebook as part of a job workflow. You specify the notebook path, configure compute resources, and define any parameters the notebook requires. Multiple notebook tasks can be chained together to form a complete data pipeline.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/6-add-notebook-task-to-job.png#lightbox">
+<img alt="Screenshot showing how to add a notebook task to a Lakeflow Job." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/6-add-notebook-task-to-job.png"/>
+</a>
+</span>
+</p>
+<p>When you add notebook tasks to a job, each task appears as a node in a <strong>Directed Acyclic Graph (DAG)</strong>. The DAG provides a visual representation of your pipeline's execution flow, showing which tasks run first and which tasks depend on others.</p>
+<p>Consider a typical data pipeline that processes sales data. The pipeline might include three notebooks: one for data ingestion, one for transformation, and one for loading data into a final table. Without dependencies configured, these notebooks could run simultaneously and cause failures when the transformation notebook tries to read data that hasn't been ingested yet.</p>
+<h2 id="configure-task-dependencies">Configure task dependencies</h2>
+<p><strong>Task dependencies</strong> control when each notebook runs relative to other tasks in your job. When you configure a dependency, you specify that one task must wait for another task to complete before starting.</p>
+<p>To add a dependency between tasks:</p>
+<ol>
+<li>Select a task in the job DAG.</li>
+<li>In the <strong>Depends on</strong> field, select the upstream task from the drop-down menu.</li>
+<li>Select <strong>Save task</strong>.</li>
+</ol>
+<p>When you select a task in the DAG before creating a new task, the new task automatically has a dependency on the selected task. This default behavior helps you build sequential pipelines quickly.</p>
+<p>Dependencies create a clear <strong>execution path</strong> through your pipeline. In a four-task job where Task 2 and Task 3 both depend on Task 1, and Task 4 depends on both Task 2 and Task 3, Azure Databricks runs Task 1 first. After Task 1 completes successfully, Task 2 and Task 3 run <strong>in parallel</strong>. Task 4 starts only after both Task 2 and Task 3 finish.</p>
+<pre><code>Task 1 (ingest_data)
+    ├── Task 2 (transform_customers)
+    └── Task 3 (transform_orders)
+            └── Task 4 (generate_report)
+</code></pre>
+<h2 id="create-a-notebook-task-from-scratch">Create a notebook task from scratch</h2>
+<p>Building a notebook-based pipeline starts with creating the job and adding your first notebook task. The following steps walk through the complete configuration process.</p>
+<ol>
+<li>In your Azure Databricks workspace, select <strong>Jobs &amp; Pipelines</strong> in the sidebar.</li>
+<li>Select <strong>Create</strong>, then select <strong>Job</strong>.</li>
+<li>Enter a task name that describes the notebook's purpose, such as <code>ingest_sales_data</code>.</li>
+<li>In the <strong>Type</strong> drop-down menu, select <strong>Notebook</strong>.</li>
+<li>In the <strong>Source</strong> drop-down menu, select <strong>Workspace</strong> to use a notebook stored in your workspace.</li>
+<li>Select the <strong>Path</strong> field and browse to your notebook location.</li>
+<li>Configure compute resources using the <strong>Compute</strong> field.</li>
+<li>Select <strong>Create task</strong>.</li>
+</ol>
+<p>After creating the first task, add additional notebook tasks and configure their dependencies to complete your pipeline structure. Each new task you add while another task is selected automatically inherits a dependency on that task.</p>
+<h2 id="pass-parameters-between-notebooks">Pass parameters between notebooks</h2>
+<p>Notebook tasks can receive <strong>parameters</strong> at runtime through the <strong>Parameters</strong> configuration. These parameters are accessible in the notebook using <code>dbutils.widgets</code>. Parameter passing enables you to reuse notebooks across different jobs with varying inputs.</p>
+<p>To configure parameters for a notebook task:</p>
+<ol>
+<li>Select the task in your job configuration.</li>
+<li>Under <strong>Parameters</strong>, select <strong>Add</strong>.</li>
+<li>Enter the parameter name in the <strong>Key</strong> field.</li>
+<li>Enter the parameter value in the <strong>Value</strong> field.</li>
+<li>Select <strong>Save task</strong>.</li>
+</ol>
+<p>In your notebook, retrieve parameters using <code>dbutils.widgets.get()</code>:</p>
+<pre><code class="lang-python"># Retrieve a parameter named 'process_date' with a default value
+dbutils.widgets.text("process_date", "2024-01-01", "Process Date")
+process_date = dbutils.widgets.get("process_date")
+
+# Use the parameter in your processing logic
+df = spark.read.table("sales_raw").filter(f"date = '{process_date}'")
+</code></pre>
+<p>This approach keeps your notebooks flexible and allows the same notebook to process different data based on job parameters.</p>
+<h2 id="best-practices-for-notebook-pipelines">Best practices for notebook pipelines</h2>
+<p>When building production notebook pipelines, follow these practices to maintain reliability and clarity.</p>
+<ul>
+<li><p><strong>Use descriptive task names</strong> that indicate the notebook's function. Names like <code>bronze_ingest_orders</code> or <code>silver_transform_customers</code> make the pipeline's purpose immediately clear in the DAG view.</p>
+</li>
+<li><p><strong>Organize notebooks in folders</strong> that mirror your pipeline structure. A folder hierarchy such as <code>/pipelines/sales/bronze/</code> and <code>/pipelines/sales/silver/</code> helps team members locate notebooks quickly.</p>
+</li>
+<li><p><strong>Minimize task dependencies</strong> where possible. While dependencies ensure correct execution order, excessive dependencies can reduce parallelism and slow down your pipeline. Only add dependencies where a true data relationship exists.</p>
+</li>
+<li><p><strong>Use workspace notebooks for production jobs</strong> rather than notebooks in Git folders when you need to track MLflow experiments. Notebooks run from remote Git repositories are ephemeral and can't reliably track MLflow runs or models.</p>
+</li>
+<li><p><strong>Consider output limits</strong> when designing your notebooks. Notebook cell output is limited to 20 MB total, with individual cells limited to 8 MB. If your notebooks generate large outputs, write results to tables instead of displaying them in cell output.</p>
+</li>
+</ul>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>7. Create pipeline with Lakeflow Spark Declarative Pipelines</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/7-create-pipeline-lakeflow-declarative">https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/7-create-pipeline-lakeflow-declarative</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Create pipeline with Lakeflow Spark Declarative Pipelines</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Production data pipelines require reliability, maintainability, and clear data quality enforcement. As a data engineer, you likely spend significant time writing code to handle incremental processing, orchestrate dependencies, and validate data quality. <strong>Lakeflow Spark Declarative Pipelines</strong> in Azure Databricks addresses these challenges by letting you define <em>what</em> your data should look like rather than <em>how</em> to process it step by step.</p>
+<p>In this unit, you learn how to create data pipelines using the declarative approach, define streaming tables and materialized views, and apply data quality expectations to enforce constraints on your data.</p>
+<h2 id="understand-the-declarative-approach">Understand the declarative approach</h2>
+<p>Traditional data pipelines require you to write imperative code that specifies every processing step. You handle incremental processing logic, manage checkpoint recovery, and orchestrate dependencies between tables. With Lakeflow Spark Declarative Pipelines, you instead declare the <strong>desired end state</strong>, and the framework handles the execution details.</p>
+<p>The declarative approach provides three key benefits for production pipelines:</p>
+<ul>
+<li><p><strong>Automatic orchestration</strong>: The framework analyzes dependencies between your tables and determines the correct execution order. If you define a silver table that reads from a bronze table, the framework automatically processes the bronze table first.</p>
+</li>
+<li><p><strong>Incremental processing</strong>: Streaming tables process each record exactly once. Materialized views automatically identify and process only changed data when possible, avoiding expensive full recomputations.</p>
+</li>
+<li><p><strong>Built-in retry logic</strong>: When failures occur, the framework retries at the most granular level possible—first at the Spark task level, then at the flow level, and finally at the pipeline level.</p>
+</li>
+</ul>
+<p>Consider a scenario where you build an analytics pipeline for customer transactions. Instead of writing hundreds of lines of Structured Streaming code with checkpoint management and state handling, you declare your tables and let the framework manage the complexity.</p>
+<h2 id="define-streaming-tables-for-data-ingestion">Define streaming tables for data ingestion</h2>
+<p>A <strong>streaming table</strong> is a Delta table optimized for append-only data processing. Each input record is processed <strong>exactly once</strong>, making streaming tables ideal for ingesting data from sources like cloud storage or message queues.</p>
+<p>The following SQL example creates a streaming table that ingests JSON files from cloud storage using Auto Loader:</p>
+<pre><code class="lang-sql">CREATE OR REFRESH STREAMING TABLE customers_bronze
+AS SELECT * FROM STREAM read_files(
+  "/Volumes/raw_data/customers",
+  format =&gt; "json"
+);
+</code></pre>
+<p>The <code>STREAM</code> keyword tells the pipeline to treat the source as a <strong>streaming dataset</strong>. On each pipeline update, only new files are processed and appended to the table.</p>
+<p>You can achieve the same result with Python:</p>
+<pre><code class="lang-python">from pyspark import pipelines as dp
+
+@dp.table
+def customers_bronze():
+  return (
+    spark.readStream.format("cloudFiles")
+     .option("cloudFiles.format", "json")
+     .option("cloudFiles.inferColumnTypes", "true")
+     .load("/Volumes/raw_data/customers")
+  )
+</code></pre>
+<p>The <code>@dp.table</code> decorator marks this function as a streaming table definition. The function returns a streaming DataFrame, which the framework processes incrementally with each update.</p>
+<h2 id="create-materialized-views-for-transformations">Create materialized views for transformations</h2>
+<p>While streaming tables handle append-only ingestion, <strong>materialized views</strong> are better suited for transformations where you need to reason about aggregations or join dimensions that might change. A materialized view caches query results and automatically keeps them <strong>synchronized with upstream changes</strong>.</p>
+<p>The following example creates a materialized view that joins customer and transaction data:</p>
+<pre><code class="lang-sql">CREATE OR REPLACE MATERIALIZED VIEW customer_transactions
+AS SELECT 
+  c.customer_id,
+  c.customer_name,
+  c.region,
+  t.transaction_date,
+  t.amount
+FROM customers c
+INNER JOIN transactions t ON c.customer_id = t.customer_id;
+</code></pre>
+<p>Unlike streaming tables, materialized views handle complex queries including aggregations and joins. When upstream tables change, the framework determines the most efficient way to update the materialized view—often processing only the affected data rather than recomputing everything.</p>
+<p>In Python, you use the <code>@dp.materialized_view</code> decorator:</p>
+<pre><code class="lang-python">from pyspark import pipelines as dp
+
+@dp.materialized_view
+def regional_sales():
+  customers_df = spark.read.table("customers")
+  transactions_df = spark.read.table("transactions")
+  
+  return (
+    customers_df.join(transactions_df, on="customer_id", how="inner")
+    .groupBy("region")
+    .agg({"amount": "sum"})
+  )
+</code></pre>
+<div class="TIP">
+<p>Tip</p>
+<p>Use streaming tables when your source data is append-only and you need low-latency processing. Use materialized views when you need aggregations, complex joins, or must handle updates and deletes in source data.</p>
+</div>
+<h2 id="apply-data-quality-expectations">Apply data quality expectations</h2>
+<p>Production pipelines require data quality enforcement. <strong>Expectations</strong> are declarative constraints that validate records as they flow through your pipeline. You define what valid data looks like, and the framework tracks metrics and takes action when violations occur.</p>
+<p>When a record fails validation, the framework can respond in different ways depending on the action you specify:</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EXPECT</code> (default)</td>
+<td>Retains invalid records, tracks violation counts in metrics</td>
+</tr>
+<tr>
+<td><code>ON VIOLATION DROP ROW</code></td>
+<td>Removes invalid records from the output</td>
+</tr>
+<tr>
+<td><code>ON VIOLATION FAIL UPDATE</code></td>
+<td>Stops the current flow; other flows continue. Manual intervention is required before reprocessing.</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>ON VIOLATION FAIL UPDATE</code> for critical constraints where any violation indicates a serious data problem that requires investigation before processing can continue.</p>
+<h2 id="develop-pipelines-with-the-lakeflow-pipelines-editor">Develop pipelines with the Lakeflow Pipelines Editor</h2>
+<p>The Lakeflow Pipelines Editor provides an integrated development environment for creating and testing pipelines. When you create a new ETL pipeline in Azure Databricks, the editor provides a default folder structure with separate directories for transformation source code, exploratory notebooks, and utility modules.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>The code examples in this unit are <strong>pipeline definitions</strong>, not interactive notebook code. You cannot run these statements directly in a regular notebook. The <code>pyspark.pipelines</code> module and streaming table DDL statements are only available within the Lakeflow pipeline runtime. To execute your pipeline code, use the <strong>Dry run</strong> feature to validate, then <strong>run the pipeline</strong> through the Jobs &amp; Pipelines interface.</p>
+</div>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/7-lakeflow-pipeline-editor.png#lightbox">
+<img alt="Screenshot of Azure Databricks Lakeflow Pipelines Editor." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/media/7-lakeflow-pipeline-editor.png"/>
+</a>
+</span>
+</p>
+<p>The editor supports iterative development through several features:</p>
+<ul>
+<li><p><strong>Genie Code</strong>: Describe your pipeline in natural language and let this agentic experience create, update, and debug pipeline code for you — from data discovery and code generation through to pipeline execution and resolving data quality issues.</p>
+</li>
+<li><p><strong>Dry run</strong>: Validates your pipeline code without processing data, allowing you to catch syntax errors and missing dependencies before execution.</p>
+</li>
+<li><p><strong>Selective execution</strong>: Run individual files or single table definitions rather than the entire pipeline, enabling faster iteration during development.</p>
+</li>
+<li><p><strong>Interactive DAG</strong>: Visualize the dependency graph between your tables, select multiple tables for targeted refreshes, and inspect execution metrics.</p>
+</li>
+<li><p><strong>Data preview</strong>: Sample data from streaming tables and materialized views directly in the editor to verify transformation logic.</p>
+</li>
+</ul>
+<p>With the declarative approach and integrated tooling, you build production-grade data pipelines that are maintainable, observable, and enforce consistent data quality. The framework handles the complexity of incremental processing and orchestration, so you can focus on defining the business logic that matters to your organization.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>8. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/10-summary">https://learn.microsoft.com/en-us/training/modules/design-implement-data-pipelines/10-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Designing and implementing data pipelines in Azure Databricks requires understanding both the conceptual framework and the practical tools available. Throughout this module, you explored the <strong>order of operations</strong> that guide reliable pipeline design—from data ingestion through cleaning, transformation, loading, and serving. You learned how the <strong>medallion architecture</strong> provides a structured approach where each stage builds on validated data from the previous stage, ensuring data quality and maintainability.</p>
+<p>Choosing between <strong>notebooks</strong> and <strong>Lakeflow Spark Declarative Pipelines</strong> depends on your specific requirements. Notebooks offer flexibility for complex business logic, rapid prototyping, and custom integrations. Lakeflow Spark Declarative Pipelines reduce operational complexity by automatically managing orchestration, incremental processing, and dependency analysis. Many production environments benefit from combining both approaches—using notebooks for specialized processing while declarative pipelines handle core ETL workflows.</p>
+<p>Task logic design in <strong>Lakeflow Jobs</strong> enables sophisticated workflow patterns. You configured <strong>task dependencies</strong> to control execution order, implemented <strong>conditional branching</strong> with If/else tasks, and used <strong>For each</strong> tasks for iterative processing. <strong>Error handling</strong> proved essential for production reliability—you applied data quality expectations in declarative pipelines, configured retry policies and notifications at the job level, and implemented exception handling in notebook code.</p>
+<p>Apply these concepts by starting with clear pipeline architecture that matches the medallion model. Choose the pipeline approach that fits your team's skills and the complexity of your transformations. Design task dependencies that maximize parallelism while respecting data relationships. Implement error handling strategies that protect data quality and enable rapid recovery when failures occur. These practices form the foundation for building data platforms that scale with your organization's needs.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design and implement data modeling with Azure Databricks</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Design and implement data modeling with Azure Databricks</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/1-introduction">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/1-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Your organization processes millions of transactions daily from multiple source systems, and stakeholders need reliable analytics that reflect both current operations and historical trends. The data engineering team faces critical decisions: How should data flow from source systems into the <strong>lakehouse</strong>? Which table formats provide the right balance of performance and compatibility? How do you maintain historical accuracy while keeping queries fast?</p>
+<p><strong>Data modeling</strong> in Azure Databricks with <strong>Unity Catalog</strong> addresses these challenges through deliberate design choices that affect every downstream consumer. You select <strong>ingestion patterns</strong> that match your latency requirements. You choose table formats like <strong>Delta Lake</strong> or <strong>Apache Iceberg</strong> based on transaction needs and cross-platform compatibility. You design <strong>partitioning schemes</strong> and <strong>clustering strategies</strong> that align with how analysts query the data.</p>
+<p>These decisions compound over time. A table partitioned incorrectly today creates performance problems that grow with data volume. A <strong>dimension table</strong> without proper change tracking loses historical context. Thoughtful upfront design creates a foundation that scales efficiently and answers questions you haven't yet anticipated.</p>
+<p>This module guides you through key data modeling decisions for Azure Databricks environments. You'll learn to design ingestion logic, select the right tools for each data source type, and implement storage strategies that optimize query performance. You'll explore <strong>slowly changing dimensions</strong> for historical accuracy and understand when <strong>managed tables</strong> provide advantages over <strong>external tables</strong>.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Design ingestion logic and data source configuration</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/2-design-data-ingestion-logic">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/2-design-data-ingestion-logic</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Design ingestion logic and data source configuration</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Designing ingestion logic requires you to make critical decisions about how data moves from source systems into Azure Databricks. These decisions affect data freshness, processing efficiency, and system reliability. Before you select tools or write code, you need to understand the characteristics of your data sources and define extraction strategies that align with your business requirements.</p>
+<p>In this unit, you explore the key design considerations for data ingestion logic and data source configuration in Azure Databricks. The focus here is on conceptual logic and design patterns—specific tool selection and implementation details are covered in later units.</p>
+<h2 id="understand-extraction-types">Understand extraction types</h2>
+<p><strong>Extraction type</strong> determines how you capture data from source systems and impacts both the <strong>timeliness</strong> and <strong>efficiency</strong> of your data pipeline. Azure Databricks supports three primary extraction patterns, each suited to different scenarios.</p>
+<h3 id="full-extraction">Full extraction</h3>
+<p><strong>Full extraction</strong> reads the entire dataset from the source system during each ingestion run.</p>
+<p><a data-linktype="relative-path" href="media/2-understand-extraction-types-full.png#lightbox">
+<img alt="Diagram explaining full extraction." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/2-understand-extraction-types-full.png"/>
+</a>
+</p>
+<p>This approach works well when:</p>
+<ul>
+<li>Source systems don't support change tracking</li>
+<li>Data volumes are small enough to reprocess efficiently</li>
+<li>You need to rebuild destination tables from scratch periodically</li>
+<li>Data relationships are complex and incremental logic would be error-prone</li>
+</ul>
+<p>Full extraction becomes impractical as data volumes grow. Reprocessing millions of records when only a few thousand changed wastes compute resources and delays downstream consumers.</p>
+<h3 id="incremental-extraction">Incremental extraction</h3>
+<p><strong>Incremental extraction</strong> processes only new or changed records since the last ingestion run. The engine tracks what data has been processed and queries only for updates.</p>
+<p><a data-linktype="relative-path" href="media/2-understand-extraction-types-incremental.png#lightbox">
+<img alt="Diagram explaining incremental extraction." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/2-understand-extraction-types-incremental.png"/>
+</a>
+</p>
+<p>This pattern requires:</p>
+<ul>
+<li>A reliable <strong>change indicator</strong> in the source data (timestamp, sequence number, or version column)</li>
+<li><strong>State management</strong> to track the last processed position</li>
+<li>Logic to handle <strong>late-arriving</strong> or <strong>out-of-order</strong> records</li>
+</ul>
+<p>Incremental extraction significantly improves efficiency for large datasets. Instead of reading millions of rows, you might process only thousands of changes per run.</p>
+<h3 id="streaming-extraction">Streaming extraction</h3>
+<p><strong>Streaming extraction</strong> provides <strong>near real-time</strong> data capture through continuous processing. Rather than running on a schedule, streaming jobs remain active and process records as they arrive.</p>
+<p><a data-linktype="relative-path" href="media/2-understand-extraction-types-streaming.png#lightbox">
+<img alt="Diagram explaining streaming extraction." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/2-understand-extraction-types-streaming.png"/>
+</a>
+</p>
+<p>Consider streaming when:</p>
+<ul>
+<li>Business processes require data freshness measured in seconds or minutes</li>
+<li>Source systems publish events to message buses or change feeds</li>
+<li>You need to react to events as they occur</li>
+</ul>
+<p>Streaming extraction requires always-on infrastructure but delivers the lowest latency for data availability.</p>
+<h2 id="design-for-change-data-capture">Design for change data capture</h2>
+<p><strong>Change data capture</strong> (CDC) is a specialized extraction pattern that captures individual row-level changes, including inserts, updates, and deletes. CDC differs from simple incremental extraction because it preserves the operation type for each change.</p>
+<p><a data-linktype="relative-path" href="media/2-design-for-change-data-capture.png#lightbox">
+<img alt="Diagram explaining change data capture." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/2-design-for-change-data-capture.png"/>
+</a>
+</p>
+<p>When designing for CDC, consider how your source system produces change records:</p>
+<ul>
+<li><strong>Database transaction logs</strong>: Databases like SQL Server can expose row-level changes using its transaction log–based CDC feature. Downstream systems such as Azure Databricks can then read these changes and process them as part of the ingestion pipeline.</li>
+<li><strong>Change data feeds</strong>: Delta tables and some databases like Azure Cosmos DB provide built-in change tracking that surfaces row changes with metadata.</li>
+<li><strong>Periodic snapshots</strong>: Some systems don't support continuous CDC, requiring you to compare snapshots to determine changes.</li>
+</ul>
+<p>CDC enables use cases that simple incremental extraction can't support. You can accurately replicate deletes, maintain audit trails, and process updates that modify key columns.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>CDC requires sequencing information to handle out-of-order events correctly. Your source data needs a column (such as a timestamp or sequence number) that establishes the correct order of changes.</p>
+</div>
+<h2 id="identify-source-file-type-characteristics">Identify source file type characteristics</h2>
+<p>When data arrives as files rather than from transactional systems, the file format influences your ingestion design. Each format has distinct characteristics that affect processing.</p>
+<p><a data-linktype="relative-path" href="media/2-identify-source-file-type-characteristics.png#lightbox">
+<img alt="Diagram explaining source file type characteristics." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/2-identify-source-file-type-characteristics.png"/>
+</a>
+</p>
+<h3 id="text-based-formats">Text-based formats</h3>
+<p><strong>CSV</strong> and <strong>JSON</strong> files are common source formats because they're human-readable and widely supported. However, they present challenges for efficient processing:</p>
+<ul>
+<li><strong>Schema variability</strong>: Files might have inconsistent column orders, missing fields, or data type variations</li>
+<li><strong>No compression efficiency</strong>: Text formats typically consume more storage than binary alternatives</li>
+<li><strong>Parse overhead</strong>: Every value requires text-to-type conversion during reads</li>
+</ul>
+<p>Use text-based formats when source systems can only produce these formats or when data volumes are small enough that efficiency concerns don't apply.</p>
+<h3 id="columnar-formats">Columnar formats</h3>
+<p><strong>Parquet</strong> and <strong>ORC</strong> files store data in columnar format, enabling efficient analytical queries. These formats offer:</p>
+<ul>
+<li><strong>Compression</strong>: Columnar storage achieves better compression ratios by grouping similar values</li>
+<li><strong>Column pruning</strong>: Queries read only the columns they need, reducing I/O</li>
+<li><strong>Embedded schema</strong>: The file contains metadata describing column names and types</li>
+</ul>
+<p>Design your ingestion to favor columnar source formats when you have control over how upstream systems export data.</p>
+<h3 id="semi-structured-formats">Semi-structured formats</h3>
+<p>XML and nested JSON files represent hierarchical data that doesn't fit a flat tabular structure. When ingesting semi-structured data:</p>
+<ul>
+<li>Plan for schema extraction or definition.</li>
+<li>Determine whether to flatten the structure or preserve nesting.</li>
+<li>Account for varying document structures within the same source.</li>
+</ul>
+<h2 id="data-source-connection-considerations">Data source connection considerations</h2>
+<p>Data source configuration defines how Azure Databricks connects to and authenticates with source systems. Your design must address connection security, credential management, and access patterns.</p>
+<h3 id="cloud-object-storage-sources">Cloud object storage sources</h3>
+<p>Cloud storage (Azure Data Lake Storage, Amazon S3, or Google Cloud Storage) serves as the most common landing zone for ingestion. When configuring storage connections:</p>
+<ul>
+<li>Use Unity Catalog external locations to govern access to storage paths.</li>
+<li>Configure appropriate authentication methods (managed identity, service principals, or storage credentials).</li>
+<li>Design folder structures that support efficient incremental processing.</li>
+</ul>
+<p>Folder structure significantly impacts how efficiently Azure Databricks can identify and process new files. Consider these patterns:</p>
+<p><strong>Date-based partitioning</strong>: Organize files by date hierarchy to enable partition pruning during incremental reads:</p>
+<pre><code>/data/sales/year=2025/month=11/day=28/
+/data/sales/year=2025/month=11/day=29/
+</code></pre>
+<p>This structure allows queries to scan only relevant date partitions rather than listing all files.</p>
+<p><strong>Source-based organization</strong>: When ingesting from multiple sources, separate data by source system to simplify processing logic:</p>
+<pre><code>/landing/erp/orders/
+/landing/crm/customers/
+/landing/web/clickstream/
+</code></pre>
+<p><strong>Processing state folders</strong>: Use separate folders to track file processing status:</p>
+<pre><code>/incoming/     # New files arrive here
+/processing/   # Files currently being processed
+/archive/      # Successfully processed files
+/failed/       # Files that failed processing
+</code></pre>
+<p>When designing folder structures, consider:</p>
+<ul>
+<li><strong>File discovery overhead</strong>: Flat structures with thousands of files slow down listing operations. Partitioned structures reduce the files Azure Databricks must enumerate.</li>
+<li><strong>Auto Loader compatibility</strong>: Azure Databricks <strong>Auto Loader</strong> efficiently tracks new files in cloud storage. Structure folders to align with how Auto Loader discovers and checkpoints files.</li>
+<li><strong>Partition column extraction</strong>: Use Hive-style partitioning (<code>key=value</code>) so Azure Databricks can automatically extract partition values as columns without parsing file contents.</li>
+</ul>
+<h3 id="database-sources">Database sources</h3>
+<p>Connecting to transactional databases requires different considerations than cloud storage:</p>
+<ul>
+<li><strong>Network connectivity</strong> between Azure Databricks and the database server.</li>
+<li>Authentication credentials stored securely (using <strong>secrets</strong> rather than hardcoded values).</li>
+<li><strong>Connection pooling</strong> and <strong>query pushdown</strong> capabilities.</li>
+<li>Impact on source system performance during extraction.</li>
+</ul>
+<h3 id="streaming-sources">Streaming sources</h3>
+<p>Message buses and event streams (such as Azure Event Hubs or other common messaging platforms) require:</p>
+<ul>
+<li>Broker connection details and authentication.</li>
+<li><strong>Consumer group</strong> configuration for parallel processing.</li>
+<li><strong>Offset management</strong> to track consumption position.</li>
+<li><strong>Schema registry</strong> integration for message format validation.</li>
+</ul>
+<h3 id="saas-application-sources">SaaS application sources</h3>
+<p>Enterprise applications like Salesforce, ServiceNow, or SAP expose data through APIs with unique characteristics:</p>
+<ul>
+<li>API rate limits that constrain extraction throughput.</li>
+<li>Pagination strategies for large result sets.</li>
+<li>Authentication flows (OAuth, API keys, or certificate-based).</li>
+<li>Available change tracking or webhook capabilities.</li>
+</ul>
+<h2 id="apply-a-requirements-driven-design-framework">Apply a requirements-driven design framework</h2>
+<p>Effective ingestion design starts with analyzing requirements before selecting extraction types or file formats. Use the following repeatable framework to guide your design decisions.</p>
+<p><a data-linktype="relative-path" href="media/2-apply-requirements-driven-design-framework.png#lightbox">
+<img alt="Diagram explaining how to design effective ingestion" data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/2-apply-requirements-driven-design-framework.png"/>
+</a>
+</p>
+<h3 id="step-1-gather-requirements">Step 1: Gather requirements</h3>
+<p>Before making any technical decisions, answer these key questions:</p>
+<table>
+<thead>
+<tr>
+<th>Requirement Category</th>
+<th>Questions to Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data volume</strong></td>
+<td>How much data exists in the source? How much changes between runs? What's the growth rate?</td>
+</tr>
+<tr>
+<td><strong>Latency requirements</strong></td>
+<td>How fresh must data be for downstream consumers? Are there SLAs to meet?</td>
+</tr>
+<tr>
+<td><strong>Source capabilities</strong></td>
+<td>Does the source support change tracking, CDC, or only full extraction? What file formats can it produce?</td>
+</tr>
+<tr>
+<td><strong>Data quality</strong></td>
+<td>How reliable is the source data? What validation or cleansing is needed?</td>
+</tr>
+<tr>
+<td><strong>Network constraints</strong></td>
+<td>What bandwidth exists between source and Azure Databricks? Are there firewall or VPN requirements?</td>
+</tr>
+<tr>
+<td><strong>Cost implications</strong></td>
+<td>What are the compute, storage, and data transfer costs of different approaches?</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-2-map-requirements-to-extraction-type">Step 2: Map requirements to extraction type</h3>
+<p>Use your requirements analysis to select the appropriate extraction pattern:</p>
+<table>
+<thead>
+<tr>
+<th>If your requirements indicate...</th>
+<th>Then choose...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small data volume (&lt; 100K rows), no change tracking available, simple rebuild acceptable</td>
+<td><strong>Full extraction</strong></td>
+</tr>
+<tr>
+<td>Large data volume, reliable change indicator exists (timestamp/sequence), hourly or daily freshness sufficient</td>
+<td><strong>Incremental extraction</strong></td>
+</tr>
+<tr>
+<td>Real-time or near real-time freshness required, source publishes events, streaming infrastructure available</td>
+<td><strong>Streaming extraction</strong></td>
+</tr>
+<tr>
+<td>Need to capture deletes and operation types, audit trail required, source supports transaction log capture</td>
+<td><strong>CDC extraction</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-3-select-source-file-format">Step 3: Select source file format</h3>
+<p>When you control the source format or need to choose a landing zone format, match the format to your needs:</p>
+<table>
+<thead>
+<tr>
+<th>If your scenario involves...</th>
+<th>Then prefer...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Large analytical datasets, columnar queries, need compression</td>
+<td><strong>Parquet</strong></td>
+</tr>
+<tr>
+<td>Interoperability with many systems, human readability needed</td>
+<td><strong>CSV or JSON</strong></td>
+</tr>
+<tr>
+<td>Hierarchical or nested data structures</td>
+<td><strong>JSON or XML</strong></td>
+</tr>
+<tr>
+<td>High-frequency streaming with schema evolution</td>
+<td><strong>Avro with schema registry</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-4-validate-your-design">Step 4: Validate your design</h3>
+<p>Before implementing, verify your design addresses these concerns:</p>
+<ul>
+<li><p><strong>The extraction type meets latency requirements.</strong> If not, downstream consumers receive stale data, potentially causing incorrect business decisions or SLA violations.</p>
+</li>
+<li><p><strong>The approach scales to handle projected data growth.</strong> If not, pipelines that work today may fail or become prohibitively slow as data volumes increase.</p>
+</li>
+<li><p><strong>Source system capabilities support your chosen pattern.</strong> If not, the pipeline fails at runtime or requires costly workarounds that add complexity.</p>
+</li>
+<li><p><strong>Cost estimates are within budget constraints.</strong> If not, the solution may be technically sound but financially unsustainable for production use.</p>
+</li>
+<li><p><strong>Data quality checks are planned for the pipeline.</strong> If not, invalid or corrupted data propagates to downstream systems, causing errors or incorrect analytics.</p>
+</li>
+</ul>
+<h3 id="apply-the-framework-a-practical-example">Apply the framework: A practical example</h3>
+<p>An e-commerce platform needs to ingest order data. Orders are stored in a PostgreSQL database, and the business requires hourly reporting.</p>
+<p><strong>Step 1 - Gather requirements:</strong></p>
+<ul>
+<li><strong>Volume</strong>: 50,000 new orders daily, 2 million total rows, 15% annual growth.</li>
+<li><strong>Latency</strong>: One-hour freshness acceptable for reporting.</li>
+<li><strong>Source</strong>: PostgreSQL supports timestamp-based queries but no native CDC.</li>
+<li><strong>Quality</strong>: Source data is validated at entry; minimal cleansing needed.</li>
+<li><strong>Network</strong>: Direct connectivity via Azure Private Link.</li>
+<li><strong>Cost</strong>: Minimize compute usage; storage costs are secondary.</li>
+</ul>
+<p><strong>Step 2 - Map to extraction type:</strong></p>
+<p>Large volume with reliable timestamp column and hourly latency requirement → <strong>Incremental extraction</strong>.</p>
+<p>Why not the others?</p>
+<ul>
+<li><strong>Full extraction</strong>: Reprocessing 2 million rows hourly wastes compute when only ~2,000 orders change per hour.</li>
+<li><strong>Streaming</strong>: One-hour latency doesn't justify the cost of always-on streaming infrastructure.</li>
+<li><strong>CDC</strong>: PostgreSQL doesn't expose native transaction log CDC, and the use case doesn't require tracking deletes or operation types.</li>
+</ul>
+<p><strong>Step 3 - Select file format:</strong></p>
+<p>Data lands in Azure Data Lake Storage for processing → <strong>Parquet</strong> for efficient columnar storage. Date-partitioned layout for incremental discovery → <code>/landing/orders/year=2025/month=11/day=28/</code>.</p>
+<p>Why not the others?</p>
+<ul>
+<li><strong>CSV/JSON</strong>: Larger file sizes, no compression benefits, and slower query performance for analytical workloads.</li>
+<li><strong>Avro</strong>: Better suited for streaming with schema evolution; batch ingestion doesn't need its streaming-oriented features.</li>
+<li><strong>XML</strong>: Adds parsing complexity without benefits for structured tabular order data.</li>
+</ul>
+<p><strong>Step 4 - Validate design:</strong></p>
+<ul>
+<li>✓ Hourly incremental meets one-hour latency requirement.</li>
+<li>✓ Processing only changes scales efficiently with growth.</li>
+<li>✓ PostgreSQL <code>order_updated_at</code> column enables incremental queries.</li>
+<li>✓ Processing thousands vs. millions of rows reduces compute costs.</li>
+</ul>
+<p><strong>Final decision</strong>: Incremental extraction using the <code>order_updated_at</code> timestamp column, scheduled hourly, landing data as Parquet files in Azure Data Lake Storage.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Document your design decisions and the rationale behind them. When requirements change or issues arise, this documentation helps you understand why the current approach was chosen and what tradeoffs were made. Consider creating a design decision record for each major pipeline.</p>
+</div>
+<p>Building on this requirements-driven foundation, you're ready to evaluate the specific tools and loading methods that implement your ingestion design.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Choose a data ingestion tool</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/3-choose-data-ingestion-tool">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/3-choose-data-ingestion-tool</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Choose a data ingestion tool</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When you design data pipelines in Azure Databricks, selecting the right ingestion tool directly impacts pipeline reliability, maintenance effort, and long-term costs. Each tool addresses different scenarios, data sources, and operational requirements. Understanding these differences helps you make informed decisions that align with your organization's needs.</p>
+<h2 id="understand-the-ingestion-tool-landscape">Understand the ingestion tool landscape</h2>
+<p>Azure Databricks provides multiple ingestion options that span a spectrum from fully managed services to highly customizable frameworks. The tools you choose depend on factors such as your data source type, latency requirements, and how much control you need over the ingestion process.</p>
+<p><a data-linktype="relative-path" href="media/3-understand-ingestion-tool-landscape.png#lightbox">
+<img alt="Diagram showing the ingestion tool landscape." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/3-understand-ingestion-tool-landscape.png"/>
+</a>
+</p>
+<p>At the most managed end, <strong>Lakeflow Connect</strong> offers turnkey connectors for enterprise applications and databases. These connectors handle authentication, change tracking, error recovery, and schema evolution automatically. At the customizable end, <strong>Spark Structured Streaming</strong> gives you complete control over how data flows through your pipeline, though it requires more development and maintenance effort.</p>
+<p>Between these extremes, you find tools like <strong>Auto Loader</strong> for cloud storage files, <strong>COPY INTO</strong> for SQL-based batch loading, and notebook-based approaches using <strong>JDBC/ODBC</strong> connections. Additionally, <strong>Azure Data Factory</strong> serves as an orchestration layer that can coordinate data movement into Azure Databricks from the broader Azure ecosystem.</p>
+<h2 id="lakeflow-connect">Lakeflow Connect</h2>
+<p>Lakeflow Connect represents the modern approach to data ingestion in Azure Databricks. It offers both fully managed connectors and standard connectors that integrate with Lakeflow Spark Declarative Pipelines for a streamlined experience.</p>
+<p>Managed connectors are organized into three types:</p>
+<ul>
+<li><p><strong>SaaS connectors</strong> provide out-of-the-box integration with enterprise applications such as Salesforce, ServiceNow, SharePoint, HubSpot, Jira, Microsoft Dynamics 365, Workday, Zendesk, and many others. These connectors handle source-specific authentication, incremental reads, API rate limiting, schema evolution, and automated retries. They run on serverless compute and write to streaming tables governed by Unity Catalog.</p>
+</li>
+<li><p><strong>Database connectors</strong> ingest data from relational databases including MySQL, PostgreSQL, and SQL Server using change data capture (CDC). Because CDC-based connectors read from database transaction logs rather than querying tables directly, they require an <strong>ingestion gateway</strong> deployed in your network and a staging storage volume to buffer captured changes.</p>
+</li>
+<li><p><strong>Community connectors</strong> are open-source connectors built and maintained by the community. They extend Lakeflow Connect to sources that don't yet have a managed connector. You can use an existing community connector or contribute your own.</p>
+</li>
+</ul>
+<div class="NOTE">
+<p>Note</p>
+<p>The connector ecosystem is growing rapidly. See the <a data-linktype="absolute-path" href="/en-us/azure/databricks/ingestion/lakeflow-connect/">managed connectors documentation</a> for the current full list of supported sources.</p>
+</div>
+<p><strong>Standard connectors</strong> extend Lakeflow Connect to cloud object storage and message buses. You can ingest data from Amazon S3, Azure Data Lake Storage, or Google Cloud Storage using Auto Loader. For real-time data, standard connectors support Apache Kafka, Google Pub/Sub, and Apache Pulsar.</p>
+<p><a data-linktype="relative-path" href="media/3-lakeflow-connect.png#lightbox">
+<img alt="Diagram explaining Lakeflow connect connectors." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/3-lakeflow-connect.png"/>
+</a>
+</p>
+<p>Consider Lakeflow Connect when you need reliable, low-maintenance ingestion from supported sources. The managed connectors significantly reduce development time and ongoing maintenance compared to custom solutions. However, if your data source isn't supported or you need highly specialized ingestion logic, you might need to explore other options.</p>
+<p>Lakeflow Connect supports both <strong>scheduled</strong> ingestion (hourly, daily, weekly) and <strong>on-demand</strong> triggers, making it suitable for regular data refresh cycles and ad hoc loading scenarios.</p>
+<h2 id="query-based-connectors">Query-based connectors</h2>
+<p>Query-based connectors are a lightweight alternative to CDC database connectors for scheduled ingestion from relational databases. Instead of reading transaction logs, they query the source table directly using a <strong>cursor column</strong> — a monotonically increasing timestamp or integer that tracks which rows are new or updated since the last pipeline run.</p>
+<p>Because they query the source directly, query-based connectors don't require an ingestion gateway or staging storage. On each scheduled run, the connector retrieves all rows with a cursor column value greater than the high-water mark from the previous run, then writes results to streaming tables in Unity Catalog.</p>
+<p>Supported sources include Oracle, Teradata, SQL Server, MySQL, MariaDB, PostgreSQL, and all Lakehouse Federation data sources.</p>
+<p>Query-based connectors support three history tracking modes for destination tables:</p>
+<ul>
+<li><strong>SCD Type 1</strong>: Overwrites the existing row with the latest source row. No history is preserved.</li>
+<li><strong>SCD Type 2</strong>: Preserves the full history by adding new rows with version metadata.</li>
+<li><strong>Append-only</strong>: Appends every ingested row without merging or overwriting.</li>
+</ul>
+<p>Choose query-based connectors over CDC database connectors when CDC or binlog infrastructure isn't available but a reliable cursor column exists in the source. Choose CDC connectors when you need every intermediate row state between pipeline runs or when soft-delete tracking is critical. The trade-off is that query-based connectors place more load directly on source tables compared to CDC connectors, which read from the binlog.</p>
+<h2 id="auto-loader">Auto Loader</h2>
+<p>Auto Loader provides incremental file processing for data arriving in cloud storage. Rather than scanning entire directories to find new files, Auto Loader efficiently tracks which files have been processed and ingests only new arrivals.</p>
+<p>Auto Loader works by maintaining state in a checkpoint location that tracks processed files. When new files land in your cloud storage, Auto Loader discovers them through either directory listing or file notification mode. Directory listing periodically scans for new files, while file notification mode uses cloud-native events for immediate detection.</p>
+<p><a data-linktype="relative-path" href="media/3-auto-loader.png#lightbox">
+<img alt="Diagram explaining how Auto Loader works." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/3-auto-loader.png"/>
+</a>
+</p>
+<p>Key capabilities of Auto Loader include:</p>
+<ul>
+<li><strong>Schema inference and evolution</strong>: Automatically detects the schema of incoming files and handles schema changes gracefully.</li>
+<li><strong>Exactly-once processing</strong>: Guarantees each file is processed once, even across failures and restarts.</li>
+<li><strong>Scalability</strong>: Efficiently handles billions of files for backfills or migrations.</li>
+<li><strong>Format support</strong>: Processes JSON, CSV, Parquet, Avro, ORC, XML, text, and binary files.</li>
+</ul>
+<p>Auto Loader fits scenarios where data arrives as files in cloud storage—common patterns include log files, exports from upstream systems, and data landing zones. You can use Auto Loader with Lakeflow Spark Declarative Pipelines for a managed experience or with Structured Streaming for more control.</p>
+<h2 id="copy-into">COPY INTO</h2>
+<p>The <code>COPY INTO</code> SQL command loads data from cloud storage into Delta tables. Unlike Auto Loader, which runs continuously as a stream, <code>COPY INTO</code> executes as a batch operation that you schedule or trigger manually.</p>
+<p><code>COPY INTO</code> tracks which files it has already processed, making the operation idempotent. Running the same command multiple times doesn't duplicate data because previously loaded files are skipped. This characteristic makes <code>COPY INTO</code> useful for scheduled batch jobs where you want predictable, repeatable behavior.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>The tracking metadata is stored as part of the Delta table's transaction log (the <code>_delta_log</code> directory)</p>
+</div>
+<p><a data-linktype="relative-path" href="media/3-copy-into.png#lightbox">
+<img alt="Diagram explaining how COPY INTO works." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/3-copy-into.png"/>
+</a>
+</p>
+<p>Common scenarios for <code>COPY INTO</code> include one-time data migrations, scheduled batch loads from landing zones, and SQL-first workflows where you prefer declarative syntax over streaming APIs.</p>
+<p>Choose <code>COPY INTO</code> over Auto Loader when you're performing a one-time batch load of a large dataset. <code>COPY INTO</code> provides a simpler configuration model without requiring streaming infrastructure, making it ideal for loading hundreds of gigabytes or even terabytes of data in a single operation. Auto Loader's continuous processing model and checkpoint management add unnecessary complexity when you only need to load data once.</p>
+<p>However, for ongoing incremental ingestion at scale, Auto Loader provides better performance and more robust file discovery.</p>
+<h2 id="spark-structured-streaming">Spark Structured Streaming</h2>
+<p>Spark Structured Streaming provides the foundation for real-time data processing in Azure Databricks. It enables continuous ingestion from various streaming sources with exactly-once processing guarantees.</p>
+<p>Streaming sources supported include:</p>
+<ul>
+<li><strong>Apache Kafka and Azure Event Hubs</strong>: For event-driven architectures and message queue processing.</li>
+<li><strong>Delta Lake change feeds</strong>: For propagating changes between Delta tables.</li>
+<li><strong>Cloud storage via Auto Loader</strong>: For file-based streaming ingestion.</li>
+<li><strong>Socket and custom sources</strong>: For specialized ingestion scenarios.</li>
+</ul>
+<p>Choose Structured Streaming when you need fine-grained control over streaming behavior, custom watermarking or windowing logic, or when working with sources not supported by higher-level abstractions.</p>
+<h2 id="jdbc-and-odbc-connections">JDBC and ODBC connections</h2>
+<p>Notebook-based ingestion using JDBC or ODBC remains a practical approach for extracting data from relational databases. You write code that connects directly to source databases, executes queries, and loads results into Delta tables.</p>
+<p>This approach supports virtually any database with a JDBC or ODBC driver: SQL Server, Oracle, PostgreSQL, MySQL, and many others. You implement full or incremental loads by writing appropriate queries, often using watermark columns to track extraction progress.</p>
+<p>While Lakeflow Connect managed connectors are replacing JDBC/ODBC for many scenarios, notebook-based connections remain valuable when:</p>
+<ul>
+<li>Your database isn't supported by Lakeflow Connect managed connectors.</li>
+<li>You need custom extraction logic that managed connectors can't accommodate.</li>
+<li>You're maintaining existing pipelines that use this pattern.</li>
+<li>You require specific query pushdown optimizations for large tables.</li>
+</ul>
+<p>When using JDBC/ODBC, store credentials securely using Databricks secrets rather than hardcoding them in notebooks. Consider the performance impact on source systems and implement appropriate throttling or scheduling to avoid overwhelming transactional databases.</p>
+<p>For on-premises databases, additional network infrastructure is required—either Azure ExpressRoute/VPN for direct JDBC connectivity from Databricks, or Azure Data Factory with a Self-Hosted Integration Runtime to land data in cloud storage first.</p>
+<h2 id="azure-data-factory">Azure Data Factory</h2>
+<p>Azure Data Factory (ADF) serves as an orchestration and data movement platform within the Azure ecosystem. It excels at coordinating workflows that span multiple services and landing data from diverse sources into cloud storage where Azure Databricks can process it.</p>
+<p>ADF integrates extensively with Microsoft services like Dynamics 365, Azure SQL Database, and Microsoft Fabric. When your data originates from these sources, ADF provides straightforward connectivity and can land data in Azure Data Lake Storage for subsequent Databricks processing.</p>
+<p>Understanding ADF's appropriate role is important. Use ADF for:</p>
+<ul>
+<li><strong>Orchestration</strong>: Coordinating workflows that involve multiple Azure services.</li>
+<li><strong>Initial data landing</strong>: Moving data from Azure sources to cloud storage.</li>
+<li><strong>Enterprise integration</strong>: When company policy mandates ADF for data movement.</li>
+</ul>
+<p><a data-linktype="relative-path" href="media/3-azure-data-factory.png#lightbox">
+<img alt="Diagram explaining how Azure Data Factory can be used together with Azure Databricks." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/3-azure-data-factory.png"/>
+</a>
+</p>
+<p>Avoid using ADF for core ETL transformations inside Databricks. Running transformations through ADF activities introduces unnecessary complexity and performs less efficiently than Databricks-native processing. Let ADF handle data movement into your lakehouse, then use Azure Databricks tools for transformation logic.</p>
+<h2 id="apply-a-decision-framework">Apply a decision framework</h2>
+<p>Selecting an ingestion tool becomes clearer when you evaluate your scenario against key decision criteria.</p>
+<p><a data-linktype="relative-path" href="media/3-decision-framework.png#lightbox">
+<img alt="Diagram showing decision framework for selecting data loading approach." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/3-decision-framework.png"/>
+</a>
+</p>
+<p>Start by identifying your data source type, then consider operational requirements and organizational context.</p>
+<p>For <strong>enterprise applications</strong> (Salesforce, ServiceNow, SharePoint), Lakeflow Connect managed connectors offer the fastest path to production with minimal maintenance. These connectors handle the complexity of API integration, rate limiting, and change tracking.</p>
+<p>For <strong>relational databases</strong> with supported types, Lakeflow Connect offers two managed paths: <strong>database connectors</strong> (CDC-based, requires gateway) for continuous change capture, and <strong>query-based connectors</strong> for simpler scheduled ingestion using a cursor column. For unsupported databases, notebook-based JDBC/ODBC extraction remains a viable approach.</p>
+<p>For <strong>files in cloud storage</strong>, Auto Loader provides efficient incremental discovery and processing. Use COPY INTO for simpler batch scenarios or when you prefer SQL-first workflows.</p>
+<p>For <strong>streaming data</strong> from message buses (Kafka, Event Hubs, Pub/Sub), standard connectors with Lakeflow Spark Declarative Pipelines balance automation with flexibility. For complex streaming requirements, Structured Streaming offers maximum control.</p>
+<p>For <strong>Azure ecosystem sources</strong> requiring coordination with other services, Azure Data Factory can orchestrate data landing into your lakehouse. Keep transformation logic within Azure Databricks rather than in ADF data flows.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Start with the most managed option that meets your requirements. Managed connectors reduce development time and maintenance burden. Only move to more customizable approaches when specific requirements can't be met by higher-level abstractions.</p>
+</div>
+<p>Your choice also depends on team skills and organizational standards. Document your decisions and the reasoning behind them to help future team members understand the pipeline architecture.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Choose a data table format</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/4-choose-data-table-format">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/4-choose-data-table-format</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Choose a data table format</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data engineers face a critical decision early in every data pipeline: which table format should store your data? This choice affects query performance, transaction reliability, interoperability with other platforms, and long-term maintenance of your lakehouse architecture.</p>
+<p>Azure Databricks supports multiple storage formats, each designed for different scenarios. Understanding their differences helps you select the right format for your specific requirements.</p>
+<h2 id="understand-file-formats-versus-table-formats">Understand file formats versus table formats</h2>
+<p>Before comparing options, it's important to distinguish between file formats and table formats. A <strong>file format</strong> like Parquet, CSV, or JSON defines how data is physically stored on disk. A <strong>table format</strong> like Delta Lake or Apache Iceberg builds on top of file formats by adding a metadata layer that tracks transactions, schema changes, and data file locations.</p>
+<p><a data-linktype="relative-path" href="media/4-file-formats-versus-table-formats.png#lightbox">
+<img alt="Diagram explaining file formats versus table formats." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/4-file-formats-versus-table-formats.png"/>
+</a>
+</p>
+<p>Both Delta Lake and Apache Iceberg use Parquet as their underlying file format. The key difference lies in the metadata layer that enables advanced features like ACID transactions, time travel, and schema evolution.</p>
+<h2 id="how-parquet-stores-data-differently">How Parquet stores data differently</h2>
+<p>Parquet uses <strong>columnar storage</strong> rather than row-based storage. This fundamental difference significantly impacts analytical query performance.</p>
+<p>In row-based formats like CSV, data is organized by record. Reading a single column requires scanning every row in the file. In columnar formats like Parquet, data for each column is stored together. When a query needs only specific columns, Parquet reads just those columns and skips the rest entirely.</p>
+<p>Parquet organizes data into <strong>row groups</strong>, each containing <strong>column chunks</strong>. Every column chunk stores statistics including minimum and maximum values for that data segment. When you execute a query with a filter condition, the query engine checks these statistics first. If the filter value falls outside the min/max range of a row group, the engine skips reading that entire section.</p>
+<p><a data-linktype="relative-path" href="media/4-parquet-file-layout.png#lightbox">
+<img alt="Diagram explaining how parquet stores data differently." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/4-parquet-file-layout.png"/>
+</a>
+</p>
+<p>This columnar approach provides two optimization techniques that dramatically improve analytics performance:</p>
+<ul>
+<li><strong>Column pruning</strong>: The engine reads only the columns your query references, reducing I/O substantially.</li>
+<li><strong>Predicate pushdown</strong>: Filter conditions are evaluated against column statistics before reading data, skipping irrelevant row groups entirely.</li>
+</ul>
+<p>For analytical workloads that typically access a subset of columns across many rows, Parquet substantially outperforms row-based formats.</p>
+<h2 id="delta-lake-as-the-default-format">Delta Lake as the default format</h2>
+<p>Delta Lake is the default storage format for all tables in Azure Databricks. When you create a table without specifying a format, Azure Databricks automatically uses Delta Lake.</p>
+<p>Delta Lake extends Parquet files with a <strong>transaction log</strong> that records every change to your table. This log enables several capabilities that Parquet alone doesn't provide:</p>
+<ul>
+<li><p><strong>ACID transactions</strong>: Multiple concurrent readers and writers can access the same table without data corruption. Each transaction either completes entirely or has no effect.</p>
+</li>
+<li><p><strong>Time travel</strong>: Query previous versions of your table using timestamps or version numbers. Roll back changes if needed.</p>
+</li>
+<li><p><strong>Schema enforcement and evolution</strong>: The table validates incoming data against its defined schema, preventing corrupt or incompatible data from entering your lakehouse. When requirements change, you can add new columns, modify data types, or rename columns without rewriting existing data.</p>
+</li>
+<li><p><strong>Unified batch and streaming</strong>: Use the same table as both a batch source and a streaming source or sink.</p>
+</li>
+</ul>
+<p>Delta Lake integrates deeply with the Azure Databricks platform. Features like <strong>liquid clustering</strong> and <strong>predictive optimization</strong> are available for both Delta Lake and managed Apache Iceberg tables in Unity Catalog. <strong>Change data feed</strong>, however, is specific to Delta Lake and relies on its transaction log.</p>
+<p>For most scenarios in Azure Databricks, Delta Lake is the recommended choice. It provides the performance benefits of Parquet with transactional guarantees that production data systems require.</p>
+<h2 id="apache-iceberg-for-cross-platform-scenarios">Apache Iceberg for cross-platform scenarios</h2>
+<p>Apache Iceberg is an alternative open table format that Azure Databricks supports for managed and foreign tables. Like Delta Lake, Iceberg provides ACID transactions, schema evolution, and time travel capabilities built on top of Parquet files.</p>
+<p>Iceberg's hierarchical and well-defined logical structure makes it highly flexible, supporting scalability and advanced optimizations. It supports manifest pruning, file-Level statistics, hidden partitioning and partition evolution.</p>
+<p><a data-linktype="relative-path" href="media/4-iceberg-layout.png#lightbox">
+<img alt="Diagram explaining Apache Iceberg layout." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/4-iceberg-layout.png"/>
+</a>
+</p>
+<p>The primary reason to choose Iceberg is <strong>interoperability</strong>. Iceberg is widely adopted across the data ecosystem, including platforms like Snowflake, Amazon Athena, Trino, Apache Spark, and Apache Flink. If your organization runs workloads across multiple platforms that need to read and write the same tables, Iceberg provides a common format all platforms understand.</p>
+<p>Unity Catalog can manage Iceberg tables directly, allowing Azure Databricks to serve as an Iceberg catalog for external engines. You can also read Iceberg tables managed by other catalogs like AWS Glue or Snowflake Horizon Catalog through foreign table connections.</p>
+<p>Consider Iceberg when:</p>
+<ul>
+<li>Your data needs to be accessed by multiple processing engines outside Azure Databricks.</li>
+<li>Your organization has standardized on Iceberg for cross-platform data sharing.</li>
+<li>You're integrating with systems that don't support Delta Lake.</li>
+</ul>
+<p>For workloads that run primarily within Azure Databricks, Delta Lake remains the recommended format due to its deeper platform integration and optimization features.</p>
+<h2 id="when-row-based-formats-apply">When row-based formats apply</h2>
+<p>CSV and JSON remain valid choices for specific scenarios, even though they're less efficient for large-scale analytics.</p>
+<p>Use CSV or JSON when:</p>
+<ul>
+<li>You're receiving data from external systems in these formats as an initial landing zone.</li>
+<li>You need human-readable data for debugging or quick inspection.</li>
+<li>You're integrating with systems that only support text-based formats.</li>
+<li>Data volumes are small enough that performance differences are negligible.</li>
+</ul>
+<p>For persistent storage of analytical data, convert incoming CSV or JSON files to <strong>Delta Lake tables</strong> during ingestion. This conversion captures the efficiency gains of columnar storage while adding transactional guarantees.</p>
+<h2 id="apply-decision-criteria">Apply decision criteria</h2>
+<p>Selecting a table format depends on your specific requirements. Start with Delta Lake as your default choice, then evaluate alternatives only when specific constraints require them.</p>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Delta Lake</th>
+<th>Apache Iceberg</th>
+<th>CSV/JSON</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Analytics performance</td>
+<td>Excellent</td>
+<td>Excellent</td>
+<td>Poor</td>
+</tr>
+<tr>
+<td>ACID transactions</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Time travel</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Azure Databricks integration</td>
+<td>Deep</td>
+<td>Supported</td>
+<td>Basic</td>
+</tr>
+<tr>
+<td>Cross-platform compatibility</td>
+<td>Growing</td>
+<td>Wide</td>
+<td>Universal</td>
+</tr>
+<tr>
+<td>Recommended for production</td>
+<td>Yes</td>
+<td>Yes (when interop required)</td>
+<td>No (landing zone only)</td>
+</tr>
+</tbody>
+</table>
+<p>Your choice also depends on organizational standards. If your architecture team has established conventions for table formats, align with those decisions to maintain consistency across your data platform.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Design and implement a data partitioning scheme</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/5-design-data-partitioning-scheme">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/5-design-data-partitioning-scheme</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Design and implement a data partitioning scheme</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data partitioning directly affects how efficiently your queries run and how much compute resources you consume. When you partition a table, you divide data into discrete segments based on column values, allowing the query engine to read only relevant portions of your dataset. This approach, called <strong>partition pruning</strong>, can dramatically reduce data scans when filters align with partition boundaries.</p>
+<p>Consider a retail company processing millions of daily sales transactions. Analysts frequently query data by date ranges to generate weekly reports, compare month-over-month trends, and analyze seasonal patterns. Without partitioning, every query scans the entire transaction history. With proper partitioning by date, queries for a specific week touch only a fraction of the stored files.</p>
+<h2 id="determine-when-partitioning-applies">Determine when partitioning applies</h2>
+<p>Databricks recommends that you don't partition tables containing less than <strong>1 TB</strong> of data. For smaller tables, the overhead of managing partition metadata and the potential for creating many small files outweighs any query performance benefits. Unpartitioned Delta tables in recent Databricks Runtime versions automatically benefit from <strong>ingestion time clustering</strong>, which provides similar query advantages without explicit configuration.</p>
+<p>When your tables exceed <strong>1 TB</strong>, partitioning becomes a valuable optimization technique. At this scale, the benefits of reading only relevant data segments significantly offset the costs of partition management. Partitioning also enables parallel processing, as Spark can distribute different partitions across cluster nodes for concurrent execution.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Each partition should contain at least <strong>1 GB</strong> of data. This guideline helps you avoid over-partitioning, which creates excessive small files and degrades query performance.</p>
+</div>
+<p><a data-linktype="relative-path" href="media/5-determine-when-partitioning-applies.png#lightbox">
+<img alt="Diagram helping you to determine when partitioning applies." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/5-determine-when-partitioning-applies.png"/>
+</a>
+</p>
+<p>For very large tables in the hundreds of terabytes range, partitioning delivers even greater benefits. At this scale, partition pruning dramatically reduces the amount of data the query engine needs to process, improving both performance and cost efficiency.</p>
+<h2 id="choose-effective-partition-keys">Choose effective partition keys</h2>
+<p>Partition key selection requires you to understand your data characteristics and query patterns. Effective partition keys share common traits that maximize performance benefits while avoiding common pitfalls.</p>
+<h3 id="low-cardinality-columns-work-best">Low cardinality columns work best</h3>
+<p>Choose columns with a <strong>limited number of distinct values</strong>. Date columns, geographic regions, product categories, and status fields make excellent partition keys because they create a manageable number of partitions. A column with thousands or millions of unique values, like customer ID or transaction ID, leads to over-partitioning and poor performance.</p>
+<p>For example, partitioning a sales table by <code>sale_date</code> at the daily level might create 365 partitions per year. If each day contains sufficient data volume, this granularity works well. However, partitioning by <code>sale_timestamp</code> at the second level would create millions of partitions, each containing minimal data.</p>
+<h3 id="align-with-query-patterns">Align with query patterns</h3>
+<p>Your partition key should match the columns that users filter on most frequently. If analysts consistently query sales data by date ranges, partitioning by date enables efficient pruning. If queries primarily filter by region, consider region as your partition key instead.</p>
+<p>When multiple filter patterns exist, prioritize the most common or most performance-critical queries. You can define one partitioning scheme per table, so choose columns that benefit the majority of your workload. For significantly different query patterns, consider creating separate optimized <strong>materialized views</strong> or <strong>summary tables</strong> for specific use cases.</p>
+<h3 id="consider-data-growth-over-time">Consider data growth over time</h3>
+<p>Select a partition scheme that scales appropriately as your data grows. Partitioning by year works well initially but might create partitions that are too large over time. Conversely, partitioning by hour might work for high-volume data but creates too many small partitions for moderate volumes.</p>
+<p>Evaluate your expected data growth rate when choosing partition granularity. A balance between partition size and the number of partitions helps maintain consistent query performance as your dataset expands.</p>
+<p>Also consider data distribution across partitions. Severely uneven partition sizes can create processing bottlenecks, as nodes handling larger partitions take longer to complete while others remain idle.</p>
+<h2 id="implement-partitions-in-azure-databricks">Implement partitions in Azure Databricks</h2>
+<p>You define partitions when creating a table using the <code>PARTITIONED BY</code> clause in SQL or the <code>partitionBy</code> method in PySpark. Once you establish partitions, Azure Databricks automatically routes incoming data to the appropriate partition directories based on column values.</p>
+<h3 id="create-a-partitioned-table-with-sql">Create a partitioned table with SQL</h3>
+<p>The following example creates a sales transactions table partitioned by the transaction date:</p>
+<pre><code class="lang-sql">CREATE TABLE sales.transactions (
+    transaction_id STRING,
+    customer_id STRING,
+    product_id STRING,
+    quantity INT,
+    unit_price DECIMAL(10,2),
+    total_amount DECIMAL(12,2),
+    transaction_date DATE
+)
+PARTITIONED BY (transaction_date);
+</code></pre>
+<p>When you query this table with a date filter, the query engine reads only the partitions that match your filter criteria:</p>
+<pre><code class="lang-sql">SELECT product_id, SUM(total_amount) AS revenue
+FROM sales.transactions
+WHERE transaction_date BETWEEN '2024-01-01' AND '2024-01-31'
+GROUP BY product_id;
+</code></pre>
+<h3 id="create-a-partitioned-table-with-pyspark">Create a partitioned table with PySpark</h3>
+<p>When using PySpark, specify partitioning during the write operation:</p>
+<pre><code class="lang-python">df.write.format("delta") \
+    .partitionBy("transaction_date") \
+    .saveAsTable("sales.transactions")
+</code></pre>
+<p>For subsequent writes, maintain consistency by including the same partition specification:</p>
+<pre><code class="lang-python">new_transactions_df.write.format("delta") \
+    .mode("append") \
+    .partitionBy("transaction_date") \
+    .saveAsTable("sales.transactions")
+</code></pre>
+<h3 id="use-generated-columns-for-partition-flexibility">Use generated columns for partition flexibility</h3>
+<p>Generated columns provide a way to derive partition values from existing columns without storing redundant data. This approach is useful when your source data contains timestamps but you want to partition by date:</p>
+<pre><code class="lang-sql">CREATE TABLE sales.transactions (
+    transaction_id STRING,
+    customer_id STRING,
+    product_id STRING,
+    quantity INT,
+    unit_price DECIMAL(10,2),
+    total_amount DECIMAL(12,2),
+    transaction_timestamp TIMESTAMP,
+    transaction_date DATE GENERATED ALWAYS AS (CAST(transaction_timestamp AS DATE))
+)
+PARTITIONED BY (transaction_date);
+</code></pre>
+<div class="TIP">
+<p>Tip</p>
+<p>With this configuration, Delta Lake automatically generates partition filters when you query using the base timestamp column. A query filtering on <code>transaction_timestamp</code> benefits from partition pruning without requiring explicit date filters.</p>
+</div>
+<h2 id="avoid-common-partitioning-mistakes">Avoid common partitioning mistakes</h2>
+<p>Understanding what to avoid is as important as knowing what to do. Several common mistakes can significantly degrade performance and complicate data management.</p>
+<p><a data-linktype="relative-path" href="media/5-avoid-common-partition-mistakes.png#lightbox">
+<img alt="Diagram explaining common partitioning mistakes." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/5-avoid-common-partition-mistakes.png"/>
+</a>
+</p>
+<h3 id="over-partitioning-creates-small-file-problems">Over-partitioning creates small file problems</h3>
+<p>Creating too many partitions, each containing insufficient data, leads to <strong>small file problems</strong>. When partitions contain files smaller than the target file size, query performance suffers from excessive metadata operations and reduced read efficiency. Aim for partitions with at least <strong>1 GB</strong> of data.</p>
+<p>Signs of over-partitioning include slow query performance despite partition pruning, a large number of small files in partition directories, and long table optimization times. If you observe these symptoms, consider choosing a coarser partition granularity.</p>
+<h3 id="partitioning-on-high-cardinality-columns-fails">Partitioning on high-cardinality columns fails</h3>
+<p>Columns with many unique values make poor partition keys. Partitioning by customer ID, transaction ID, or other <strong>high-cardinality columns</strong> creates millions of partitions that degrade rather than improve performance. Reserve high-cardinality column optimization for other techniques that are designed for this purpose.</p>
+<h3 id="changing-partitions-requires-rewriting-data">Changing partitions requires rewriting data</h3>
+<p>Partition columns are part of the table structure. Changing your partitioning strategy requires <strong>rewriting the entire table</strong> to a new location with different partition boundaries. This operation consumes significant compute resources and time for large tables.</p>
+<p>Plan your partitioning strategy carefully before loading data at scale. Consider future query patterns and data growth to avoid costly restructuring later.</p>
+<h3 id="document-partitioning-decisions">Document partitioning decisions</h3>
+<p>Record your partition key choices and the reasoning behind them. This documentation helps team members understand query optimization opportunities and prevents accidental changes that could impact performance. Include information about expected partition sizes, query patterns that benefit from the scheme, and any constraints that influenced your decisions.</p>
+<h2 id="consider-liquid-clustering-as-an-alternative">Consider liquid clustering as an alternative</h2>
+<p>When you encounter partitioning challenges—especially with <strong>high-cardinality columns</strong> like timestamps or when query patterns are <strong>uncertain</strong>—liquid clustering provides a modern alternative. Unlike traditional partitioning, liquid clustering offers:</p>
+<ul>
+<li>Flexibility to adjust optimization strategies without rewriting data</li>
+<li>Automatic maintenance as tables grow</li>
+<li>Reduced partition management overhead</li>
+</ul>
+<p>Liquid clustering is the <strong>recommended approach</strong> for new tables where partitioning constraints would limit performance or create excessive maintenance burden. It's particularly effective for tables that exceed 1 TB and require filtering on columns that would create too many partitions using traditional approaches.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Liquid clustering is not compatible with partitioned tables. Choose one approach based on your requirements when designing new tables.</p>
+</div>
+<p>For implementation details, syntax, and optimization strategies, refer to the <strong>Design and implement a clustering strategy</strong> unit later in this module.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Choose a slowly changing dimension (SCD) type</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/6-choose-slowly-changing-dimension-type">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/6-choose-slowly-changing-dimension-type</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Choose a slowly changing dimension (SCD) type</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Dimension tables in a data warehouse capture descriptive attributes about business entities like customers, products, or employees. These attributes change over time, and how you handle those changes directly affects your ability to perform accurate historical analysis. Slowly changing dimensions (SCDs) provide frameworks for managing these changes, and choosing the right SCD type is a critical design decision.</p>
+<p>As a data engineer, you're expected to understand SCD types and implement them when directed. While data architects often make the initial design decisions, you need sufficient knowledge to evaluate trade-offs, recommend approaches, and execute implementations correctly. This unit helps you understand the characteristics of each SCD type so you can select the appropriate approach for your business requirements.</p>
+<h2 id="understand-dimension-changes">Understand dimension changes</h2>
+<p>Before selecting an SCD type, consider what happens when source data changes. Imagine a customer named Hank Zoeng moves from Seattle to Portland. Your customer dimension table currently shows Seattle as his city. You have three fundamental options:</p>
+<ul>
+<li><strong>Overwrite</strong> the existing value with Portland, losing all record that he was ever in Seattle.</li>
+<li><strong>Preserve</strong> the Seattle record and create a new version showing Portland, maintaining the complete history.</li>
+<li><strong>Track</strong> a limited history by adding a "previous city" column alongside the current value.</li>
+</ul>
+<p>Each approach serves different analytical needs. Sales reports that show "current customer location" need different handling than analyses tracking "customer migration patterns" or "sales by customer's region at time of purchase."</p>
+<h2 id="scd-type-0">SCD Type 0</h2>
+<p><strong>SCD Type 0</strong> represents the simplest approach: never update dimension attributes after the initial insert. The original values remain permanently, regardless of source system changes.</p>
+<p><a data-linktype="relative-path" href="media/6-slowly-changing-dimension-type-0.png#lightbox">
+<img alt="Diagram explaining SCD type 0." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/6-slowly-changing-dimension-type-0.png"/>
+</a>
+</p>
+<p>This type works well for:</p>
+<ul>
+<li><strong>True constants</strong>: Birth dates, original registration dates, or founding dates that genuinely never change.</li>
+<li><strong>Audit requirements</strong>: When regulations require preserving the original value exactly as first recorded.</li>
+<li><strong>Reference data</strong>: Lookup values that represent permanent classifications.</li>
+</ul>
+<p>Type 0 is rarely used in isolation because most dimension attributes do change over time. However, individual columns within a dimension table might use Type 0 treatment while other columns use different SCD types.</p>
+<h2 id="scd-type-1">SCD Type 1</h2>
+<p><strong>SCD Type 1</strong> overwrites the existing dimension record with new values. When Hank moves from Seattle to Portland, you update his row directly. The dimension table always reflects the current state of the source system.</p>
+<p><a data-linktype="relative-path" href="media/6-slowly-changing-dimension-type-1.png#lightbox">
+<img alt="Diagram explaining SCD type 1." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/6-slowly-changing-dimension-type-1.png"/>
+</a>
+</p>
+<p>Type 1 is appropriate when:</p>
+<ul>
+<li><strong>Historical values don't matter</strong>: Correcting data entry errors, updating email addresses, or refreshing phone numbers.</li>
+<li><strong>Analysis focuses on current state</strong>: Reports that answer "where do our customers live today?" rather than "where did they live when they made purchases?"</li>
+<li><strong>Simplicity is prioritized</strong>: Type 1 requires no additional columns or versioning logic.</li>
+</ul>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Type 1 changes affect historical aggregations. If Hank purchased $10,000 of products while in Seattle, those sales now appear attributed to Portland after the update. This behavior might misrepresent historical performance by region.</p>
+</div>
+<p>Consider using Type 1 for supplementary attributes that don't affect analytical accuracy, such as:</p>
+<ul>
+<li>Contact information (email, phone, address corrections).</li>
+<li>Descriptive text fields (product descriptions, customer notes).</li>
+<li>Error corrections in any attribute.</li>
+</ul>
+<h2 id="scd-type-2">SCD Type 2</h2>
+<p><strong>SCD Type 2</strong> preserves complete history by inserting new rows for each version of a dimension member. When Hank moves to Portland, the existing Seattle row remains and a new Portland row is created. Both rows share the same natural key (customer ID) but have different surrogate keys.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>A natural key is also referred to as a <strong>business key</strong> or <strong>source system key</strong>. It represents the unique identifier from the original data source, such as customer ID, employee number, or product code.</p>
+</div>
+<p>Type 2 dimensions require additional tracking attributes:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Surrogate key</strong></td>
+<td>Unique identifier for each version</td>
+</tr>
+<tr>
+<td><strong>Validity start date</strong></td>
+<td>When this version became effective</td>
+</tr>
+<tr>
+<td><strong>Validity end date</strong></td>
+<td>When this version expired (often 12/31/9999 for current)</td>
+</tr>
+<tr>
+<td><strong>Current flag</strong></td>
+<td>Boolean indicating the active version</td>
+</tr>
+</tbody>
+</table>
+<p>The following table shows how Hank Zoeng's customer record appears after moving from Seattle to Portland:</p>
+<table>
+<thead>
+<tr>
+<th>SK</th>
+<th>CustomerID</th>
+<th>Name</th>
+<th>City</th>
+<th>ValidFrom</th>
+<th>ValidTo</th>
+<th>Current</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1001</td>
+<td>C-555</td>
+<td>Hank Zoeng</td>
+<td>Seattle</td>
+<td>2020-01-15</td>
+<td>2024-03-01</td>
+<td>FALSE</td>
+</tr>
+<tr>
+<td>1002</td>
+<td>C-555</td>
+<td>Hank Zoeng</td>
+<td>Portland</td>
+<td>2024-03-01</td>
+<td>9999-12-31</td>
+<td>TRUE</td>
+</tr>
+</tbody>
+</table>
+<p>Type 2 is appropriate when:</p>
+<ul>
+<li><strong>Historical accuracy matters</strong>: Analyzing sales by the customer's location at the time of purchase.</li>
+<li><strong>Audit trails are required</strong>: Tracking employee assignments, territory changes, or organizational restructuring over time.</li>
+<li><strong>Trend analysis is needed</strong>: Understanding how dimension attributes evolved.</li>
+</ul>
+<p>Type 2 increases complexity and storage requirements. Each version creates a new row, and fact tables reference specific versions through surrogate keys. Query complexity increases because analysts must understand the versioning model.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Reserve Type 2 for attributes where historical perspective affects business decisions. Don't apply Type 2 to every changing attribute—the overhead isn't justified for supplementary data like phone numbers.</p>
+</div>
+<h2 id="scd-type-3">SCD Type 3</h2>
+<p><strong>SCD Type 3</strong> tracks limited history by adding columns for previous values. Instead of creating new rows, you add a "previous city" column alongside "current city." This approach tracks only the most recent change, not the complete history.</p>
+<p>The following table shows how Hank Zoeng's customer record appears after moving from Seattle to Portland:</p>
+<table>
+<thead>
+<tr>
+<th>CustomerID</th>
+<th>Name</th>
+<th>CurrentCity</th>
+<th>PreviousCity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C-555</td>
+<td>Hank Zoeng</td>
+<td>Portland</td>
+<td>Seattle</td>
+</tr>
+</tbody>
+</table>
+<p>Type 3 is appropriate when:</p>
+<ul>
+<li><strong>Only the previous value matters</strong>: Comparing current versus prior organizational structure.</li>
+<li><strong>Storage constraints exist</strong>: When Type 2 versioning would create too many rows.</li>
+<li><strong>Analysis compares before and after</strong>: Product reformulations, price tier changes, or policy updates.</li>
+</ul>
+<p>Type 3 is the least common SCD type because:</p>
+<ul>
+<li>It captures only one prior value (or a fixed number of prior values).</li>
+<li>Adding columns for each tracked attribute can widen tables significantly.</li>
+<li>Semantic models can find Type 3 structures difficult to use.</li>
+</ul>
+<p>Most scenarios that seem to need Type 3 are better served by Type 2, which provides complete history without schema changes for each attribute.</p>
+<h2 id="compare-scd-types">Compare SCD types</h2>
+<p>The following table summarizes when to select each SCD type:</p>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Type 0</th>
+<th>Type 1</th>
+<th>Type 2</th>
+<th>Type 3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>History preserved</strong></td>
+<td>Original only</td>
+<td>None</td>
+<td>Complete</td>
+<td>Limited</td>
+</tr>
+<tr>
+<td><strong>Storage impact</strong></td>
+<td>Minimal</td>
+<td>Minimal</td>
+<td>High</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td><strong>Query complexity</strong></td>
+<td>Simple</td>
+<td>Simple</td>
+<td>Complex</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td><strong>Common use cases</strong></td>
+<td>Constants, audit requirements</td>
+<td>Error corrections, contact updates</td>
+<td>Sales attribution, territory tracking</td>
+<td>Before/after comparisons</td>
+</tr>
+<tr>
+<td><strong>Fact table relationship</strong></td>
+<td>Natural key</td>
+<td>Natural key</td>
+<td>Surrogate key</td>
+<td>Natural key</td>
+</tr>
+</tbody>
+</table>
+<h2 id="apply-mixed-scd-strategies">Apply mixed SCD strategies</h2>
+<p>Production dimension tables often combine multiple SCD types. A customer dimension might handle attributes differently based on their analytical significance:</p>
+<ul>
+<li><strong>Type 0</strong>: Original registration date (never changes).</li>
+<li><strong>Type 1</strong>: Email address, phone number (current state is sufficient).</li>
+<li><strong>Type 2</strong>: Assigned sales region (historical accuracy required for sales attribution).</li>
+</ul>
+<p>This hybrid approach balances storage efficiency with analytical requirements. When designing dimensions, evaluate each attribute individually to determine the appropriate change handling strategy.</p>
+<p>Understanding when to apply each SCD type enables you to implement dimensions that accurately support your organization's analytical requirements. The implementation details for loading and maintaining SCD tables in Azure Databricks are covered in later units.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>7. Implement a slowly changing dimension (SCD) type 2</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/7-implement-slowly-changing-dimension-type-2">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/7-implement-slowly-changing-dimension-type-2</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Implement a slowly changing dimension (SCD) type 2</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>After selecting SCD Type 2 for a dimension, you need to implement the table structure and change capture logic in Azure Databricks. This unit focuses on creating SCD Type 2 tables and implementing the MERGE patterns that maintain version history as source data changes.</p>
+<h2 id="create-the-scd-type-2-table">Create the SCD Type 2 table</h2>
+<p>The following SQL creates a customer dimension table with SCD Type 2 tracking columns:</p>
+<pre><code class="lang-sql">CREATE TABLE sales.customer (
+    customer_sk BIGINT GENERATED ALWAYS AS IDENTITY,
+    customer_id STRING NOT NULL,
+    customer_name STRING,
+    email STRING,
+    city STRING,
+    region STRING,
+    valid_from TIMESTAMP NOT NULL,
+    valid_to TIMESTAMP NOT NULL,
+    is_current BOOLEAN
+)
+USING DELTA
+TBLPROPERTIES (
+    delta.enableChangeDataFeed = true
+);
+</code></pre>
+<p>The <code>GENERATED ALWAYS AS IDENTITY</code> clause creates an auto-incrementing surrogate key for each new row. Enabling the change data feed allows downstream processes to capture incremental changes efficiently.</p>
+<h2 id="implement-change-capture-with-merge">Implement change capture with MERGE</h2>
+<p>The <code>MERGE</code> statement provides an efficient way to implement SCD Type 2 logic when processing updates from source systems. The statement handles inserts, updates, and the versioning logic in a single transaction.</p>
+<p>The following pattern closes the current version and inserts the new version when changes occur:</p>
+<pre><code class="lang-sql">MERGE INTO sales.customer AS target
+USING (
+    SELECT 
+        source.customer_id,
+        source.customer_name,
+        source.email,
+        source.city,
+        source.region,
+        current_timestamp() AS valid_from,
+        CAST('9999-12-31' AS TIMESTAMP) AS valid_to,
+        true AS is_current
+    FROM staging.customers AS source
+) AS updates
+ON target.customer_id = updates.customer_id AND target.is_current = true
+WHEN MATCHED AND (
+    target.customer_name &lt;&gt; updates.customer_name OR
+    target.email &lt;&gt; updates.email OR
+    target.city &lt;&gt; updates.city OR
+    target.region &lt;&gt; updates.region
+) THEN UPDATE SET
+    target.valid_to = current_timestamp(),
+    target.is_current = false
+WHEN NOT MATCHED THEN INSERT (
+    customer_id, customer_name, email, city, region,
+    valid_from, valid_to, is_current
+) VALUES (
+    updates.customer_id, updates.customer_name, updates.email, 
+    updates.city, updates.region, updates.valid_from, 
+    updates.valid_to, updates.is_current
+);
+
+-- Insert new versions for updated records
+INSERT INTO sales.customer
+SELECT 
+    s.customer_id,
+    s.customer_name,
+    s.email,
+    s.city,
+    s.region,
+    current_timestamp() AS valid_from,
+    CAST('9999-12-31' AS TIMESTAMP) AS valid_to,
+    true AS is_current
+FROM staging.customers s
+JOIN sales.customer h 
+    ON s.customer_id = h.customer_id 
+    AND h.valid_to = current_timestamp()
+    AND h.is_current = false;
+</code></pre>
+<div class="TIP">
+<p>Tip</p>
+<p>Consider using Lakeflow Spark Declarative Pipelines with the <code>AUTO CDC</code> API for automated SCD Type 2 processing. This approach handles out-of-order records and simplifies SCD Type 2 table maintenance. See the Azure Databricks documentation for change data capture pipelines.</p>
+</div>
+<h2 id="query-historical-data">Query historical data</h2>
+<p>Once you've implemented an SCD Type 2 table, you can query data as it existed at any point in time. The query pattern depends on your analytical needs.</p>
+<h3 id="point-in-time-queries">Point-in-time queries</h3>
+<p>To find the state of data at a specific moment, filter on the validity period:</p>
+<pre><code class="lang-sql">SELECT customer_id, customer_name, city
+FROM sales.customer
+WHERE valid_from &lt;= '2023-06-15 12:00:00'
+  AND valid_to &gt; '2023-06-15 12:00:00';
+</code></pre>
+<p>This query returns exactly one row per customer—the version that was valid at the specified timestamp.</p>
+<h3 id="track-record-history">Track record history</h3>
+<p>To view the complete history of changes for a specific entity:</p>
+<pre><code class="lang-sql">SELECT customer_name, city, valid_from, valid_to
+FROM sales.customer
+WHERE customer_id = 'C-555'
+ORDER BY valid_from;
+</code></pre>
+<p>This query reveals all versions of customer C-555, showing how their attributes changed over time.</p>
+<h3 id="use-delta-lake-time-travel">Use Delta Lake time travel</h3>
+<p>Delta Lake provides built-in time travel capabilities that complement explicit SCD Type 2 table designs. You can query previous table versions using the <code>TIMESTAMP AS OF</code> or <code>VERSION AS OF</code> syntax:</p>
+<pre><code class="lang-sql">-- Query table state from 7 days ago
+SELECT * FROM sales.customer 
+TIMESTAMP AS OF '2024-01-15';
+
+-- Query a specific table version
+SELECT * FROM sales.customer 
+VERSION AS OF 42;
+</code></pre>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Delta Lake time travel has a default retention of 7 days. For longer historical analysis, use explicit SCD columns (ValidFrom, ValidTo) rather than relying solely on time travel. Configure <code>delta.logRetentionDuration</code> and <code>delta.deletedFileRetentionDuration</code> if you need extended time travel access.</p>
+</div>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>8. Design and implement a temporal (history) table to record changes over time</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/8-design-temporal-history-table">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/8-design-temporal-history-table</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Design and implement a temporal (history) table to record changes over time</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data pipelines often require tracking not just current values, but every change that occurs over time. Temporal tables provide a mechanism for recording row-level changes automatically, enabling point-in-time queries and complete audit trails. Unlike slowly changing dimensions that focus on business data history, temporal tables capture technical history for operational traceability and debugging.</p>
+<h2 id="understand-temporal-tables-versus-scd-type-2">Understand temporal tables versus SCD Type 2</h2>
+<p>Temporal tables and SCD Type 2 dimensions serve different purposes, though both track historical changes. Understanding when to use each approach helps you design appropriate solutions.</p>
+<p><strong>SCD Type 2</strong> tracks changes to business entities over time for analytical reporting. When a customer moves from Seattle to Portland, you want to attribute historical sales to the customer's location at the time of each transaction. SCD Type 2 maintains business-meaningful versions with explicit start and end dates.</p>
+<p><strong>Temporal (history) tables</strong> capture technical changes for operational needs. When troubleshooting why data loaded incorrectly, you need to see exactly what values existed at each point in time, which files were processed, and when changes occurred. Temporal tables provide this forensic capability automatically.</p>
+<p><a data-linktype="relative-path" href="media/8-understand-temporal-tables-versus-slowly-changing-dimension-type-2.png#lightbox">
+<img alt="Diagram explaining temporal tables versus SCD Type 2." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/8-understand-temporal-tables-versus-slowly-changing-dimension-type-2.png"/>
+</a>
+</p>
+<p>Consider using temporal tables when you need to:</p>
+<ul>
+<li>Debug data ingestion issues by examining table state at specific timestamps</li>
+<li>Audit all changes for compliance or regulatory requirements</li>
+<li>Reproduce analyses or reports from a specific point in time</li>
+<li>Track operational metadata like load times and source file information</li>
+</ul>
+<h2 id="enable-change-data-feed-for-row-level-tracking">Enable change data feed for row-level tracking</h2>
+<p>Delta Lake's change data feed captures every row-level change automatically. When enabled, the runtime records change events with metadata indicating whether each row was inserted, deleted, or updated. Change data feed is disabled by default, so you must explicitly enable it on tables where you need this capability.</p>
+<p>To enable change data feed on a new table:</p>
+<pre><code class="lang-sql">CREATE TABLE bronze.sales_transactions (
+    transaction_id STRING,
+    customer_id STRING,
+    amount DECIMAL(10,2),
+    transaction_date TIMESTAMP,
+    source_file STRING,
+    load_timestamp TIMESTAMP
+)
+USING DELTA
+TBLPROPERTIES (delta.enableChangeDataFeed = true);
+</code></pre>
+<p>For existing tables, enable change data feed with an <code>ALTER TABLE</code> statement:</p>
+<pre><code class="lang-sql">ALTER TABLE bronze.sales_transactions 
+SET TBLPROPERTIES (delta.enableChangeDataFeed = true);
+</code></pre>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Change data feed only records changes that occur after you enable it. Past changes to a table aren't captured. Enable this feature before loading production data.</p>
+</div>
+<h2 id="query-table-history">Query table history</h2>
+<p>Once change data feed is enabled, you can query the change history to see exactly what modifications occurred. The change data feed adds three metadata columns to your data:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_change_type</code></td>
+<td>The type of change: <code>insert</code>, <code>update_preimage</code>, <code>update_postimage</code>, or <code>delete</code></td>
+</tr>
+<tr>
+<td><code>_commit_version</code></td>
+<td>The Delta log version containing the change</td>
+</tr>
+<tr>
+<td><code>_commit_timestamp</code></td>
+<td>The timestamp when the change was committed</td>
+</tr>
+</tbody>
+</table>
+<p>Query changes within a specific time range:</p>
+<pre><code class="lang-sql">SELECT 
+    transaction_id,
+    amount,
+    _change_type,
+    _commit_version,
+    _commit_timestamp
+FROM table_changes('bronze.sales_transactions', '2026-01-01', '2026-01-31')
+WHERE _change_type IN ('insert', 'update_postimage')
+ORDER BY _commit_timestamp;
+</code></pre>
+<p>This query helps identify when specific records were modified, which is valuable for debugging data quality issues.</p>
+<h2 id="use-time-travel-for-point-in-time-queries">Use time travel for point-in-time queries</h2>
+<p>Delta Lake maintains a transaction log that enables querying data as it existed at any point in history. This capability supports debugging scenarios where you need to compare current data with a previous state.</p>
+<p>Query data at a specific timestamp:</p>
+<pre><code class="lang-sql">SELECT * FROM bronze.sales_transactions
+TIMESTAMP AS OF '2026-01-15 14:30:00';
+</code></pre>
+<p>Query data at a specific version:</p>
+<pre><code class="lang-sql">SELECT * FROM bronze.sales_transactions
+VERSION AS OF 42;
+</code></pre>
+<p>To view the complete history of operations performed on a table:</p>
+<pre><code class="lang-sql">DESCRIBE HISTORY bronze.sales_transactions;
+</code></pre>
+<p>The history output includes the operation type, timestamp, user, and detailed metrics for each change.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Time travel availability depends on retention settings. By default, Delta Lake retains data files for 7 days and log files for 30 days. Configure <code>delta.deletedFileRetentionDuration</code> and <code>delta.logRetentionDuration</code> for longer retention periods.</p>
+</div>
+<h2 id="persist-change-history-for-long-term-auditing">Persist change history for long-term auditing</h2>
+<p>Because Delta Lake's built-in time travel has retention limits, you should persist change data to a separate history table for long-term audit requirements. This approach creates a permanent record of all changes.</p>
+<p>Use Structured Streaming to continuously capture changes:</p>
+<pre><code class="lang-python">(spark.readStream
+    .option("readChangeFeed", "true")
+    .option("ignoreDeletes", "false")
+    .table("bronze.sales_transactions")
+    .writeStream
+    .option("checkpointLocation", "/checkpoints/sales_history")
+    .trigger(availableNow=True)
+    .toTable("audit.sales_transactions_history")
+)
+</code></pre>
+<p>The <code>readChangeFeed</code> option instructs Spark to read the change data feed, which returns row-level change events including inserts, updates, and deletes. The <code>ignoreDeletes</code> option controls whether delete operations are included in the stream. Setting it to <code>false</code> ensures that delete records are captured in the history table, providing a complete audit trail of all data changes.</p>
+<p>The history table contains every change event with full metadata, enabling queries across the entire lifetime of your data—not just the retention window.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Schedule the history capture process to run after each data load. Using <code>trigger(availableNow=True)</code> processes all available changes as a batch, which works well with scheduled workflows.</p>
+</div>
+<h2 id="configure-retention-for-compliance-requirements">Configure retention for compliance requirements</h2>
+<p>For temporal tables supporting compliance or regulatory needs, configure retention settings to match your requirements:</p>
+<pre><code class="lang-sql">ALTER TABLE bronze.sales_transactions 
+SET TBLPROPERTIES (
+    delta.logRetentionDuration = 'interval 90 days',
+    delta.deletedFileRetentionDuration = 'interval 90 days'
+);
+</code></pre>
+<p>Both properties must be set together. The <code>logRetentionDuration</code> controls how long history metadata is retained, while <code>deletedFileRetentionDuration</code> controls how long deleted data files are preserved before <code>VACUUM</code> removes them.</p>
+<p>Longer retention periods increase storage costs but provide extended time travel access and change data feed availability for auditing.</p>
+<p>With temporal tables configured properly, you can trace every change to your data from ingestion through transformation, supporting both operational debugging and regulatory compliance requirements.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>9. Choose granularity on a column or table based on requirements</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/9-choose-granularity">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/9-choose-granularity</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Choose granularity on a column or table based on requirements</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p><strong>Granularity</strong> is one of the most critical design decisions you make when building a data model. It defines the <strong>level of detail</strong> captured in your tables and directly affects <strong>storage costs</strong>, <strong>query performance</strong>, and the <strong>analytical questions</strong> you can answer. As a data engineer, understanding granularity helps you design tables that meet business requirements while maintaining efficient operations.</p>
+<p>This unit explains what granularity means in the context of dimensional modeling and how to evaluate different granularity options based on your organization's requirements.</p>
+<h2 id="understand-what-granularity-represents">Understand what granularity represents</h2>
+<p>Granularity, sometimes called <strong>"grain,"</strong> describes the level of detail that each row in a table represents. In a <strong>fact table</strong>, the grain determines what business event or measurement each row captures. In a <strong>dimension table</strong>, the grain determines how entities are represented and versioned.</p>
+<p>Consider an IoT sensor data scenario. You could design your fact table at different levels of granularity:</p>
+<p><a data-linktype="relative-path" href="media/9-understand-what-granularity-represents.png#lightbox">
+<img alt="Diagram explaining what granularity represents." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/9-understand-what-granularity-represents.png"/>
+</a>
+</p>
+<ul>
+<li><p><strong>Millisecond-level granularity</strong>: Each row represents a single sensor reading captured at the millisecond level. This captures the most detailed information, including precise timestamps, sensor values, and device identifiers for each measurement.</p>
+</li>
+<li><p><strong>Second aggregated granularity</strong>: Each row represents the average, minimum, or maximum sensor value for a device per second. Individual readings are summarized into per-second statistics.</p>
+</li>
+<li><p><strong>Minute aggregated granularity</strong>: Each row represents aggregated sensor statistics for a device during an entire minute. This provides the least detail but requires the least storage.</p>
+</li>
+</ul>
+<p>The grain you choose affects everything downstream. Once you <strong>lose detail through aggregation</strong>, you <strong>can't recover it</strong>. If your minute-aggregated table shows that sensor X had an average temperature of 75°C during a specific minute, you can't determine which milliseconds had temperature spikes or identify the exact moment an anomaly occurred.</p>
+<h2 id="evaluate-factors-that-influence-granularity-decisions">Evaluate factors that influence granularity decisions</h2>
+<p>Choosing the appropriate granularity requires balancing multiple competing concerns. The right choice depends on your specific business context and technical constraints.</p>
+<h3 id="business-requirements-drive-the-grain">Business requirements drive the grain</h3>
+<p>The analytical questions your organization needs to answer should be the <strong>primary factor</strong> in determining granularity. Ask yourself: what's the <strong>most detailed level of analysis</strong> required?</p>
+<p>If operations engineers need to detect equipment anomalies at the millisecond level, per-minute aggregates won't suffice. If management only needs hourly utilization summaries by production line, storing every sensor reading wastes resources.</p>
+<p>Consider these scenarios:</p>
+<table>
+<thead>
+<tr>
+<th>Business requirement</th>
+<th>Minimum granularity needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Detect equipment vibration anomalies in real-time</td>
+<td>Millisecond event level</td>
+</tr>
+<tr>
+<td>Analyze temperature trends for predictive maintenance</td>
+<td>Second aggregate level</td>
+</tr>
+<tr>
+<td>Monitor hourly energy consumption per device</td>
+<td>Minute aggregate level</td>
+</tr>
+<tr>
+<td>Report daily production metrics by facility</td>
+<td>Hourly aggregate level</td>
+</tr>
+</tbody>
+</table>
+<h3 id="query-patterns-shape-performance">Query patterns shape performance</h3>
+<p>The way users query your data influences the optimal granularity. When queries typically filter and aggregate to higher levels, storing overly fine-grained data creates <strong>unnecessary processing overhead</strong>. Each query must scan and aggregate more rows than necessary.</p>
+<p>At the same time, storing data at too coarse a granularity prevents users from drilling down to answer detailed questions. Finding the balance requires understanding both current and anticipated query patterns.</p>
+<h3 id="storage-and-compute-costs-accumulate">Storage and compute costs accumulate</h3>
+<p>Finer granularity means <strong>more rows</strong>, which increases <strong>storage costs</strong>. It also increases <strong>compute costs</strong> because queries must process more data. In Azure Databricks, these costs compound over time as historical data accumulates.</p>
+<p>A manufacturing facility with thousands of sensors capturing readings at millisecond intervals might generate billions of rows daily at the finest granularity. Aggregating to per-second or per-minute statistics could reduce row counts by 99% or more, translating directly to lower storage and query costs.</p>
+<h3 id="compliance-and-audit-requirements-matter">Compliance and audit requirements matter</h3>
+<p><strong>Regulatory requirements</strong> sometimes mandate specific granularity levels. Financial services organizations often must retain <strong>transaction-level detail</strong> for audit purposes, regardless of storage costs. Healthcare organizations might need to track individual patient interactions for compliance reasons.</p>
+<p>When compliance drives your granularity decision, document the requirements clearly. This justification helps when stakeholders question why you're storing more detail than analytical needs alone would require.</p>
+<h2 id="apply-granularity-to-fact-tables">Apply granularity to fact tables</h2>
+<p>Fact tables benefit most from careful granularity decisions because they typically contain the <strong>largest volumes of data</strong>. The grain of a fact table is determined by the combination of its <strong>dimension keys</strong>.</p>
+<p>A sales fact table with dimension keys for date, product, customer, and store has a grain of "one row per product per customer per store per day." Every unique combination of these dimension values creates a distinct row. Adding a time dimension key at the hour level would change the grain to "one row per product per customer per store per hour," significantly increasing row counts.</p>
+<p><a data-linktype="relative-path" href="media/9-apply-granularity-fact-tables.png#lightbox">
+<img alt="Table explaining how adding an hour dimension to a fact table, increases the number of rows." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/9-apply-granularity-fact-tables.png"/>
+</a>
+</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Declare your fact table grain explicitly before adding any columns. The grain statement serves as a contract that guides all subsequent design decisions. For example: "This fact table contains one row per sales order line item."</p>
+</div>
+<p>When designing fact tables, consider whether you need:</p>
+<ul>
+<li><p><strong>Atomic grain</strong>: The most detailed level captured in the source system. Choosing atomic grain provides <strong>maximum analytical flexibility</strong> because you can always aggregate up, but never disaggregate down.</p>
+</li>
+<li><p><strong>Aggregate grain</strong>: Pre-summarized data at a higher level than the source. Aggregate fact tables <strong>improve query performance</strong> for common analytical patterns but limit the questions users can answer.</p>
+</li>
+</ul>
+<p>Many organizations maintain both atomic and aggregate fact tables, using aggregate tables as performance optimization while preserving atomic detail for ad-hoc analysis. In Azure Databricks, <strong>materialized views</strong> can automatically maintain these aggregate tables, refreshing them as the underlying atomic data changes.</p>
+<h2 id="apply-granularity-to-dimension-tables">Apply granularity to dimension tables</h2>
+<p>Dimension tables also have a grain, though it works differently than fact table grain. The dimension grain determines how you represent and version your business entities.</p>
+<p>For a customer dimension, you might choose:</p>
+<ul>
+<li><strong>One row per customer</strong>: The current state of each customer, updated in place when attributes change (SCD Type 1).</li>
+<li><strong>One row per customer per version</strong>: A new row for each significant change, preserving historical states (SCD Type 2).</li>
+<li><strong>One row per customer per time period</strong>: Periodic snapshots capturing customer attributes at regular intervals.</li>
+</ul>
+<p>The dimension grain you choose must <strong>align with your fact table grain</strong>. If your fact table tracks individual transactions with surrogate keys to customer dimension, your customer dimension grain must support that relationship. A transaction referencing customer version 5 must be able to find that specific version in the dimension table.</p>
+<h2 id="balance-trade-offs-when-selecting-granularity">Balance trade-offs when selecting granularity</h2>
+<p>No single granularity choice is universally correct. Each decision involves trade-offs that you must evaluate against your specific requirements.</p>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Fine granularity</th>
+<th>Coarse granularity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Analytical flexibility</strong></td>
+<td>High - can answer detailed questions</td>
+<td>Low - limited to aggregate analysis</td>
+</tr>
+<tr>
+<td><strong>Storage costs</strong></td>
+<td>Higher - more rows to store</td>
+<td>Lower - fewer rows</td>
+</tr>
+<tr>
+<td><strong>Query performance</strong></td>
+<td>Slower for aggregate queries</td>
+<td>Faster for common patterns</td>
+</tr>
+<tr>
+<td><strong>Historical analysis</strong></td>
+<td>Supports point-in-time analysis</td>
+<td>May lose historical detail</td>
+</tr>
+<tr>
+<td><strong>Compliance support</strong></td>
+<td>Better for audit requirements</td>
+<td>May not meet regulations</td>
+</tr>
+</tbody>
+</table>
+<p>When you're uncertain, <strong>starting with finer granularity</strong> is often safer. You can always create aggregate tables later for performance optimization, but you <strong>can't recover detail</strong> that was never captured. However, this guidance assumes you have the budget and infrastructure to support finer-grained storage initially.</p>
+<p>Understanding how to choose appropriate granularity enables you to design data models that support your organization's analytical needs while managing costs effectively. The implementation details for building and loading tables at your chosen granularity in Azure Databricks are covered in later units.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>10. Choose managed vs unmanaged tables</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/10-choose-managed-vs-unmanaged-tables">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/10-choose-managed-vs-unmanaged-tables</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Choose managed vs unmanaged tables</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When you create tables in Azure Databricks, you face a fundamental decision that affects data lifecycle management, governance, and operational flexibility. Understanding the differences between <strong>managed tables</strong> and <strong>external tables</strong> (sometimes called unmanaged tables) helps you choose the right approach for each scenario in your data platform.</p>
+<p>In this unit, you learn how to distinguish between managed and external tables, and explore the factors that guide your choice.</p>
+<h2 id="understand-managed-tables">Understand managed tables</h2>
+<p><strong>Managed tables</strong> are fully controlled by Unity Catalog. This means Unity Catalog manages both the table metadata <em>and</em> the underlying data files in cloud storage. When you create a managed table without specifying a storage location, Azure Databricks automatically stores the data in a managed storage location associated with the containing schema, catalog, or metastore.</p>
+<p>Because Unity Catalog has full control over managed tables, it can automatically optimize them for performance and cost. Several features are available exclusively for managed tables:</p>
+<ul>
+<li><strong>Predictive optimization</strong> runs maintenance operations like compaction and vacuuming automatically</li>
+<li><strong>Automatic liquid clustering</strong> intelligently selects and updates clustering keys based on query patterns</li>
+<li><strong>Metadata caching</strong> provides faster query performance through in-memory caching</li>
+<li><strong>Automatic file cleanup</strong> removes data files 8 days after you drop a table</li>
+</ul>
+<p>Managed tables always use Delta Lake or Apache Iceberg format, ensuring ACID transactions and advanced data management capabilities.</p>
+<h2 id="understand-external-tables">Understand external tables</h2>
+<p><strong>External tables</strong> (also called unmanaged tables) take a different approach. Unity Catalog manages only the table metadata, while you maintain control over the data files and their storage location. When you create an external table, you explicitly specify where the data resides using a <code>LOCATION</code> clause that points to an external location registered in Unity Catalog.</p>
+<p>This separation means that when you drop an external table, Unity Catalog removes the metadata but leaves the data files intact in your storage location. You remain responsible for managing those files directly through your cloud provider.</p>
+<p>External tables support a broader range of file formats beyond Delta Lake and Iceberg, including CSV, JSON, Avro, Parquet, ORC, and text files.</p>
+<h2 id="compare-key-characteristics">Compare key characteristics</h2>
+<p>The following table summarizes the key differences between managed and external tables:</p>
+<table>
+<thead>
+<tr>
+<th>Characteristic</th>
+<th>Managed tables</th>
+<th>External tables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data storage location</strong></td>
+<td>Unity Catalog managed location</td>
+<td>User-specified external location</td>
+</tr>
+<tr>
+<td><strong>Metadata management</strong></td>
+<td>Unity Catalog</td>
+<td>Unity Catalog</td>
+</tr>
+<tr>
+<td><strong>Data file management</strong></td>
+<td>Unity Catalog</td>
+<td>User managed</td>
+</tr>
+<tr>
+<td><strong>Supported formats</strong></td>
+<td>Delta Lake, Apache Iceberg</td>
+<td>Delta, CSV, JSON, Avro, Parquet, ORC, text</td>
+</tr>
+<tr>
+<td><strong>Automatic optimization</strong></td>
+<td>Yes (predictive optimization)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Behavior on DROP TABLE</strong></td>
+<td>Files deleted after 8 days</td>
+<td>Files remain in storage</td>
+</tr>
+<tr>
+<td><strong>UNDROP TABLE support</strong></td>
+<td>Yes (within 8 days)</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h2 id="evaluate-decision-criteria">Evaluate decision criteria</h2>
+<p>Choosing between managed and external tables depends on your specific requirements. Consider the following factors when making your decision.</p>
+<p><a data-linktype="relative-path" href="media/10-evaluate-decision-criteria.png#lightbox">
+<img alt="Diagram explaining how to evaluate decision criteria." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/10-evaluate-decision-criteria.png"/>
+</a>
+</p>
+<h3 id="data-ownership-and-lifecycle">Data ownership and lifecycle</h3>
+<p>If Azure Databricks should fully control the data lifecycle, including automatic cleanup when tables are dropped, use a managed table. This approach simplifies data management and reduces storage costs over time.</p>
+<p>If the data must persist independently of the Azure Databricks workspace, or if you need to retain data after removing the table definition, use an external table. The data files remain available for other purposes even after the table is dropped.</p>
+<h3 id="external-system-access">External system access</h3>
+<p>When other tools or systems outside Azure Databricks need to read or write the data directly, external tables provide the necessary flexibility. However, consider that direct external access bypasses Unity Catalog access controls and auditing.</p>
+<p>For sharing data across regions, cloud providers, or with external partners, <strong>Delta Sharing</strong> offers a governed approach that maintains security controls even with managed tables.</p>
+<h3 id="migration-and-compatibility">Migration and compatibility</h3>
+<p>External tables provide a practical path when migrating from Hive metastore to Unity Catalog. You can register existing data without moving files, allowing a quick upgrade. After migration, you can convert external tables to managed tables to take advantage of optimization features.</p>
+<p>If you need to support non-Delta and non-Iceberg formats, external tables are your only option within Unity Catalog.</p>
+<h3 id="governance-and-compliance">Governance and compliance</h3>
+<p>Consider your organization's data retention and compliance requirements. Managed tables offer stronger governance through centralized control, while external tables give you flexibility to manage data according to specific regulatory requirements or storage policies defined outside Azure Databricks.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Avoid registering the same table as an external table in multiple metastores. This practice can lead to consistency issues because changes in one metastore don't automatically propagate to others.</p>
+</div>
+<h2 id="apply-best-practices">Apply best practices</h2>
+<p>Databricks recommends managed tables for most use cases because they provide the best combination of governance, performance, and operational simplicity. Use external tables when your requirements specifically call for them.</p>
+<p>When you do use external tables:</p>
+<ul>
+<li>Limit external access to reads when possible, with all writes happening through Azure Databricks</li>
+<li>Consider creating one external location per schema for clearer organization</li>
+<li>Plan to migrate external tables to managed tables when their original use case no longer applies</li>
+</ul>
+<p>With this understanding of managed and external tables, you can make informed decisions that balance governance requirements, operational needs, and performance considerations for your data platform.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>11. Design and implement a clustering strategy</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/11-design-clustering-strategy">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/11-design-clustering-strategy</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Design and implement a clustering strategy</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Optimizing how data is physically organized on disk directly affects <strong>query performance</strong> and <strong>storage efficiency</strong>. When you design a clustering strategy for your Delta Lake tables, you determine how the query engine locates and retrieves relevant data. The right approach can dramatically reduce the amount of data scanned during queries, lowering both response times and compute costs.</p>
+<p>Azure Databricks provides several complementary techniques for data organization. Understanding when to apply <strong>liquid clustering</strong>, <strong>Z-ordering</strong>, or <strong>deletion vectors</strong> helps you make decisions that balance performance, maintenance effort, and compatibility with your existing tables.</p>
+<h2 id="understand-data-skipping-fundamentals">Understand data skipping fundamentals</h2>
+<p>Before examining specific clustering techniques, it's important to understand the underlying mechanism they all leverage: <strong>data skipping</strong>. Delta Lake automatically collects statistics for each data file, including minimum and maximum values, null counts, and record counts for each column. When you execute a query with filter conditions, the query engine checks these statistics first and skips files that can't possibly contain matching records.</p>
+<p>For example, if you query sales data for January 2026, and a particular file's statistics show it contains only records from March 2026, the engine skips that file entirely without reading its contents. This optimization happens automatically, but its effectiveness depends on how well your data is organized.</p>
+<p><a data-linktype="relative-path" href="media/11-understand-data-skipping-fundamentals.png#lightbox">
+<img alt="Diagram explaining data skipping fundamentals." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/media/11-understand-data-skipping-fundamentals.png"/>
+</a>
+</p>
+<p>Data skipping becomes powerful when <strong>related records are stored together</strong> in the same files. If records for each month are scattered randomly across all files, the engine can't skip any files because each file contains records from every month. Clustering techniques exist to solve exactly this problem.</p>
+<h2 id="implement-liquid-clustering-for-new-tables">Implement liquid clustering for new tables</h2>
+<p>Liquid clustering is the <strong>recommended approach</strong> for organizing data in new Delta Lake tables, and is also available in Public Preview for managed Apache Iceberg tables in Unity Catalog (Databricks Runtime 16.4 LTS and above). Unlike traditional partitioning, liquid clustering allows you to <strong>change your clustering strategy without rewriting existing data</strong>. This flexibility is valuable when query patterns evolve or when you're uncertain which columns will be filtered most frequently.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>For managed Iceberg tables in Unity Catalog, specifying a <code>PARTITION BY</code> clause is interpreted as liquid clustering keys — not traditional Hive-style partitions. There is no separate Iceberg-specific partition behavior; all layout optimization goes through liquid clustering.</p>
+</div>
+<p>To enable liquid clustering, use the <strong><code>CLUSTER BY</code></strong> clause when creating a table:</p>
+<pre><code class="lang-sql">CREATE TABLE sales.transactions (
+    transaction_id STRING,
+    customer_id STRING,
+    product_category STRING,
+    region STRING,
+    transaction_date DATE,
+    amount DECIMAL(12,2)
+)
+CLUSTER BY (region, transaction_date);
+</code></pre>
+<p>You can specify <strong>up to four clustering keys</strong>. Choose columns that appear frequently in your query filters. The order of clustering keys matters less than selecting the right columns, as liquid clustering optimizes for all specified keys simultaneously.</p>
+<p>After creating a clustered table, run the <code>OPTIMIZE</code> command to apply clustering to your data:</p>
+<pre><code class="lang-sql">OPTIMIZE sales.transactions;
+</code></pre>
+<p>Liquid clustering is <strong>incremental</strong>. Each <code>OPTIMIZE</code> run clusters only the data that needs reorganization, making regular maintenance efficient. Databricks recommends scheduling <code>OPTIMIZE</code> jobs every one or two hours for tables with frequent inserts or updates.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>For Unity Catalog managed tables, enable <strong>predictive optimization</strong> to automate <code>OPTIMIZE</code> operations. Azure Databricks analyzes your workload patterns and runs maintenance operations automatically.</p>
+</div>
+<h3 id="change-clustering-keys-when-needed">Change clustering keys when needed</h3>
+<p>One significant advantage of liquid clustering over partitioning is the ability to modify your clustering strategy. If your query patterns change, update the clustering keys with an <code>ALTER TABLE</code> statement:</p>
+<pre><code class="lang-sql">ALTER TABLE sales.transactions
+CLUSTER BY (customer_id, transaction_date);
+</code></pre>
+<p>Subsequent <code>OPTIMIZE</code> operations use the new clustering approach. Previously written data isn't automatically rewritten. To apply new clustering to all existing data, run:</p>
+<pre><code class="lang-sql">OPTIMIZE sales.transactions FULL;
+</code></pre>
+<h3 id="enable-automatic-clustering-key-selection">Enable automatic clustering key selection</h3>
+<p>Azure Databricks can intelligently select clustering keys based on your actual query patterns. Automatic liquid clustering analyzes workload history and chooses columns that provide the greatest data skipping benefit:</p>
+<pre><code class="lang-sql">CREATE TABLE sales.orders CLUSTER BY AUTO;
+</code></pre>
+<p>You can enable automatic clustering on existing tables:</p>
+<pre><code class="lang-sql">ALTER TABLE sales.transactions CLUSTER BY AUTO;
+</code></pre>
+<p>Automatic liquid clustering requires predictive optimization to be enabled. Azure Databricks periodically evaluates whether different clustering keys would improve performance and adjusts the strategy accordingly.</p>
+<h2 id="migrate-from-z-ordering-to-liquid-clustering">Migrate from Z-ordering to liquid clustering</h2>
+<p>Z-ordering is a legacy technique that organizes data to colocate related information in the same files. While liquid clustering is recommended for new tables, you'll encounter existing tables that use Z-ordering and need to understand both approaches.</p>
+<p>Z-ordering uses the <code>OPTIMIZE</code> command with a <code>ZORDER BY</code> clause:</p>
+<pre><code class="lang-sql">OPTIMIZE sales.legacy_transactions
+ZORDER BY (region, transaction_date);
+</code></pre>
+<p>Z-ordering differs from liquid clustering in several important ways:</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Liquid Clustering</th>
+<th>Z-Ordering</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Key flexibility</td>
+<td>Change keys without data rewrite</td>
+<td>Changing keys requires full rewrite</td>
+</tr>
+<tr>
+<td>Write performance</td>
+<td>Clustering on write for eligible operations</td>
+<td>Applied only during OPTIMIZE</td>
+</tr>
+<tr>
+<td>Concurrent writes</td>
+<td>Row-level concurrency supported</td>
+<td>Transaction-level concurrency</td>
+</tr>
+<tr>
+<td>Compatibility</td>
+<td>Requires Databricks Runtime 13.3 LTS or above</td>
+<td>Supported in all runtimes</td>
+</tr>
+</tbody>
+</table>
+<p>When you inherit a Z-ordered table, you have two options. Continue using Z-ordering for consistency, or migrate to liquid clustering for improved flexibility. To migrate, first enable liquid clustering on the existing unpartitioned table:</p>
+<pre><code class="lang-sql">ALTER TABLE sales.legacy_transactions
+CLUSTER BY (region, transaction_date);
+</code></pre>
+<p>Then run a full optimization to reorganize all existing data:</p>
+<pre><code class="lang-sql">OPTIMIZE sales.legacy_transactions FULL;
+</code></pre>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Liquid clustering is not compatible with partitioning. For partitioned tables, evaluate whether the benefits of liquid clustering justify migrating to an unpartitioned table structure.</p>
+</div>
+<h2 id="manage-deletion-vectors-for-efficient-updates">Manage deletion vectors for efficient updates</h2>
+<p>Deletion vectors address a different aspect of data organization: how Delta Lake handles modified or deleted records. By default, when you update or delete a single row in a Parquet file, Delta Lake must <strong>rewrite the entire file</strong>. For tables with frequent modifications, this creates significant overhead.</p>
+<p>With deletion vectors enabled, Delta Lake <strong>marks modified rows as deleted</strong> in a separate metadata file rather than rewriting the Parquet file immediately. Subsequent reads apply these deletions on the fly, combining the original file with the deletion vector to return accurate results.</p>
+<p>Deletion vectors are enabled by default for new tables created with Databricks Runtime 14.1 or above. You can enable them explicitly on existing tables:</p>
+<pre><code class="lang-sql">ALTER TABLE sales.transactions
+SET TBLPROPERTIES ('delta.enableDeletionVectors' = true);
+</code></pre>
+<p>Deletion vectors are applied physically when the data files are rewritten during:</p>
+<ul>
+<li>An <code>OPTIMIZE</code> command</li>
+<li>Auto-compaction triggers</li>
+<li>A <code>REORG TABLE ... APPLY (PURGE)</code> operation</li>
+</ul>
+<p>For compliance scenarios where you need to ensure deleted data is <strong>physically removed</strong>, run a <code>REORG</code> operation followed by <code>VACUUM</code>:</p>
+<pre><code class="lang-sql">REORG TABLE sales.transactions APPLY (PURGE);
+VACUUM sales.transactions;
+</code></pre>
+<p>Deletion vectors also enable <strong>row-level concurrency</strong>, allowing multiple concurrent transactions to modify different rows in the same table without conflicts. This capability is particularly valuable for tables with high update volumes.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>12. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/14-summary">https://learn.microsoft.com/en-us/training/modules/design-implement-data-modeling-unity-catalog/14-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>You've learned how to design and implement data modeling strategies that form the foundation of a well-architected Azure Databricks lakehouse. Starting with ingestion logic design, you explored how to match extraction types to source system capabilities and latency requirements. You evaluated ingestion tools—from Lakeflow Connect for managed connectors to Auto Loader for file-based streaming—and selected the right tool for each scenario.</p>
+<p>Table format selection between Delta Lake and Apache Iceberg depends on your requirements: Delta Lake for deep Azure Databricks integration and Apache Iceberg when cross-platform compatibility is essential. You designed partitioning schemes that enable partition pruning for tables exceeding 1 TB. Slowly changing dimension types give you the tools to maintain historical accuracy where business requirements demand it.</p>
+<p>Granularity decisions establish analytical flexibility. Starting with atomic grain preserves maximum detail, while aggregate tables optimize common query patterns. Liquid clustering organizes data for efficient data skipping, and managed tables simplify operations through predictive optimization.</p>
+<p>Apply these concepts by evaluating your current data pipelines against the decision frameworks presented. Start with one table that would benefit from improved clustering, measure performance before and after, and expand your optimizations based on results.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>

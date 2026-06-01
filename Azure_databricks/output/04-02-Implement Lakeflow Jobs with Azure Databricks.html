@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implement Lakeflow Jobs with Azure Databricks</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Implement Lakeflow Jobs with Azure Databricks</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/1-introduction">https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/1-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data pipelines rarely succeed when run manually at arbitrary times. <strong>Production workloads</strong> demand automation—jobs that execute reliably, respond to data changes, and recover from failures without human intervention. <strong>Lakeflow Jobs</strong> in Azure Databricks provides the <strong>orchestration layer</strong> that transforms ad hoc data processing into robust, automated workflows.</p>
+<p>Building effective data pipelines requires more than writing transformation logic. You need to configure how tasks execute, when they run, and what happens when something goes wrong. A well-designed job coordinates multiple tasks with proper <strong>dependencies</strong>, allocates appropriate <strong>compute resources</strong>, and maintains visibility through alerts and notifications. Without these capabilities, even the best data transformations become operational liabilities that require constant monitoring and manual restarts.</p>
+<p>Lakeflow Jobs addresses these challenges through a comprehensive set of features. You create jobs that organize tasks as <strong>directed acyclic graphs (DAGs)</strong>, defining execution order and dependencies. You configure <strong>triggers</strong> that respond to table updates, file arrivals, or continuous processing needs—eliminating rigid schedules that miss data changes or waste resources. You set up <strong>schedules</strong> using simple intervals or cron expressions when time-based execution fits your requirements. <strong>Alerts and notifications</strong> keep your team informed about job status without constant dashboard monitoring. <strong>Automatic restart policies</strong> handle transient failures gracefully, maintaining pipeline reliability during inevitable infrastructure hiccups.</p>
+<p>This module guides you through implementing these Lakeflow Jobs capabilities. You explore <strong>job creation</strong> and <strong>task configuration</strong>, event-based and scheduled triggers, alerting strategies, and <strong>retry policies</strong> that keep your data pipelines running smoothly. By mastering these concepts, you build automation that your organization can depend on for <strong>critical data processing workloads</strong>.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Create job setup and configuration</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/2-create-lakeflow-job">https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/2-create-lakeflow-job</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Create job setup and configuration</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When you need to automate data processing or orchestrate multiple operations in Azure Databricks, you create a <strong>Lakeflow Job</strong>. A job coordinates tasks, manages their execution order, and allocates compute resources to run your workloads reliably.</p>
+<p>In this unit, you learn how to create and configure a Lakeflow Job, including setting up tasks, selecting compute resources, and organizing task dependencies.</p>
+<h2 id="understand-job-structure">Understand job structure</h2>
+<p>A Lakeflow Job consists of one or more <strong>tasks</strong> organized as a <strong>Directed Acyclic Graph (DAG)</strong>. The DAG defines execution order and dependencies between tasks, allowing you to build workflows that range from a single notebook execution to complex multi-step data pipelines.</p>
+<p>Every job requires at minimum:</p>
+<ul>
+<li>A <strong>task</strong> containing the logic to run</li>
+<li>A <strong>compute resource</strong> to execute the task</li>
+<li>A <strong>unique name</strong> to identify the job</li>
+</ul>
+<p>Tasks within a job can execute notebooks, Python scripts, SQL queries, or Lakeflow Spark Declarative Pipelines. You configure each task type differently, but all tasks follow the same pattern: define what to run, specify where to run it, and configure any required parameters.</p>
+<h2 id="create-a-job-and-add-tasks">Create a job and add tasks</h2>
+<p>To create a new job in Azure Databricks:</p>
+<ol>
+<li>In your workspace sidebar, select <strong>Jobs &amp; Pipelines</strong>.</li>
+<li>Select <strong>Create</strong>, then <strong>Job</strong>.</li>
+<li>Enter a descriptive name for your job.</li>
+<li>Configure your first task by specifying the <strong>Task name</strong> and selecting the <strong>Type</strong> (such as Notebook, Python script, or SQL).</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/2-create-lakeflow-job.png#lightbox">
+<img alt="Screenshot of the lakeflow editor." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/2-create-lakeflow-job.png"/>
+</a>
+</span>
+</p>
+<p>The task type determines which configuration options appear. For a notebook task, you specify the notebook path and any parameters. For a SQL task, you select a query and SQL warehouse. The following table summarizes common task types and their configuration requirements:</p>
+<table>
+<thead>
+<tr>
+<th>Task type</th>
+<th>Key configuration</th>
+<th>Compute options</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Notebook</td>
+<td>Notebook path, parameters</td>
+<td>Serverless, classic jobs, all-purpose</td>
+</tr>
+<tr>
+<td>Python script</td>
+<td>Script path, CLI arguments</td>
+<td>Serverless, classic jobs, all-purpose</td>
+</tr>
+<tr>
+<td>Python wheel</td>
+<td>Wheel package path, entry point</td>
+<td>Serverless, classic jobs, all-purpose</td>
+</tr>
+<tr>
+<td>SQL</td>
+<td>Query or file, SQL warehouse</td>
+<td>Serverless SQL warehouse, pro SQL warehouse</td>
+</tr>
+<tr>
+<td>Pipeline</td>
+<td>Existing pipeline selection</td>
+<td>Serverless or classic pipeline compute</td>
+</tr>
+<tr>
+<td>dbt / dbt platform</td>
+<td>dbt project, profiles</td>
+<td>Serverless or classic jobs compute</td>
+</tr>
+<tr>
+<td>JAR</td>
+<td>Main class, JAR path</td>
+<td>Classic jobs compute</td>
+</tr>
+<tr>
+<td>Spark Submit</td>
+<td>Spark parameters</td>
+<td>Classic jobs compute</td>
+</tr>
+<tr>
+<td>Run Job</td>
+<td>Existing job selection</td>
+<td>Determined by the referenced job</td>
+</tr>
+</tbody>
+</table>
+<p>Additional task types support control flow within a job. <strong>If/else</strong> tasks evaluate a condition and route execution to different downstream paths. <strong>For each</strong> tasks apply the same logic across every item in an input array. These patterns are covered in the <em>Design and implement data pipelines</em> module.</p>
+<p>After configuring a task, select <strong>Create task</strong> to add it to your job.</p>
+<h2 id="configure-task-sources">Configure task sources</h2>
+<p>Tasks that run code (notebooks, Python scripts, SQL files) need a source location. You have three options for specifying where your code lives:</p>
+<p><strong>Workspace</strong> stores code directly in your Azure Databricks workspace. Use the file browser to navigate to your notebook or script, then confirm your selection. This option works well for development and simple workflows.</p>
+<p><strong>Git provider</strong> connects to a remote repository. You specify the repository URL, branch or tag, and the relative path to your file. All tasks in a job share the same Git reference, ensuring consistent code versions across the workflow. When you use Git, Azure Databricks captures a snapshot of the code at run time, so your job executes against a specific commit.</p>
+<p><strong>DBFS/ADLS</strong> (for Python scripts) allows you to reference files stored in volumes or cloud storage. Provide the full URI, such as <code>abfss://container@storage.dfs.core.windows.net/path/script.py</code>.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/2-configure-lakeflow-task.png#lightbox">
+<img alt="Screenshot of the lakeflow editor task configuration." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/2-configure-lakeflow-task.png"/>
+</a>
+</span>
+</p>
+<h2 id="configure-compute-resources">Configure compute resources</h2>
+<p>Each task needs compute resources to execute. Azure Databricks offers several compute options optimized for different workloads.</p>
+<p><strong>Serverless compute</strong> is the default for supported task types. Azure Databricks manages the infrastructure, so you don't configure cluster settings. Serverless compute reduces operational overhead and scales automatically.</p>
+<p><strong>Classic jobs compute</strong> gives you control over cluster configuration. You specify the Spark version, instance types, and autoscaling policies. Use classic compute when you need specific configurations or libraries not supported by serverless.</p>
+<p><strong>SQL warehouses</strong> run SQL tasks. Select an existing serverless or pro SQL warehouse from your workspace.</p>
+<p>When multiple tasks share the same compute resource, the cluster remains active until all tasks complete. Sharing compute reduces startup time between tasks but incurs cost during idle periods. You can balance this by grouping related tasks on shared compute while isolating resource-intensive operations.</p>
+<p>To view and modify compute configuration:</p>
+<ol>
+<li>Open your job and select the <strong>Job details</strong> panel.</li>
+<li>Under <strong>Compute</strong>, review the resources assigned to each task.</li>
+<li>Use <strong>Configure</strong> to modify classic jobs compute or <strong>Swap</strong> to change compute for all tasks using a resource.</li>
+</ol>
+<h2 id="set-up-task-dependencies">Set up task dependencies</h2>
+<p>Jobs with multiple tasks use dependencies to control execution order. Dependencies create the DAG structure that determines which tasks run in sequence and which can run in parallel.</p>
+<p>To add a dependency:</p>
+<ol>
+<li>Select a task in the task graph.</li>
+<li>In the <strong>Depends on</strong> field, select the upstream tasks that must complete first.</li>
+<li>Choose a <strong>Run if</strong> condition to specify when the downstream task should execute.</li>
+</ol>
+<p>The available run-if conditions let you handle various scenarios:</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>When the task runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>All succeeded</strong></td>
+<td>All upstream tasks completed successfully</td>
+</tr>
+<tr>
+<td><strong>At least one succeeded</strong></td>
+<td>Any upstream task succeeded</td>
+</tr>
+<tr>
+<td><strong>None failed</strong></td>
+<td>No upstream tasks failed (some may be skipped)</td>
+</tr>
+<tr>
+<td><strong>All done</strong></td>
+<td>All upstream tasks finished, regardless of outcome</td>
+</tr>
+<tr>
+<td><strong>At least one failed</strong></td>
+<td>At least one upstream task failed</td>
+</tr>
+<tr>
+<td><strong>All failed</strong></td>
+<td>All upstream tasks failed</td>
+</tr>
+</tbody>
+</table>
+<p>Use <strong>All done</strong> for cleanup tasks that should run regardless of earlier results. Use <strong>At least one failed</strong> to trigger error-handling logic when problems occur.</p>
+<h2 id="add-job-parameters">Add job parameters</h2>
+<p>Parameters make your jobs reusable by letting you pass different values to each run. You define parameters at the job level, and they're automatically available to all tasks that accept key-value inputs.</p>
+<p>To add job parameters:</p>
+<ol>
+<li>In the <strong>Job details</strong> panel, locate the <strong>Parameters</strong> section.</li>
+<li>Select <strong>Add</strong> and enter a key-value pair.</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/2-add-parameters.png#lightbox">
+<img alt="Screenshot of the lakeflow editor add parameter section." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/2-add-parameters.png"/>
+</a>
+</span>
+</p>
+<p>Tasks access parameters differently based on their type. In notebooks, use <code>dbutils.widgets.get("parameter_name")</code> to retrieve parameter values. Python scripts receive parameters as command-line arguments.</p>
+<p>You can also reference dynamic values in parameters. For example, <code>{{job.trigger.time.iso_date}}</code> inserts the trigger date, useful for processing data based on when the job runs.</p>
+<h2 id="organize-with-tags">Organize with tags</h2>
+<p>Tags help you categorize and filter jobs in your workspace. Add tags as labels or key-value pairs to group related jobs by team, project, or environment.</p>
+<p>To add tags:</p>
+<ol>
+<li>In the <strong>Job details</strong> panel, select <strong>+ Tag</strong>.</li>
+<li>Enter a key and optionally a value.</li>
+</ol>
+<p>Tags also propagate to job clusters, enabling consistent monitoring and cost attribution across your organization.</p>
+<h2 id="configure-job-access-permissions">Configure job access permissions</h2>
+<p>Job permissions control who can view, run, and manage your Lakeflow Jobs independently from compute permissions. Azure Databricks provides four permission levels:</p>
+<table>
+<thead>
+<tr>
+<th>Permission level</th>
+<th>Capabilities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CAN VIEW</strong></td>
+<td>View job configuration, task definitions, and run history</td>
+</tr>
+<tr>
+<td><strong>CAN RUN</strong></td>
+<td>Everything in CAN VIEW plus trigger job runs manually</td>
+</tr>
+<tr>
+<td><strong>CAN MANAGE RUN</strong></td>
+<td>Everything in CAN RUN plus cancel runs, view output, and restart failed runs</td>
+</tr>
+<tr>
+<td><strong>CAN MANAGE</strong></td>
+<td>Everything in CAN MANAGE RUN plus edit configuration, modify tasks, change schedules, and set permissions</td>
+</tr>
+</tbody>
+</table>
+<p>To configure permissions, navigate to <strong>Jobs &amp; Pipelines</strong>, select your job, open the <strong>Permissions</strong> tab, and add users or groups with the appropriate level. Job creators and workspace admins automatically receive <code>CAN MANAGE</code> permissions.</p>
+<p>When a job runs, it executes with the job owner's permissions or the configured service principal's permissions—not the triggering user's permissions. For production jobs, grant <code>CAN MANAGE</code> to the pipeline team, <code>CAN RUN</code> to users who need manual execution, and <code>CAN VIEW</code> to stakeholders requiring visibility.</p>
+<h2 id="configure-run-identity-and-unity-catalog-access">Configure run identity and Unity Catalog access</h2>
+<p>When your job accesses Unity Catalog objects—such as tables, views, or volumes—the job's <strong>run identity</strong> must have the required Unity Catalog privileges. This is a critical prerequisite before configuring any job that reads from or writes to Unity Catalog-managed data.</p>
+<p>The run identity is the principal whose permissions Unity Catalog evaluates during job execution. By default, jobs run as the <strong>job owner</strong> (the user who created the job). For production workloads, you can configure a <strong>service principal</strong> as the run identity to avoid dependency on individual user accounts.</p>
+<p>Before creating your job, verify that the run identity has the necessary privileges:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Required Unity Catalog privilege</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read from a table</td>
+<td><code>SELECT</code> on the table</td>
+</tr>
+<tr>
+<td>Write to a table</td>
+<td><code>MODIFY</code> on the table</td>
+</tr>
+<tr>
+<td>Create tables in a schema</td>
+<td><code>CREATE TABLE</code> and <code>USE SCHEMA</code> on the schema</td>
+</tr>
+<tr>
+<td>Access a volume</td>
+<td><code>READ VOLUME</code> or <code>WRITE VOLUME</code> on the volume</td>
+</tr>
+</tbody>
+</table>
+<p>To grant privileges to a service principal or user, use SQL commands like:</p>
+<pre><code class="lang-sql">GRANT SELECT, MODIFY ON TABLE catalog.schema.table TO `service-principal-id`;
+GRANT USE SCHEMA ON SCHEMA catalog.schema TO `service-principal-id`;
+</code></pre>
+<p>If the run identity lacks the required privileges, the job fails at runtime with an authorization error—even if the job configuration itself is valid. Always verify Unity Catalog access before scheduling production jobs.</p>
+<p>With your job created, tasks configured, dependencies set, and permissions assigned, you're ready to run your workflow. The next step is understanding how to monitor job execution and handle run outcomes.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Configure job triggers</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/3-configure-job-triggers">https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/3-configure-job-triggers</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Configure job triggers</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When you configure job triggers in Lakeflow Jobs, you enable automated pipeline execution based on data events rather than fixed schedules. Your jobs can respond to changes in source tables, new file arrivals, or run continuously to process data as it becomes available.</p>
+<p>In this unit, you learn how to configure event-based triggers that automate your data workflows.</p>
+<h2 id="understand-trigger-types-for-automated-job-execution">Understand trigger types for automated job execution</h2>
+<p>Lakeflow Jobs supports several trigger types that determine when your jobs run. While scheduled triggers run at fixed times, event-based triggers respond to data changes in your environment.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/3-configure-trigger.png#lightbox">
+<img alt="Screenshot of the lakeflow job trigger dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/3-configure-trigger.png"/>
+</a>
+</span>
+</p>
+<table>
+<thead>
+<tr>
+<th>Trigger type</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Table update</strong></td>
+<td>Runs when monitored tables receive new data or modifications</td>
+</tr>
+<tr>
+<td><strong>File arrival</strong></td>
+<td>Runs when new files appear in a Unity Catalog storage location</td>
+</tr>
+<tr>
+<td><strong>Continuous</strong></td>
+<td>Runs immediately after the previous run completes or fails</td>
+</tr>
+</tbody>
+</table>
+<p>Each trigger type addresses different automation scenarios. Table update triggers work well when your job depends on upstream data processing. File arrival triggers handle scenarios where external systems drop files into storage locations. Continuous triggers keep your jobs running around the clock for near real-time processing.</p>
+<p>To add a trigger to an existing job, open the job in your workspace, navigate to the <strong>Job details</strong> pane, and select <strong>Add trigger</strong> under <strong>Schedules &amp; Triggers</strong>. From there, you select the trigger type and configure its settings.</p>
+<h2 id="configure-table-update-triggers">Configure table update triggers</h2>
+<p>Table update triggers run your job when source tables receive updates. This approach eliminates the need for continuously running clusters while ensuring your pipeline processes new data promptly.</p>
+<p>A table update trigger monitors one or more Unity Catalog tables for data changes such as inserts, updates, merges, and deletes. The supported table types include:</p>
+<ul>
+<li>Unity Catalog Delta and Iceberg managed tables</li>
+<li>Unity Catalog external tables backed by Delta Lake</li>
+<li>Materialized views and streaming tables</li>
+<li>Unity Catalog views that depend on supported tables</li>
+</ul>
+<p>When you configure a table update trigger with multiple tables, you choose between two behaviors. Select <strong>Any table is updated</strong> to run the job when any monitored table changes. Select <strong>All tables are updated</strong> to wait until every monitored table receives an update before triggering a run.</p>
+<p>Consider a scenario where your transformation job depends on data from three source tables. If your business logic requires all three sources to be current before processing, configure the trigger with <strong>All tables are updated</strong>. If processing partial updates is acceptable, use <strong>Any table is updated</strong> for faster response times.</p>
+<p>The following advanced options give you finer control over trigger timing:</p>
+<ul>
+<li><strong>Minimum time between triggers</strong>: Sets a waiting period after a job completes before the next run can start, even if tables are updated during this window</li>
+<li><strong>Wait after last change</strong>: Delays the trigger for a specified time after a table update, resetting if additional updates occur</li>
+</ul>
+<p>These settings help you batch updates efficiently. For example, if your upstream processes update tables in rapid succession, a 60-second wait after last change ensures your job processes the complete batch rather than triggering multiple runs.</p>
+<p>When you add a table update trigger, your job gains access to dynamic parameter values that provide context about what triggered the run:</p>
+<pre><code>{{job.trigger.table_update.updated_tables}}
+{{job.trigger.table_update.&lt;catalog.schema.table&gt;.commit_timestamp.iso_datetime}}
+{{job.trigger.table_update.&lt;catalog.schema.table&gt;.version}}
+</code></pre>
+<p>You can pass these values to your tasks to customize processing based on which tables changed or to track data lineage.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>For optimal performance with table update triggers, enable file events on the external location where your tables are stored. This one-time setup step uses cloud provider change notifications to track updates more efficiently.</p>
+</div>
+<h2 id="configure-file-arrival-triggers">Configure file arrival triggers</h2>
+<p>File arrival triggers run your job when new files appear in a Unity Catalog external location or volume. This trigger type integrates well with scenarios where external systems deliver data files on irregular schedules.</p>
+<p>A file arrival trigger monitors a specified path and recursively checks all subdirectories for new files. The trigger makes a best-effort check approximately every minute, though cloud storage performance can affect timing.</p>
+<p>To configure a file arrival trigger, specify the storage location using the full path to an external location or volume:</p>
+<pre><code>/Volumes/mycatalog/myschema/myvolume/
+/Volumes/mycatalog/myschema/myvolume/incoming/
+</code></pre>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/3-configure-file-arrival-trigger.png#lightbox">
+<img alt="Screenshot of the lakeflow file arrival trigger dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/3-configure-file-arrival-trigger.png"/>
+</a>
+</span>
+</p>
+<p>Before creating a file arrival trigger, verify you have:</p>
+<ul>
+<li>A workspace with Unity Catalog enabled</li>
+<li>READ permission on the storage location</li>
+<li>CAN MANAGE permission on the job</li>
+</ul>
+<p>Like table update triggers, file arrival triggers support advanced timing options. Use <strong>Minimum time between triggers</strong> to control run frequency, and <strong>Wait after last change</strong> to batch multiple file arrivals into a single processing run.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>File arrival triggers respond only to new files. Overwriting an existing file with the same name doesn't trigger a run. Design your file delivery processes to use unique file names for each batch.</p>
+</div>
+<p>For production workloads, enable file events on your external location. Without file events enabled, you're limited to 50 jobs with file arrival triggers per workspace, and each monitored location can contain at most 10,000 files. With file events enabled, these limitations don't apply.</p>
+<h2 id="configure-continuous-triggers">Configure continuous triggers</h2>
+<p>Continuous triggers keep your job running by starting a new run immediately after the previous one completes or fails. This approach suits scenarios requiring near real-time data processing.</p>
+<p>When you configure a continuous trigger, your job enters a perpetual cycle: complete a run, start the next run. If a run fails, the trigger still starts a new run, making continuous jobs resilient to transient errors.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/3-configure-continuous-trigger.png#lightbox">
+<img alt="Screenshot of the lakeflow continuous trigger dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/3-configure-continuous-trigger.png"/>
+</a>
+</span>
+</p>
+<p>Continuous triggers work well for:</p>
+<ul>
+<li>Processing streaming data where low latency matters</li>
+<li>Monitoring systems that need constant operation</li>
+<li>ETL workflows that must keep pace with high-volume data sources</li>
+</ul>
+<p>Before enabling a continuous trigger, consider the cost implications. Your job continuously consumes compute resources, which can add up over time. Use serverless compute to optimize costs, as it scales automatically based on workload.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Continuous jobs on serverless compute only support <strong>bounded</strong> Structured Streaming triggers such as <code>Trigger.AvailableNow</code>. Time-based streaming triggers—<code>Trigger.ProcessingTime</code> and <code>Trigger.Continuous</code>—are <strong>not</strong> supported on serverless compute. If your streaming workload requires time-based triggers, use classic jobs compute. For low-latency streaming on serverless, use Lakeflow Spark Declarative Pipelines in continuous mode instead.</p>
+</div>
+<div class="NOTE">
+<p>Note</p>
+<p>When you resume a paused continuous trigger while a run is still active, the scheduler waits for that run to complete before triggering a new one.</p>
+</div>
+<h2 id="manage-trigger-lifecycle">Manage trigger lifecycle</h2>
+<p>After you configure triggers, you can pause and resume them without deleting the configuration. In the <strong>Job details</strong> pane under <strong>Schedules &amp; Triggers</strong>, the <strong>Pause</strong> and <strong>Resume</strong> buttons control trigger state.</p>
+<p>Pausing a trigger stops new runs from starting while allowing any active run to complete. This capability is useful during maintenance windows or when you need to investigate issues without losing your trigger configuration.</p>
+<p>To receive notifications when trigger evaluation fails, configure email or system destination notifications on your job. This approach ensures you're informed when triggers encounter problems such as permission changes or table deletions.</p>
+<p>Now that you understand how to configure triggers that automate job execution based on data events, you can build responsive pipelines that process data as it becomes available.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Schedule a job</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/4-schedule-job">https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/4-schedule-job</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Schedule a job</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When you schedule a Lakeflow Job, you define exactly when your workflow runs without manual intervention. Scheduling transforms ad hoc data processing into reliable, automated pipelines that keep your data fresh and your business processes running smoothly.</p>
+<p>Azure Databricks provides two scheduling approaches. Simple schedules handle recurring intervals like "every 12 hours," while advanced schedules give you precise control through cron expressions that can target specific days, times, and even months.</p>
+<h2 id="create-a-simple-schedule">Create a simple schedule</h2>
+<p>Simple schedules work well when you need consistent intervals between job runs. You specify a number and a time unit—minutes, hours, days, or weeks—and Azure Databricks handles the rest.</p>
+<p>To add a simple schedule to your job:</p>
+<ol>
+<li>In your Azure Databricks workspace sidebar, select <strong>Jobs &amp; Pipelines</strong>.</li>
+<li>Select your job's name to open its details.</li>
+<li>In the <strong>Job details</strong> panel, select <strong>Add trigger</strong>.</li>
+<li>Set <strong>Trigger type</strong> to <strong>Scheduled</strong>.</li>
+<li>Set <strong>Schedule type</strong> to <strong>Simple</strong>.</li>
+<li>Specify your interval (for example, 12 hours).</li>
+<li>Select <strong>Save</strong>.</li>
+</ol>
+<p>With simple schedules, you can't control when the first run happens—the scheduler picks a time when you save the configuration. Each subsequent run then follows your specified interval.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Azure Databricks enforces a minimum interval of 10 seconds between job runs, regardless of your configuration.</p>
+</div>
+<h2 id="configure-an-advanced-schedule">Configure an advanced schedule</h2>
+<p>Advanced schedules use cron expressions to define precisely when your job runs. This approach handles complex requirements like "at 8:00 AM every weekday" or "on the last Friday of each month."</p>
+<p>To create an advanced schedule:</p>
+<ol>
+<li>In the Job details panel, select <strong>Add trigger</strong>.</li>
+<li>Set <strong>Trigger type</strong> to <strong>Scheduled</strong>.</li>
+<li>Set <strong>Schedule type</strong> to <strong>Advanced</strong>.</li>
+<li>Specify the period, starting time, and time zone.</li>
+<li>Optionally, select <strong>Show Cron Syntax</strong> to view and edit the expression directly.</li>
+<li>Select <strong>Save</strong>.</li>
+</ol>
+<h3 id="understand-cron-expression-format">Understand cron expression format</h3>
+<p>A cron expression contains six or seven fields separated by spaces:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Allowed values</th>
+<th>Special characters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Seconds</td>
+<td>Yes</td>
+<td>0-59</td>
+<td><code>, - * /</code></td>
+</tr>
+<tr>
+<td>Minutes</td>
+<td>Yes</td>
+<td>0-59</td>
+<td><code>, - * /</code></td>
+</tr>
+<tr>
+<td>Hours</td>
+<td>Yes</td>
+<td>0-23</td>
+<td><code>, - * /</code></td>
+</tr>
+<tr>
+<td>Day of month</td>
+<td>Yes</td>
+<td>1-31</td>
+<td><code>, - * ? / L W</code></td>
+</tr>
+<tr>
+<td>Month</td>
+<td>Yes</td>
+<td>1-12 or JAN-DEC</td>
+<td><code>, - * /</code></td>
+</tr>
+<tr>
+<td>Day of week</td>
+<td>Yes</td>
+<td>1-7 or SUN-SAT</td>
+<td><code>, - * ? / L #</code></td>
+</tr>
+<tr>
+<td>Year</td>
+<td>No</td>
+<td>empty, 1970-2099</td>
+<td><code>, - * /</code></td>
+</tr>
+</tbody>
+</table>
+<p>The special characters let you build flexible schedules:</p>
+<ul>
+<li><code>*</code> selects all values in a field ("every minute" or "every hour")</li>
+<li><code>?</code> means "no specific value"—use it in day-of-month or day-of-week when you specify the other</li>
+<li><code>-</code> defines ranges like <code>10-12</code> for hours 10, 11, and 12</li>
+<li><code>,</code> lists multiple values like <code>MON,WED,FRI</code></li>
+<li><code>/</code> specifies increments—<code>0/15</code> in minutes means every 15 minutes starting at 0</li>
+<li><code>L</code> means "last"—in day-of-month, it's the last day; <code>6L</code> in day-of-week means "last Friday"</li>
+<li><code>#</code> specifies "nth occurrence"—<code>6#3</code> means "third Friday of the month"</li>
+</ul>
+<h3 id="common-cron-expression-examples">Common cron expression examples</h3>
+<p>These expressions cover typical scheduling scenarios:</p>
+<table>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Schedule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0 0 12 * * ?</code></td>
+<td>Every day at noon</td>
+</tr>
+<tr>
+<td><code>0 15 10 ? * MON-FRI</code></td>
+<td>Weekdays at 10:15 AM</td>
+</tr>
+<tr>
+<td><code>0 0 8 1 * ?</code></td>
+<td>First day of every month at 8:00 AM</td>
+</tr>
+<tr>
+<td><code>0 30 6 ? * 6L</code></td>
+<td>Last Friday of every month at 6:30 AM</td>
+</tr>
+<tr>
+<td><code>0 0 */2 * * ?</code></td>
+<td>Every 2 hours</td>
+</tr>
+</tbody>
+</table>
+<h2 id="choose-the-right-time-zone">Choose the right time zone</h2>
+<p>Time zone selection affects when your scheduled jobs actually run. Azure Databricks lets you choose any time zone, but your choice has implications for consistency.</p>
+<p>Time zones that observe daylight saving time (DST) create complications. When DST begins or ends, an hourly job might skip a run or appear delayed by an hour or two. If your business logic depends on consistent hourly execution—measured in absolute time—select UTC instead.</p>
+<p>Consider these factors when choosing a time zone:</p>
+<ul>
+<li><strong>Business alignment</strong>: If stakeholders expect reports at 8:00 AM local time, schedule in their time zone and accept DST shifts.</li>
+<li><strong>Data consistency</strong>: If you process data from systems using UTC timestamps, schedule in UTC to maintain alignment.</li>
+<li><strong>Cross-region coordination</strong>: When jobs must run simultaneously across regions, UTC provides a single reference point.</li>
+</ul>
+<div class="TIP">
+<p>Tip</p>
+<p>For jobs that must run at exact intervals regardless of local time changes, always use UTC.</p>
+</div>
+<h2 id="control-concurrent-job-runs">Control concurrent job runs</h2>
+<p>When scheduled jobs take longer than expected, a new run might start before the previous one finishes. This overlap can cause data corruption, duplicate processing, or resource contention. Azure Databricks provides concurrency settings to control this behavior.</p>
+<h3 id="configure-maximum-concurrent-runs">Configure maximum concurrent runs</h3>
+<p>The <strong>Maximum concurrent runs</strong> setting limits how many instances of the same job can execute simultaneously. By default, jobs allow multiple concurrent runs. For jobs that must not overlap—such as those writing to the same tables—set this value to <strong>1</strong>.</p>
+<p>To configure maximum concurrent runs:</p>
+<ol>
+<li>Open your job in the <strong>Jobs &amp; Pipelines</strong> workspace UI.</li>
+<li>In the <strong>Job details</strong> panel, locate the <strong>Maximum concurrent runs</strong> setting.</li>
+<li>Set the value to control how many runs can execute at once.</li>
+</ol>
+<p>When a new run is triggered but the maximum concurrent runs limit is reached, Azure Databricks must decide what to do with the incoming run.</p>
+<h3 id="configure-queue-behavior-for-overlapping-runs">Configure queue behavior for overlapping runs</h3>
+<p>When concurrent runs exceed your configured limit, you choose how the scheduler handles the new run:</p>
+<table>
+<thead>
+<tr>
+<th>Behavior</th>
+<th>Description</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Queue the run</strong></td>
+<td>The new run waits until a slot becomes available, then executes</td>
+<td>Jobs that must eventually run—no triggers should be missed</td>
+</tr>
+<tr>
+<td><strong>Cancel the run</strong></td>
+<td>The new run is immediately canceled</td>
+<td>Jobs where stale triggers are not valuable</td>
+</tr>
+<tr>
+<td><strong>Skip the run</strong></td>
+<td>Similar to cancel—the run doesn't execute</td>
+<td>Jobs where missing occasional runs is acceptable</td>
+</tr>
+</tbody>
+</table>
+<p>For most data pipelines, <strong>queue the run</strong> ensures that all scheduled executions eventually complete. This approach prevents data gaps when a job occasionally runs longer than its schedule interval.</p>
+<p>Consider a job scheduled to run every hour. If a run takes 75 minutes to complete, the next scheduled trigger arrives while the job is still running. With concurrency set to 1 and queue enabled:</p>
+<ol>
+<li>The first run continues processing.</li>
+<li>The second run enters the queue.</li>
+<li>When the first run completes, the queued run starts immediately.</li>
+</ol>
+<p>This pattern ensures sequential, non-overlapping execution while preserving all scheduled runs.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Queued runs consume no compute resources while waiting. They only start when a concurrent slot becomes available.</p>
+</div>
+<h2 id="scheduling-considerations-for-production-workloads">Scheduling considerations for production workloads</h2>
+<p>The Azure Databricks job scheduler handles most scenarios reliably, but it's not designed for low-latency requirements. Network conditions or cloud service issues can occasionally delay job starts by several minutes. When service recovers, scheduled jobs run immediately.</p>
+<p>Keep these points in mind:</p>
+<ul>
+<li>Schedule jobs with buffer time between dependent pipelines</li>
+<li>Don't rely on sub-minute precision for business-critical timing</li>
+<li>Monitor job run history to identify scheduling patterns or delays</li>
+<li>Use the minimum 10-second interval rule when planning high-frequency jobs</li>
+</ul>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Configure job alerts</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/5-configure-job-alerts">https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/5-configure-job-alerts</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Configure job alerts</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When your data pipelines run in production, you need to know when something goes wrong—or even when everything goes right. Configuring <strong>job alerts</strong> in Azure Databricks gives you visibility into job execution without constantly monitoring dashboards. Alerts enable you to respond quickly to failures, track long-running jobs, and maintain confidence in your data workflows.</p>
+<p>In this unit, you learn how to configure notifications for jobs and tasks, choose appropriate alert destinations, and apply best practices that keep your alerts actionable.</p>
+<h2 id="understand-notification-events">Understand notification events</h2>
+<p>Azure Databricks can notify you when specific events occur during job execution. Each event type serves a different operational purpose.</p>
+<table>
+<thead>
+<tr>
+<th>Event type</th>
+<th>When it fires</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Start</strong></td>
+<td>Job run begins</td>
+<td>Track job initiation, confirm scheduled jobs started</td>
+</tr>
+<tr>
+<td><strong>Success</strong></td>
+<td>Job completes successfully</td>
+<td>Verify pipeline completion, trigger downstream processes</td>
+</tr>
+<tr>
+<td><strong>Failure</strong></td>
+<td>Job terminates with error</td>
+<td>Investigate issues, initiate incident response</td>
+</tr>
+<tr>
+<td><strong>Duration warning</strong></td>
+<td>Run exceeds configured threshold</td>
+<td>Identify performance degradation, catch runaway jobs</td>
+</tr>
+<tr>
+<td><strong>Streaming backlog</strong></td>
+<td>Backlog exceeds threshold for 10 minutes</td>
+<td>Monitor streaming job health</td>
+</tr>
+</tbody>
+</table>
+<p>When a job completes in a <strong>Succeeded with failures</strong> state—meaning some tasks failed but the job itself finished—Databricks considers this a success. If you need visibility into partial failures, configure your Success notifications accordingly or add task-level notifications.</p>
+<p>With these event types in mind, you can now configure where these notifications should go.</p>
+<h2 id="configure-notification-destinations">Configure notification destinations</h2>
+<p>Notifications can go to email addresses or third-party systems. Third-party <strong>system destinations</strong> integrate with tools your team already uses for incident management and collaboration.</p>
+<p>Supported system destinations include:</p>
+<ul>
+<li><strong>Slack</strong>: Channel notifications for team visibility</li>
+<li><strong>Microsoft Teams</strong>: Integration with your collaboration platform</li>
+<li><strong>PagerDuty</strong>: Incident management and on-call escalation</li>
+<li><strong>HTTP webhooks</strong>: Custom integrations with any service that accepts HTTP requests</li>
+</ul>
+<p>Before you can use system destinations, a workspace administrator must configure them. Navigate to <strong>Admin Settings</strong> and select <strong>Notifications</strong> to create destinations. Each destination requires appropriate credentials—webhook URLs for Slack and Teams, integration keys for PagerDuty.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/5-create-new-destination.png#lightbox">
+<img alt="Screenshot of the admin notification settings." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/5-create-new-destination.png"/>
+</a>
+</span>
+</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Use different credentials for each configured destination. If one third-party endpoint is compromised, you can revoke its access without affecting other notification destinations.</p>
+</div>
+<p>For each job or task, you can configure up to three system destinations per event type. This limit encourages thoughtful notification design rather than flooding multiple channels.</p>
+<h2 id="add-notifications-to-a-job">Add notifications to a job</h2>
+<p>To configure job-level notifications, follow these steps:</p>
+<ol>
+<li>Open your job in the Azure Databricks workspace.</li>
+<li>In the <strong>Job details</strong> panel, locate the <strong>Job notifications</strong> section.</li>
+<li>Select <strong>Edit notifications</strong>.</li>
+<li>Select <strong>Add notification</strong>.</li>
+<li>Choose a destination type—either <strong>Email address</strong> or one of your configured system destinations.</li>
+<li>Select the event types you want to trigger notifications: <strong>Start</strong>, <strong>Success</strong>, <strong>Failure</strong>, <strong>Duration warning</strong>, or <strong>Streaming backlog</strong>.</li>
+<li>Select <strong>Save</strong> when you finish adding notifications.</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/5-create-job-notification.png#lightbox">
+<img alt="Screenshot showing job notifications dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/5-create-job-notification.png"/>
+</a>
+</span>
+</p>
+<p>Job-level notifications apply to the overall job run. However, job-level notifications aren't sent when individual tasks fail and retry. Consider this behavior when designing your notification strategy.</p>
+<h2 id="configure-task-level-notifications">Configure task-level notifications</h2>
+<p>For more granular visibility, configure notifications on individual tasks within your job. Task notifications fire for each task run, giving you insight into which specific step encountered issues.</p>
+<p>To add task notifications:</p>
+<ol>
+<li>Edit your job and select the task you want to monitor.</li>
+<li>In the task panel, locate <strong>Notifications</strong> and select <strong>Add</strong>.</li>
+<li>Configure the destination and event types just as you would for job notifications.</li>
+<li>Save the task configuration.</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/5-create-task-notification.png#lightbox">
+<img alt="Screenshot showing task-level notifications." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/5-create-task-notification.png"/>
+</a>
+</span>
+</p>
+<p>Task notifications are particularly valuable when your job contains multiple independent tasks. If Task A fails, you receive an immediate notification rather than waiting for the entire job to complete or fail.</p>
+<p>By default, Azure Databricks retries failed tasks three times. If you don't want notifications for every retry attempt, select <strong>Mute notifications until the last retry</strong>. This reduces noise while still alerting you when a task ultimately fails.</p>
+<h2 id="reduce-notification-noise">Reduce notification noise</h2>
+<p>Alert fatigue undermines the value of notifications. When teams receive too many alerts, they start ignoring them—including the critical ones. Apply these strategies to keep your alerts meaningful.</p>
+<p><a data-linktype="relative-path" href="media/5-alert-fatigue.png#lightbox">
+<img alt="Diagram explaining alert fatigue." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/5-alert-fatigue.png"/>
+</a>
+</p>
+<p><strong>Filter out skipped and canceled runs</strong>: When you cancel a job or a run gets skipped due to concurrent run limits, you might not need a notification. Select <strong>Mute notifications for skipped runs</strong> or <strong>Mute notifications for canceled runs</strong> to suppress these.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>These mute options apply only to job-level notifications—if you've also configured task-level notifications, you must set the same filters on each task separately.</p>
+</div>
+<p><strong>Use duration warnings strategically</strong>: Rather than alerting on every long-running job, set duration thresholds based on historical performance. A job that usually takes 30 minutes might warrant a warning at 45 minutes—not at 35.</p>
+<p><strong>Separate task and job notifications</strong>: If you enable job failure notifications, you don't necessarily need task failure notifications for every task. Choose based on whether you need to know <em>that</em> a job failed or <em>which task</em> failed.</p>
+<p><strong>Document your alert logic</strong>: Record why each alert exists, what conditions trigger it, and what action the recipient should take. This documentation helps when troubleshooting alerts or onboarding new team members.</p>
+<h2 id="monitor-with-http-webhooks">Monitor with HTTP webhooks</h2>
+<p>When built-in integrations don't meet your needs, HTTP webhooks provide flexibility. Azure Databricks sends a JSON payload to your endpoint when events occur, enabling custom processing, logging, or integration with internal systems.</p>
+<p>Webhook payloads include the event type, workspace ID, job information, and run details:</p>
+<pre><code class="lang-json">{
+  "event_type": "jobs.on_failure",
+  "workspace_id": "your_workspace_id",
+  "run": {
+    "run_id": "run_id"
+  },
+  "job": {
+    "job_id": "job_id",
+    "name": "job_name"
+  }
+}
+</code></pre>
+<p>If you require specific formatting for notifications, webhooks let you control the message structure completely. This approach is useful when integrating with monitoring platforms that have particular schema requirements.</p>
+<h2 id="monitor-pipelines-in-azure-data-factory">Monitor pipelines in Azure Data Factory</h2>
+<p>When your Databricks jobs are orchestrated by Azure Data Factory (ADF), you have additional monitoring options. ADF provides visual monitoring in the Azure portal where you can track pipeline runs, activity status, and execution duration.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/5-azure-data-factory-pipeline-runs.png#lightbox">
+<img alt="Screenshot of Azure Databricks list view for monitoring pipeline runs." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/5-azure-data-factory-pipeline-runs.png"/>
+</a>
+</span>
+</p>
+<p>ADF also supports creating alerts on metrics such as:</p>
+<ul>
+<li>Pipeline run status (failed, succeeded, canceled)</li>
+<li>Activity run counts</li>
+<li>Integration Runtime utilization</li>
+</ul>
+<p>To configure ADF alerts, navigate to <strong>Monitor</strong> &gt; <strong>Alerts &amp; metrics</strong> in the Data Factory portal. Create alert rules that specify conditions, severity levels, and action groups for notifications via email, SMS, or other channels.</p>
+<p>This layered approach—Databricks notifications for job-level events and ADF alerts for orchestration-level metrics—gives you comprehensive visibility across your data platform.</p>
+<p>With alerts configured at the right granularity and sent to the right channels, you can respond to issues quickly while avoiding the distraction of unnecessary notifications. As you deploy more jobs to production, revisit your alerting strategy to ensure it scales with your workload.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Configure automatic restarts</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/6-configure-job-automatic-restarts">https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/6-configure-job-automatic-restarts</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Configure automatic restarts</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When a production job fails at 3 AM, <strong>automatic restarts</strong> can mean the difference between a quick recovery and hours of downtime. Network blips, temporary resource constraints, and <strong>transient service interruptions</strong> happen regularly in distributed systems. Configuring your jobs to handle these failures automatically reduces manual intervention and keeps your data pipelines running reliably.</p>
+<p>In this unit, you learn how to configure automatic restarts and retry policies for Lakeflow Jobs in Azure Databricks.</p>
+<h2 id="understand-retry-behavior-in-lakeflow-jobs">Understand retry behavior in Lakeflow Jobs</h2>
+<p>Lakeflow Jobs provides multiple retry mechanisms to handle failures at different levels. The behavior depends on your job configuration and trigger type.</p>
+<p>For most job configurations, the default setting doesn't retry tasks on failure. You must explicitly configure retry policies to enable automatic restarts. However, two scenarios behave differently:</p>
+<ul>
+<li><strong>Serverless jobs</strong> auto-optimize retries by default to ensure critical workloads complete successfully</li>
+<li><strong>Continuous jobs</strong> use an <strong>exponential backoff</strong> retry policy that automatically retries the entire job on failure</li>
+</ul>
+<p>Understanding these defaults helps you choose the right configuration for your workload. Jobs that must execute exactly once, such as <strong>non-idempotent operations</strong>, require disabling auto-optimization. Jobs that can safely retry benefit from automatic restart policies.</p>
+<h2 id="configure-task-level-retry-policies">Configure task-level retry policies</h2>
+<p>You configure retry policies at the task level in the Lakeflow Jobs UI. This approach gives you granular control over how individual tasks respond to failures.</p>
+<p>To set a retry policy for a task:</p>
+<ol>
+<li>Open your job in the <strong>Jobs &amp; Pipelines</strong> workspace UI</li>
+<li>Select the <strong>Tasks</strong> tab and select the task you want to configure</li>
+<li>In the task configuration panel, select <strong>+ Add</strong> next to <strong>Retries</strong></li>
+<li>Specify the number of retry attempts and the interval between retries</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/6-configure-task-level-retry-policy.png#lightbox">
+<img alt="Screenshot of the retry policy dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/6-configure-task-level-retry-policy.png"/>
+</a>
+</span>
+</p>
+<p>The <strong>retry interval</strong> is calculated in milliseconds between the start of the failed run and the subsequent retry run. For example, if you set an interval of 60,000 milliseconds (1 minute) and your task took 30 seconds before failing, the next retry starts 30 seconds after the failure.</p>
+<p><a data-linktype="relative-path" href="media/6-task-execution-flow.png#lightbox">
+<img alt="Diagram explaining task execution flow." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/6-task-execution-flow.png"/>
+</a>
+</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Set reasonable retry limits—typically 1 to 3 retries for most workloads. Avoid configuring unlimited retries, as a persistent failure will waste resources without resolving the underlying issue.</p>
+</div>
+<p>When you configure both timeout and retry settings, the <strong>timeout applies to each retry attempt</strong>. If a task times out, it counts as a failed attempt and triggers a retry if attempts remain.</p>
+<h2 id="configure-continuous-jobs-for-always-on-workloads">Configure continuous jobs for always-on workloads</h2>
+<p><strong>Continuous mode</strong> keeps jobs running constantly, making it ideal for <strong>streaming workloads</strong> that process data as it arrives. When a continuous job fails, the platform automatically handles restarts using exponential backoff.</p>
+<p>To configure a job to run in continuous mode:</p>
+<ol>
+<li>In the <strong>Jobs &amp; Pipelines</strong> sidebar, open your job</li>
+<li>In the <strong>Job details</strong> panel, select <strong>Add trigger</strong></li>
+<li>Select <strong>Continuous</strong> in the <strong>Trigger type</strong> dropdown</li>
+<li>Optionally, select a <strong>Task retry mode</strong>—choose <strong>On failure</strong> to retry failed tasks within a job, or <strong>Never</strong> to only retry at the job level. <strong>On failure</strong> is the default for new continuous jobs. For an existing job being converted to continuous mode, you may need to select <strong>Configure retry mode</strong> first before the task retry mode option appears.</li>
+<li>Select <strong>Save</strong></li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/6-configure-continuous-job-retry-mode.png#lightbox">
+<img alt="Screenshot of the continuous job task retry mode dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/6-configure-continuous-job-retry-mode.png"/>
+</a>
+</span>
+</p>
+<p>The <strong>exponential backoff algorithm</strong> works as follows:</p>
+<ol>
+<li>When consecutive failures exceed a threshold, the job waits before the next retry</li>
+<li>Each subsequent failure increases the wait period up to a maximum set by the system</li>
+<li>If a run completes successfully or runs without failure for a threshold period, the <strong>backoff sequence resets</strong></li>
+</ol>
+<p><a data-linktype="relative-path" href="media/6-exponential-backoff-algorithm.png#lightbox">
+<img alt="Diagram explaining the exponential backoff pattern." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/6-exponential-backoff-algorithm.png"/>
+</a>
+</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Continuous jobs don't support task dependencies or task-level retry policies in the traditional sense. Instead, set the <strong>Task retry mode</strong> to control whether failed tasks retry before triggering a new job run.</p>
+</div>
+<p>You can monitor continuous jobs in the exponential backoff state through the <strong>Job details</strong> panel, which displays the number of consecutive failures, the success threshold period, and the time before the next retry.</p>
+<h2 id="set-timeout-thresholds-to-prevent-hung-tasks">Set timeout thresholds to prevent hung tasks</h2>
+<p>A task that hangs indefinitely blocks downstream processing and wastes compute resources. <strong>Timeout thresholds</strong> terminate unresponsive tasks so your job can either retry or fail cleanly.</p>
+<p><a data-linktype="relative-path" href="media/6-timeout-threshold.png#lightbox">
+<img alt="Diagram explaining timeout behavior." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/6-timeout-threshold.png"/>
+</a>
+</p>
+<p>To configure timeout thresholds:</p>
+<ol>
+<li>In the task configuration panel, select <strong>Metric thresholds</strong></li>
+<li>Select <strong>Run duration</strong> in the <strong>Metric</strong> dropdown</li>
+<li>Enter a duration in the <strong>Warning</strong> field to trigger a notification when the task exceeds expected completion time</li>
+<li>Enter a duration in the <strong>Timeout</strong> field to terminate the task if it exceeds maximum completion time</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/6-configure-metric-thresholds.png#lightbox">
+<img alt="Screenshot of the metric thresholds dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/media/6-configure-metric-thresholds.png"/>
+</a>
+</span>
+</p>
+<p>When a task times out, Azure Databricks sets its status to "Timed Out" and handles it according to your retry policy. If retries remain, the task restarts. If all retries are exhausted, the task fails and any dependent tasks are affected based on your job's dependency configuration.</p>
+<h2 id="combine-automatic-restarts-with-notifications">Combine automatic restarts with notifications</h2>
+<p>Automatic restarts work best when combined with alerting. While restarts handle transient failures, persistent issues require human investigation.</p>
+<p>Configure notifications to alert your team when:</p>
+<ul>
+<li>A task exceeds its expected duration (warning threshold)</li>
+<li>A task fails after exhausting all retry attempts</li>
+<li>A continuous job enters exponential backoff state</li>
+</ul>
+<p>When configuring task-level notifications with retries enabled, select <strong>Mute notifications until the last retry</strong> to prevent <strong>alert fatigue</strong>. This setting ensures you're only notified after all retry attempts fail.</p>
+<h2 id="apply-best-practices-for-production-workloads">Apply best practices for production workloads</h2>
+<p>Effective automatic restart configuration balances resilience with efficiency. Consider these guidelines when configuring your jobs:</p>
+<p><strong>Match retry strategy to failure type</strong>: Transient failures like network timeouts benefit from quick retries with short intervals. Resource-related failures might need longer intervals to allow systems to recover.</p>
+<p><strong>Set reasonable limits</strong>: A maximum of 3 retries with intervals of 30 seconds to 5 minutes works well for most transient failures. Avoid unlimited retries—if a job fails repeatedly for the same reason, automatic restarts won't help.</p>
+<p><strong>Monitor retry patterns</strong>: Track how often jobs use retries. A gradual increase in retry usage might indicate underlying infrastructure issues or data quality problems that need attention.</p>
+<p><strong>Design for idempotency</strong>: Jobs that can safely re-execute produce the same results regardless of how many times they run. <strong>Idempotent operations</strong> make automatic restarts safe and predictable.</p>
+<p><strong>Document your configuration</strong>: Record why specific retry limits and intervals were chosen. This context helps future maintainers understand the tradeoffs and adjust settings as requirements change.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>7. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/9-summary">https://learn.microsoft.com/en-us/training/modules/implement-lakeflow-jobs/9-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Automating data pipelines requires more than scheduling scripts to run at fixed times. Throughout this module, you explored how <strong>Lakeflow Jobs</strong> provides comprehensive orchestration capabilities that transform ad hoc processing into reliable, production-ready workflows. You learned to create jobs that coordinate multiple tasks as <strong>directed acyclic graphs (DAGs)</strong>, configure compute resources appropriately for each workload type, and establish task dependencies that control execution order.</p>
+<p>Triggering job execution emerged as a critical design decision. You configured <strong>table update triggers</strong> that respond to data changes in Unity Catalog tables, <strong>file arrival triggers</strong> that activate when new files appear in storage locations, and <strong>continuous triggers</strong> that maintain always-on processing for streaming workloads. For time-based requirements, you created <strong>schedules</strong> using simple intervals or advanced cron expressions, understanding how time zone selection affects execution timing.</p>
+<p>Operational visibility proved essential for maintaining pipeline reliability. You configured <strong>job alerts and notifications</strong> that inform your team about starts, completions, failures, and duration warnings without requiring constant dashboard monitoring. You implemented <strong>automatic restart policies</strong> with task-level retries and exponential backoff for continuous jobs, ensuring transient failures don't derail your data processing.</p>
+<p>Apply these Lakeflow Jobs capabilities incrementally as you build your data platform. Start with simple job configurations and add triggers, alerts, and retry policies as your requirements mature. Design your tasks for <strong>idempotency</strong> so automatic restarts produce consistent results. Monitor retry patterns to identify underlying infrastructure or data quality issues. These practices create automation that your organization can depend on for critical data processing workloads.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>

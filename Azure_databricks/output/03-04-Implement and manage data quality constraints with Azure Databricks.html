@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implement and manage data quality constraints with Azure Databricks</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Implement and manage data quality constraints with Azure Databricks</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/1-introduction">https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/1-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p><strong>Data quality</strong> issues can derail analytics projects, corrupt business reports, and erode confidence in your data platform. When invalid data enters your tables—whether through type mismatches, missing required values, or unexpected schema changes—problems compound as that data flows through pipelines and reaches downstream consumers. Implementing robust <strong>data quality constraints</strong> at the point of ingestion creates a foundation of trust in your data assets.</p>
+<p>Azure Databricks provides multiple mechanisms for enforcing data quality within <strong>Unity Catalog</strong>. <strong>Schema enforcement</strong> validates data types automatically when writing to Delta Lake tables. <strong>Table constraints</strong> define rules that reject invalid records at write time. <strong>Pipeline expectations</strong> in Lakeflow Spark Declarative Pipelines enable real-time quality checks on streaming data with configurable actions for violations. Together, these capabilities form a comprehensive approach to maintaining data integrity.</p>
+<p>Throughout this module, you explore practical techniques for implementing data quality constraints. You learn how to enforce data type checks using <strong>schema validation</strong>, <strong>explicit casting</strong>, and <strong>CHECK constraints</strong>. You discover strategies for managing <strong>schema drift</strong> when source systems evolve over time. You implement validation checks for <strong>nullability</strong>, <strong>uniqueness</strong>, and <strong>value ranges</strong>. Finally, you master pipeline expectations that monitor data quality metrics and take automated actions when violations occur.</p>
+<p>By combining these approaches, you build pipelines that catch quality issues early, prevent invalid data from reaching production tables, and provide visibility into the health of your data. These skills are essential for data engineers working with Unity Catalog who need to maintain high data quality standards across their organization's data estate.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Implement validation checks</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/2-implement-validation-checks">https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/2-implement-validation-checks</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Implement validation checks</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data pipelines often encounter records with missing values, duplicate identifiers, or values that fall outside acceptable ranges. Without validation checks in place, these data quality issues propagate downstream, causing incorrect analytics, failed reports, and unreliable business decisions. Validation checks catch these problems at the point of data ingestion, ensuring that only quality data flows through your pipeline.</p>
+<p>In this unit, you learn how to implement validation checks for nullability, data cardinality, and range checking using Lakeflow Spark Declarative Pipelines expectations and Delta Lake table constraints.</p>
+<h2 id="understand-validation-approaches-in-azure-databricks">Understand validation approaches in Azure Databricks</h2>
+<p>Azure Databricks provides two primary mechanisms for implementing validation checks: pipeline expectations and table constraints. Each approach serves different scenarios and offers distinct capabilities.</p>
+<p><a data-linktype="relative-path" href="media/2-understand-validation-approaches.png#lightbox">
+<img alt="Diagram explaining validation approaches in Azure Databricks." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/media/2-understand-validation-approaches.png"/>
+</a>
+</p>
+<p><strong>Pipeline expectations</strong> apply validation during data transformations in Lakeflow Spark Declarative Pipelines. Expectations let you warn, drop invalid records, or fail the pipeline when data violates your rules. This approach works well for streaming tables and materialized views where you need real-time quality control.</p>
+<p><strong>Table constraints</strong> enforce rules directly on Delta Lake tables. Constraints reject invalid data at write time, preventing bad records from ever entering your tables. This approach suits batch processing and scenarios requiring strict data integrity guarantees.</p>
+<p>With these approaches, you can validate three key dimensions of data quality: nullability (ensuring required values exist), data cardinality (verifying uniqueness where expected), and range checking (confirming values fall within acceptable bounds).</p>
+<h2 id="implement-nullability-checks">Implement nullability checks</h2>
+<p>Nullability validation ensures that required columns contain values. Consider a customer table where <code>email</code> and <code>customer_id</code> must always have values. You can implement these checks using expectations in your pipeline.</p>
+<p>Using Python, add expectation decorators to your streaming table definition:</p>
+<pre><code class="lang-python">from pyspark import pipelines as dp
+
+@dp.table
+@dp.expect_or_drop("valid_email", "email IS NOT NULL")
+@dp.expect_or_drop("valid_customer_id", "customer_id IS NOT NULL")
+def customers():
+    return spark.readStream.table("raw.customers")
+</code></pre>
+<p>The same validation in SQL uses the <code>CONSTRAINT</code> clause:</p>
+<pre><code class="lang-sql">CREATE OR REFRESH STREAMING TABLE customers(
+    CONSTRAINT valid_email EXPECT (email IS NOT NULL) ON VIOLATION DROP ROW,
+    CONSTRAINT valid_customer_id EXPECT (customer_id IS NOT NULL) ON VIOLATION DROP ROW
+) AS SELECT * FROM STREAM(raw.customers);
+</code></pre>
+<p>For Delta Lake tables outside of pipelines, use <code>NOT NULL</code> constraints in the table definition:</p>
+<pre><code class="lang-sql">CREATE TABLE customers (
+    customer_id INT NOT NULL,
+    email STRING NOT NULL,
+    first_name STRING,
+    last_name STRING
+);
+</code></pre>
+<p>You can also add nullability constraints to existing tables:</p>
+<pre><code class="lang-sql">ALTER TABLE customers ALTER COLUMN email SET NOT NULL;
+</code></pre>
+<div class="NOTE">
+<p>Note</p>
+<p>Before adding a <code>NOT NULL</code> constraint to an existing table, Azure Databricks verifies that all existing rows satisfy the constraint. The operation fails if any null values exist in the column.</p>
+</div>
+<h2 id="validate-data-cardinality">Validate data cardinality</h2>
+<p>Cardinality validation ensures that columns expected to contain unique values actually do. This check is essential for primary keys, transaction identifiers, and other fields where duplicates indicate data quality problems.</p>
+<p>Pipeline expectations can validate cardinality by checking for conditions that indicate uniqueness issues. For example, you can verify that a Social Security Number appears only once per person:</p>
+<pre><code class="lang-python">from pyspark.sql.window import Window
+from pyspark.sql.functions import count
+
+@dp.table
+@dp.expect("unique_ssn_per_person", "ssn_count = 1")
+def employees():
+    df = spark.table("raw.employees")
+    w = Window.partitionBy("ssn")
+    return df.withColumn("ssn_count", count("*").over(w))
+</code></pre>
+<p>For more comprehensive cardinality checks, combine expectations with aggregation logic in your transformation:</p>
+<pre><code class="lang-sql">CREATE OR REFRESH MATERIALIZED VIEW order_validation AS
+SELECT 
+    order_id,
+    COUNT(*) as occurrence_count
+FROM orders
+GROUP BY order_id
+HAVING COUNT(*) &gt; 1;
+</code></pre>
+<p>This materialized view identifies any duplicate order IDs, enabling you to investigate and resolve cardinality issues.</p>
+<p>Delta Lake supports primary key constraints that document expected uniqueness, though these constraints are informational and not enforced:</p>
+<pre><code class="lang-sql">CREATE TABLE orders (
+    order_id INT NOT NULL,
+    customer_id INT,
+    order_date DATE,
+    CONSTRAINT orders_pk PRIMARY KEY (order_id)
+);
+</code></pre>
+<div class="TIP">
+<p>Tip</p>
+<p>While primary key constraints aren't enforced, they help query optimization and document your data model's intended structure. Use pipeline expectations to actively enforce uniqueness.</p>
+</div>
+<h2 id="apply-range-checking">Apply range checking</h2>
+<p>Range validation confirms that numeric, date, and other values fall within acceptable bounds. This check catches data entry errors, system glitches, and integration issues that produce out-of-range values.</p>
+<p>Define range expectations using comparison operators or the <code>BETWEEN</code> clause:</p>
+<pre><code class="lang-python">@dp.table
+@dp.expect_or_fail("valid_age", "age BETWEEN 0 AND 150")
+@dp.expect_or_fail("valid_salary", "salary &gt;= 0")
+@dp.expect_or_fail("valid_hire_date", "hire_date &lt;= current_date()")
+def employees():
+    return spark.readStream.table("raw.employees")
+</code></pre>
+<p>In SQL, apply the same range checks:</p>
+<pre><code class="lang-sql">CREATE OR REFRESH STREAMING TABLE transactions(
+    CONSTRAINT valid_amount EXPECT (amount &gt; 0) ON VIOLATION DROP ROW,
+    CONSTRAINT valid_date EXPECT (transaction_date &lt;= current_date()) ON VIOLATION DROP ROW,
+    CONSTRAINT valid_quantity EXPECT (quantity BETWEEN 1 AND 10000) ON VIOLATION DROP ROW
+) AS SELECT * FROM STREAM(raw.transactions);
+</code></pre>
+<p>For Delta Lake tables, use <code>CHECK</code> constraints to enforce ranges at write time:</p>
+<pre><code class="lang-sql">ALTER TABLE employees ADD CONSTRAINT valid_age CHECK (age &gt;= 18 AND age &lt;= 120);
+ALTER TABLE transactions ADD CONSTRAINT positive_amount CHECK (amount &gt; 0);
+</code></pre>
+<p>Range checks can also validate business rules that combine multiple conditions:</p>
+<pre><code class="lang-python">@dp.expect("valid_discount", """
+    discount_percent &gt;= 0 
+    AND discount_percent &lt;= 100
+    AND (discount_percent &lt;= 50 OR customer_tier = 'PREMIUM')
+""")
+</code></pre>
+<p>This expectation ensures discounts stay within bounds and enforces that only premium customers receive discounts over 50%.</p>
+<h2 id="choose-actions-for-validation-failures">Choose actions for validation failures</h2>
+<p>When validation fails, you choose how your pipeline responds. Each action suits different business requirements and data criticality levels.</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Use case</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Warn (default)</td>
+<td>Monitoring and analysis</td>
+<td>Invalid records write to target; metrics logged</td>
+</tr>
+<tr>
+<td>Drop</td>
+<td>Data cleansing</td>
+<td>Invalid records removed before write</td>
+</tr>
+<tr>
+<td>Fail</td>
+<td>Critical data integrity</td>
+<td>Pipeline stops; transaction rolls back</td>
+</tr>
+</tbody>
+</table>
+<p>Use the <strong>warn</strong> action when you need visibility into data quality issues without blocking data flow:</p>
+<pre><code class="lang-python">@dp.expect("has_phone", "phone_number IS NOT NULL")
+</code></pre>
+<p>Use <strong>drop</strong> when invalid records should be filtered out silently:</p>
+<pre><code class="lang-python">@dp.expect_or_drop("complete_address", "street IS NOT NULL AND city IS NOT NULL")
+</code></pre>
+<p>Use <strong>fail</strong> when data integrity is critical and invalid records are unacceptable:</p>
+<pre><code class="lang-python">@dp.expect_or_fail("valid_account_balance", "balance &gt;= 0")
+</code></pre>
+<p>You can view expectation metrics in the pipeline UI by selecting a dataset with expectations and opening the <strong>Data quality</strong> tab. These metrics help you monitor validation pass rates and identify systematic data quality issues.</p>
+<p>Now that you understand how to implement validation checks, you can ensure your data pipelines maintain quality standards for nullability, cardinality, and value ranges.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Implement data type checks</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/3-implement-data-type-checks">https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/3-implement-data-type-checks</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Implement data type checks</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Every column in your dataset has an expected data type, and when incoming data doesn't match that expectation, problems cascade downstream. A string value where an integer belongs can break calculations, corrupt aggregations, or cause pipeline failures. Data type checks ensure that each field contains values of the correct type before they enter your tables.</p>
+<p>In this unit, you learn how to implement data type checks using schema enforcement, explicit type casting, and validation constraints in Azure Databricks.</p>
+<h2 id="understand-schema-enforcement">Understand schema enforcement</h2>
+<p>Delta Lake validates data types automatically when you write data to a table. This built-in mechanism, called <strong>schema enforcement</strong>, compares the data types of incoming columns against the target table's schema. When a type mismatch occurs, Delta Lake attempts to safely cast the value. If the cast fails, the write operation raises an error.</p>
+<p>Schema enforcement applies the following rules during insert operations:</p>
+<ul>
+<li>All inserted columns must exist in the target table</li>
+<li>All column data types must match or be safely castable to the target types</li>
+</ul>
+<p>Consider a table with an integer column:</p>
+<pre><code class="lang-sql">CREATE TABLE inventory (
+    product_id INT,
+    quantity INT,
+    last_updated DATE
+);
+</code></pre>
+<p>When you insert data where <code>quantity</code> is a string that represents a number, Delta Lake casts it to the target type:</p>
+<pre><code class="lang-sql">-- This succeeds because '100' can be cast to INT
+INSERT INTO inventory VALUES (1, '100', '2026-01-15');
+</code></pre>
+<p>However, inserting a string that can't be converted to an integer causes the operation to fail:</p>
+<pre><code class="lang-sql">-- This fails because 'fifty' cannot be cast to INT
+INSERT INTO inventory VALUES (2, 'fifty', '2026-01-15');
+</code></pre>
+<p>Schema enforcement provides a first line of defense against type mismatches. For more control over how mismatches are handled, you can use explicit casting.</p>
+<h2 id="use-explicit-type-casting">Use explicit type casting</h2>
+<p>The <code>cast</code> function converts values from one data type to another. When the conversion fails, an error is raised. The <code>try_cast</code> function works the same way but returns <code>NULL</code> instead of raising an error when the conversion fails.</p>
+<p>Use <code>cast</code> when you want strict validation that stops processing on invalid data:</p>
+<pre><code class="lang-sql">SELECT 
+    cast(raw_amount AS DECIMAL(10,2)) AS amount,
+    cast(raw_date AS DATE) AS transaction_date
+FROM staging_data;
+</code></pre>
+<p>Use <code>try_cast</code> when you want to identify invalid values without failing the query:</p>
+<pre><code class="lang-sql">SELECT 
+    raw_amount,
+    try_cast(raw_amount AS DECIMAL(10,2)) AS validated_amount,
+    CASE 
+        WHEN try_cast(raw_amount AS DECIMAL(10,2)) IS NULL 
+        THEN 'Invalid amount format'
+        ELSE 'Valid'
+    END AS validation_status
+FROM staging_data;
+</code></pre>
+<p>With <code>try_cast</code>, records with invalid values return <code>NULL</code> for the cast column. You can then filter, flag, or quarantine these records based on your data quality requirements.</p>
+<h2 id="implement-type-validation-with-constraints">Implement type validation with constraints</h2>
+<p><strong>CHECK constraints</strong> let you define custom validation rules that are enforced whenever data is inserted or updated. While typically used for value ranges and patterns, you can combine them with type-aware functions to create sophisticated type checks.</p>
+<p>For example, you can validate that a string column contains only numeric characters:</p>
+<pre><code class="lang-sql">CREATE TABLE orders (
+    order_id INT,
+    order_total STRING
+);
+
+ALTER TABLE orders
+ADD CONSTRAINT valid_order_total CHECK (order_total REGEXP '^[0-9]+(\\.[0-9]+)?$')
+</code></pre>
+<p>This constraint ensures the <code>order_total</code> column contains values that look like valid numbers, catching malformed data before it enters the table.</p>
+<p>For date validation, you can use the <code>try_cast</code> function within a constraint:</p>
+<pre><code class="lang-sql">ALTER TABLE events 
+ADD CONSTRAINT valid_event_date CHECK (try_cast(event_date_str AS DATE) IS NOT NULL);
+</code></pre>
+<p>This approach rejects records where <code>event_date_str</code> doesn't contain a valid date format.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Before adding a constraint to an existing table, Azure Databricks verifies that all existing rows satisfy the constraint. Plan for this validation step, especially on large tables.</p>
+</div>
+<h2 id="handle-type-mismatches-in-pipelines">Handle type mismatches in pipelines</h2>
+<p>When processing data from external sources, type mismatches are common. Implement a pattern that separates valid from invalid records, allowing you to process good data while quarantining problematic records for review:</p>
+<pre><code class="lang-sql">-- Insert valid records into the target table
+INSERT INTO silver_transactions
+SELECT 
+    transaction_id,
+    cast(amount AS DECIMAL(10,2)) AS amount,
+    cast(transaction_date AS DATE) AS transaction_date
+FROM bronze_transactions
+WHERE try_cast(amount AS DECIMAL(10,2)) IS NOT NULL
+  AND try_cast(transaction_date AS DATE) IS NOT NULL;
+
+-- Capture invalid records for investigation
+INSERT INTO quarantine_transactions
+SELECT 
+    transaction_id,
+    amount AS raw_amount,
+    transaction_date AS raw_date,
+    current_timestamp() AS quarantined_at,
+    'Type validation failed' AS reason
+FROM bronze_transactions
+WHERE try_cast(amount AS DECIMAL(10,2)) IS NULL
+   OR try_cast(transaction_date AS DATE) IS NULL;
+</code></pre>
+<p>This pattern ensures your pipeline continues processing valid data while preserving invalid records for later analysis.</p>
+<h2 id="use-pipeline-expectations-for-type-checking">Use pipeline expectations for type checking</h2>
+<p>Lakeflow Spark Declarative Pipelines provides <strong>expectations</strong> that allow you to define data quality rules directly in your pipeline definitions. You can use expectations to check that values can be cast to expected types:</p>
+<pre><code class="lang-python">from pyspark import pipelines as dp
+
+@dp.table
+@dp.expect_or_drop("valid_amount", "try_cast(amount AS DECIMAL(10,2)) IS NOT NULL")
+@dp.expect_or_drop("valid_date", "try_cast(event_date AS DATE) IS NOT NULL")
+def validated_transactions():
+    return spark.readStream.table("raw_transactions")
+</code></pre>
+<p>With <code>expect_or_drop</code>, records that fail the type check are dropped before reaching the target table. Use <code>expect</code> to log violations without dropping records, or <code>expect_or_fail</code> to stop the pipeline when violations occur.</p>
+<p>For SQL-based pipelines:</p>
+<pre><code class="lang-sql">CREATE OR REFRESH STREAMING TABLE validated_transactions (
+    CONSTRAINT valid_amount EXPECT (try_cast(amount AS DECIMAL(10,2)) IS NOT NULL) ON VIOLATION DROP ROW,
+    CONSTRAINT valid_date EXPECT (try_cast(event_date AS DATE) IS NOT NULL) ON VIOLATION DROP ROW
+)
+AS SELECT * FROM STREAM(raw_transactions);
+</code></pre>
+<p>Pipeline expectations integrate data type validation directly into your ETL logic, providing visibility into data quality metrics through the pipeline UI.</p>
+<p>Implementing data type checks at multiple levels—schema enforcement, explicit casting, constraints, and pipeline expectations—creates defense in depth. Each layer catches issues that might slip past others, resulting in higher data quality in your Unity Catalog tables.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Detect and manage schema drift</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/4-detect-manage-schema-drift">https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/4-detect-manage-schema-drift</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Detect and manage schema drift</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data pipelines often receive data from sources that evolve over time. New columns appear, others disappear, and the structure of incoming data changes as business requirements shift. Without proper controls, these changes can silently corrupt your data or break your pipelines entirely.</p>
+<p>In this unit, you learn how to detect and manage schema drift—the structural changes that occur when source systems add, remove, or rename columns over time.</p>
+<h2 id="recognize-schema-drift-challenges">Recognize schema drift challenges</h2>
+<p>While data type validation ensures values match expected types (as covered in the previous unit), schema drift addresses a different challenge: the structure of your data changes over time. A source system adds a new <code>phone_number</code> column, removes a deprecated <code>legacy_id</code> field, or renames <code>customer_email</code> to <code>email_address</code>. These structural changes happen independently of type validation.</p>
+<p>Delta Lake's schema enforcement blocks structural mismatches by default. When incoming data contains columns not present in the target table, or when required columns are missing, the write operation fails. This fail-fast behavior protects your tables from unexpected structural changes, but you need strategies to handle legitimate schema evolution.</p>
+<p><a data-linktype="relative-path" href="media/4-recognize-schema-drift-challenges.png#lightbox">
+<img alt="Diagram helping you recognize schema drift challenges." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/media/4-recognize-schema-drift-challenges.png"/>
+</a>
+</p>
+<p>Consider a streaming pipeline that processes customer data:</p>
+<pre><code class="lang-sql">CREATE TABLE customers (
+    customer_id INT,
+    name STRING,
+    email STRING
+);
+</code></pre>
+<p>When your source system adds a <code>phone_number</code> column and starts sending it in the data feed, writes fail because the target table doesn't include this column. Your pipeline stops until you decide how to handle the new field—either by rejecting it, adding it to the table schema, or preserving it for later analysis.</p>
+<h2 id="detect-and-respond-to-schema-drift">Detect and respond to schema drift</h2>
+<p>Schema drift occurs when the structure of incoming data changes over time. Your data pipelines must detect these changes and respond appropriately—either by adapting to the new schema or by alerting operators to investigate.</p>
+<p>Azure Databricks provides several approaches for handling schema drift depending on your requirements.</p>
+<h3 id="fail-on-schema-mismatch">Fail on schema mismatch</h3>
+<p>The strictest approach stops processing when schema drift is detected. This strategy works well when data structure changes require manual review before pipeline updates.</p>
+<p>With Auto Loader, you can configure this behavior using the <code>failOnNewColumns</code> mode:</p>
+<pre><code class="lang-python">(spark.readStream
+    .format("cloudFiles")
+    .option("cloudFiles.format", "json")
+    .option("cloudFiles.schemaLocation", "/path/to/schema")
+    .option("cloudFiles.schemaEvolutionMode", "failOnNewColumns")
+    .load("/path/to/source")
+    .writeStream
+    .option("checkpointLocation", "/path/to/checkpoint")
+    .toTable("target_table")
+)
+</code></pre>
+<p>When Auto Loader encounters a new column not defined in the schema, the stream stops with an <code>UnknownFieldException</code>. You must update the schema or remove the offending data before the pipeline can resume.</p>
+<h3 id="automatically-adapt-to-new-columns">Automatically adapt to new columns</h3>
+<p>For scenarios where adding new columns is acceptable, you can enable schema evolution. This approach automatically adds new columns to the target table without manual intervention.</p>
+<p>Enable schema evolution for write operations:</p>
+<pre><code class="lang-python">(df.write
+    .format("delta")
+    .mode("append")
+    .option("mergeSchema", "true")
+    .saveAsTable("target_table")
+)
+</code></pre>
+<p>For <code>MERGE</code> operations, use the schema evolution syntax:</p>
+<pre><code class="lang-sql">MERGE WITH SCHEMA EVOLUTION INTO target_table t
+USING source_data s
+ON t.customer_id = s.customer_id
+WHEN MATCHED THEN UPDATE SET *
+WHEN NOT MATCHED THEN INSERT *
+</code></pre>
+<p>New columns from the source are automatically added to the target table. However, you should carefully consider when to use schema evolution—automatic changes might introduce columns you didn't expect.</p>
+<h2 id="choose-a-schema-evolution-mode">Choose a schema evolution mode</h2>
+<p>Auto Loader supports five schema evolution modes controlled by the <code>cloudFiles.schemaEvolutionMode</code> option. Choosing the right mode depends on whether you need strict control, automatic adaptation, or a way to capture unexpected data without blocking the pipeline.</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behavior on new column or type change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addNewColumns</code> (default)</td>
+<td>Stream stops; new columns are added to schema on restart. Existing column types unchanged.</td>
+</tr>
+<tr>
+<td><code>rescue</code></td>
+<td>Schema never evolves; unexpected data stored in the rescued data column. Stream continues.</td>
+</tr>
+<tr>
+<td><code>failOnNewColumns</code></td>
+<td>Stream stops; requires manual schema update or removal of offending data before restart.</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>Schema never evolves; new columns are silently ignored unless <code>rescuedDataColumn</code> is set.</td>
+</tr>
+<tr>
+<td><code>addNewColumnsWithTypeWidening</code></td>
+<td>Stream stops; new columns are added <strong>and</strong> supported type changes are widened automatically (for example, <code>INT</code> → <code>LONG</code>). Requires Databricks Runtime 16.4 or above (Public Preview).</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>addNewColumnsWithTypeWidening</code> mode is useful when source systems gradually expand numeric ranges—for example, when a row count column grows beyond the <code>INT</code> limit. Rather than routing those records to the rescued data column, Auto Loader widens the column type automatically on restart:</p>
+<pre><code class="lang-python">(spark.readStream
+    .format("cloudFiles")
+    .option("cloudFiles.format", "json")
+    .option("cloudFiles.schemaLocation", "/path/to/schema")
+    .option("cloudFiles.schemaEvolutionMode", "addNewColumnsWithTypeWidening")
+    .load("/path/to/source")
+    .writeStream
+    .option("checkpointLocation", "/path/to/checkpoint")
+    .toTable("target_table")
+)
+</code></pre>
+<p>Unsupported type changes—such as <code>INT</code> to <code>STRING</code>—are still captured in the rescued data column when this mode is active.</p>
+<h3 id="rescue-unexpected-data">Rescue unexpected data</h3>
+<p>When you need to preserve data that doesn't match your schema without modifying the target structure, use the rescued data column. This approach captures mismatched data in a separate JSON column for later review.</p>
+<pre><code class="lang-python">(spark.readStream
+    .format("cloudFiles")
+    .option("cloudFiles.format", "json")
+    .option("cloudFiles.schemaEvolutionMode", "rescue")
+    .option("rescuedDataColumn", "_rescued_data")
+    .load("/path/to/source")
+    .writeStream
+    .option("checkpointLocation", "/path/to/checkpoint")
+    .toTable("target_table")
+)
+</code></pre>
+<p>Data that doesn't match the schema—including new columns, type mismatches, and case differences—is stored in the <code>_rescued_data</code> column. Your pipeline continues processing without interruption, and you can analyze rescued data to understand schema changes.</p>
+<h2 id="implement-error-handling-strategies">Implement error handling strategies</h2>
+<p>Beyond automatic schema management, you need strategies for handling records that violate your data quality rules. Lakeflow Spark Declarative Pipelines provides expectations that let you define constraints and specify how to handle violations.</p>
+<h3 id="drop-invalid-records">Drop invalid records</h3>
+<p>Use expectations to filter out records that don't meet your structure requirements:</p>
+<pre><code class="lang-python">from pyspark import pipelines as dp
+
+@dp.table
+@dp.expect_or_drop("required_columns_present", 
+    "customer_id IS NOT NULL AND email IS NOT NULL")
+def validated_customers():
+    return spark.readStream.table("raw_customers")
+</code></pre>
+<p>Records missing required columns are dropped before reaching the target table. The pipeline tracks metrics showing how many records were dropped.</p>
+<h3 id="fail-on-critical-violations">Fail on critical violations</h3>
+<p>When data structure issues indicate a serious problem, configure expectations to halt processing:</p>
+<pre><code class="lang-sql">CREATE OR REFRESH STREAMING TABLE validated_orders (
+    CONSTRAINT valid_structure 
+    EXPECT (order_id IS NOT NULL AND product_id IS NOT NULL) 
+    ON VIOLATION FAIL UPDATE
+) AS SELECT * FROM STREAM(raw_orders);
+</code></pre>
+<p>The pipeline stops immediately when it encounters records missing required columns, preventing invalid data from propagating downstream.</p>
+<h3 id="quarantine-problematic-records">Quarantine problematic records</h3>
+<p>For a balanced approach, route invalid records to a separate quarantine table while allowing valid records to proceed:</p>
+<pre><code class="lang-python">from pyspark import pipelines as dp
+
+@dp.table
+def valid_transactions():
+    return (
+        spark.readStream.table("raw_transactions")
+        .filter("amount IS NOT NULL AND transaction_date IS NOT NULL")
+    )
+
+@dp.table
+def quarantine_transactions():
+    return (
+        spark.readStream.table("raw_transactions")
+        .filter("amount IS NULL OR transaction_date IS NULL")
+    )
+</code></pre>
+<p>This pattern lets you investigate problematic records without blocking your main data flow.</p>
+<h2 id="apply-best-practices-for-schema-management">Apply best practices for schema management</h2>
+<p>Managing schema effectively requires a combination of technical controls and operational practices.</p>
+<p>Document your expected schemas explicitly. Store schema definitions in version control alongside your pipeline code. When source systems change, you have a clear reference for understanding the impact.</p>
+<p>Implement alerting for schema drift. Configure your pipelines to send notifications when schema changes are detected, even if the pipeline handles them automatically. Early awareness helps you understand evolving data patterns.</p>
+<p>Use consistent naming conventions. Standardize column names across your data estate to reduce case-sensitivity issues and make schema validation more predictable.</p>
+<p>Test schema handling in development. Before deploying pipelines to production, verify that your schema enforcement and drift handling work as expected with test data that includes edge cases.</p>
+<p>Consider the tradeoffs between strictness and flexibility. Strict schema enforcement catches problems early but requires more maintenance. Flexible approaches like schema evolution reduce operational overhead but might allow unexpected changes.</p>
+<p>With these strategies in place, your data pipelines can maintain data quality while adapting to the inevitable changes in your source systems.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Manage data quality with pipeline expectations</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/5-manage-data-quality-pipeline-expectations">https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/5-manage-data-quality-pipeline-expectations</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Manage data quality with pipeline expectations</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data quality issues can disrupt downstream analytics and erode trust in your data. When invalid records slip into production tables, they might cause report failures, incorrect business decisions, or compliance violations. Pipeline expectations in Lakeflow Spark Declarative Pipelines give you a way to define quality rules that run automatically as data flows through your pipeline.</p>
+<p>With expectations, you specify what valid data looks like using SQL constraints. The pipeline then checks every record against these rules and takes the action you configure—logging the issue, dropping the record, or failing the update entirely.</p>
+<h2 id="define-expectations-with-three-components">Define expectations with three components</h2>
+<p>Every expectation consists of three parts: a name, a constraint, and an action. Understanding these components helps you design effective data quality checks.</p>
+<p><a data-linktype="relative-path" href="media/5-define-expectations.png#lightbox">
+<img alt="Diagram defines expectations with three components." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/media/5-define-expectations.png"/>
+</a>
+</p>
+<p>The <strong>name</strong> identifies the expectation and appears in monitoring dashboards. Choose names that clearly describe what you're validating. For example, <code>valid_customer_age</code> communicates the rule's purpose better than <code>check_1</code>.</p>
+<p>The <strong>constraint</strong> is a SQL Boolean expression that evaluates to true or false for each record. When a record fails the constraint, the expectation triggers. You can use any valid SQL syntax except custom Python functions, external service calls, or subqueries.</p>
+<p>Here's how you might check that transaction dates fall within an expected range:</p>
+<pre><code class="lang-python">@dp.expect("valid_transaction_date", "transaction_date &gt;= '2020-01-01' AND transaction_date &lt;= current_date()")
+</code></pre>
+<p>The same constraint in SQL:</p>
+<pre><code class="lang-sql">CONSTRAINT valid_transaction_date EXPECT (transaction_date &gt;= '2020-01-01' AND transaction_date &lt;= current_date())
+</code></pre>
+<p>The <strong>action</strong> determines what happens when a record violates the constraint. You have three options, each suited to different scenarios in your data pipeline.</p>
+<h2 id="choose-the-right-action-for-invalid-records">Choose the right action for invalid records</h2>
+<p>Your choice of action depends on how critical the data quality issue is and how you want to handle violations.</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>When to use</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Warn</strong></td>
+<td>Monitoring quality trends without blocking data</td>
+<td>Invalid records flow through; metrics captured for review</td>
+</tr>
+<tr>
+<td><strong>Drop</strong></td>
+<td>Filtering out bad records automatically</td>
+<td>Invalid records removed; valid records continue</td>
+</tr>
+<tr>
+<td><strong>Fail</strong></td>
+<td>Stopping the pipeline for critical violations</td>
+<td>Update fails immediately; requires manual intervention</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>warn</strong> action is the default behavior. It writes all records to the target table, including invalid ones, while logging metrics about failures. This approach works well when you're establishing baselines or when downstream systems can handle some data quality issues.</p>
+<pre><code class="lang-python">@dp.expect("non_null_email", "email IS NOT NULL")
+def customer_contacts():
+    return spark.readStream.table("raw.customers")
+</code></pre>
+<p>The <strong>drop</strong> action removes records that fail validation before writing to the target. Use this when you need clean data downstream and can afford to lose some records.</p>
+<pre><code class="lang-python">@dp.expect_or_drop("valid_price", "price &gt;= 0 AND price &lt;= 10000")
+def validated_orders():
+    return spark.readStream.table("raw.orders")
+</code></pre>
+<p>The SQL equivalent uses <code>ON VIOLATION DROP ROW</code>:</p>
+<pre><code class="lang-sql">CREATE OR REFRESH STREAMING TABLE validated_orders(
+    CONSTRAINT valid_price EXPECT (price &gt;= 0 AND price &lt;= 10000) ON VIOLATION DROP ROW
+) AS SELECT * FROM STREAM(raw.orders);
+</code></pre>
+<p>The <strong>fail</strong> action stops execution immediately when any record violates the constraint. The pipeline atomically rolls back any partial updates. This option makes sense for critical data where invalid records indicate a serious upstream problem.</p>
+<pre><code class="lang-python">@dp.expect_or_fail("required_customer_id", "customer_id IS NOT NULL")
+def critical_transactions():
+    return spark.readStream.table("raw.transactions")
+</code></pre>
+<p>In SQL, use <code>ON VIOLATION FAIL UPDATE</code>:</p>
+<pre><code class="lang-sql">CREATE OR REFRESH STREAMING TABLE critical_transactions(
+    CONSTRAINT required_customer_id EXPECT (customer_id IS NOT NULL) ON VIOLATION FAIL UPDATE
+) AS SELECT * FROM STREAM(raw.transactions);
+</code></pre>
+<div class="NOTE">
+<p>Note</p>
+<p>When a pipeline has multiple parallel flows, a failure in one flow doesn't cause other flows to fail. Each flow operates independently.</p>
+</div>
+<h2 id="combine-multiple-expectations-for-comprehensive-checks">Combine multiple expectations for comprehensive checks</h2>
+<p>Real-world data validation often requires multiple rules. You can stack expectations on a single dataset to check different aspects of data quality.</p>
+<p>In Python, add multiple decorator calls:</p>
+<pre><code class="lang-python">@dp.expect("valid_amount", "amount &gt; 0")
+@dp.expect("valid_currency", "currency IN ('USD', 'EUR', 'GBP')")
+@dp.expect("valid_timestamp", "created_at &lt;= current_timestamp()")
+def validated_payments():
+    return spark.readStream.table("raw.payments")
+</code></pre>
+<p>Python also supports grouping expectations into reusable dictionaries. This approach helps you maintain consistency across multiple tables:</p>
+<pre><code class="lang-python">payment_rules = {
+    "valid_amount": "amount &gt; 0",
+    "valid_currency": "currency IN ('USD', 'EUR', 'GBP')",
+    "valid_timestamp": "created_at &lt;= current_timestamp()"
+}
+
+@dp.expect_all_or_drop(payment_rules)
+def clean_payments():
+    return spark.readStream.table("raw.payments")
+</code></pre>
+<p>The <code>expect_all</code>, <code>expect_all_or_drop</code>, and <code>expect_all_or_fail</code> decorators apply the same action to all expectations in the group.</p>
+<p>In SQL, separate multiple constraints with commas:</p>
+<div class="TIP">
+<p>Tip</p>
+<p>In-memory dictionaries are convenient for simple pipelines, but they embed rules inside your notebook. For production workloads where the same rules should apply across multiple pipelines, store expectations in a Unity Catalog Delta table instead — rules become version-controlled, auditable, and queryable like any other governed asset.</p>
+</div>
+<h2 id="store-rules-in-a-unity-catalog-table">Store rules in a Unity Catalog table</h2>
+<p>Centralizing expectations in a Unity Catalog table separates quality rules from pipeline logic. You update or audit rules in one place, and every pipeline that references the table picks up the change automatically.</p>
+<p>First, create a rules table in a governed schema:</p>
+<pre><code class="lang-sql">CREATE OR REPLACE TABLE governance.data_quality.rules AS
+SELECT col1 AS name, col2 AS constraint, col3 AS tag
+FROM (
+  VALUES
+    ('valid_amount',    'amount &gt; 0',                              'financial'),
+    ('valid_currency',  'currency IN (''USD'', ''EUR'', ''GBP'')',  'financial'),
+    ('non_null_email',  'email IS NOT NULL',                       'customer'),
+    ('valid_hire_date', 'hire_date &lt;= current_date()',             'hr')
+);
+</code></pre>
+<p>Then define a helper function that reads rules filtered by tag and returns them as a dictionary:</p>
+<pre><code class="lang-python">from pyspark import pipelines as dp
+from pyspark.sql.functions import col
+
+def get_rules(tag):
+    df = spark.read.table("governance.data_quality.rules").filter(col("tag") == tag).collect()
+    return {row["name"]: row["constraint"] for row in df}
+
+@dp.table
+@dp.expect_all_or_drop(get_rules("financial"))
+def validated_payments():
+    return spark.readStream.table("raw.payments")
+
+@dp.table
+@dp.expect_all_or_drop(get_rules("customer"))
+def validated_customers():
+    return spark.readStream.table("raw.customers")
+</code></pre>
+<p>Because the rules table lives in Unity Catalog, it benefits from lineage tracking, access control, and audit logs alongside your data tables. Teams can update a constraint by editing one row in the rules table, without touching any pipeline notebook.</p>
+<pre><code class="lang-sql">CREATE OR REFRESH STREAMING TABLE validated_payments(
+    CONSTRAINT valid_amount EXPECT (amount &gt; 0),
+    CONSTRAINT valid_currency EXPECT (currency IN ('USD', 'EUR', 'GBP')),
+    CONSTRAINT valid_timestamp EXPECT (created_at &lt;= current_timestamp())
+) AS SELECT * FROM STREAM(raw.payments);
+</code></pre>
+<h2 id="monitor-expectation-results">Monitor expectation results</h2>
+<p>After you define expectations, you can track their results through the pipeline UI. This visibility helps you understand data quality trends and identify recurring issues.</p>
+<p>To view expectation metrics:</p>
+<ol>
+<li>Open <strong>Jobs &amp; Pipelines</strong> in the Azure Databricks workspace sidebar.</li>
+<li>Select your pipeline by name.</li>
+<li>Select a dataset that has expectations defined.</li>
+<li>Open the <strong>Data quality</strong> tab in the right sidebar.</li>
+</ol>
+<p><a data-linktype="relative-path" href="media/5-monitor-expectation-results.png#lightbox">
+<img alt="Screenshot of the declarative pipeline editor, highlighting expectations." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/media/5-monitor-expectation-results.png"/>
+</a>
+</p>
+<p>The metrics show you how many records passed or failed each expectation during pipeline runs. For <code>warn</code> and <code>drop</code> actions, you see counts of violations. For <code>fail</code> actions, the pipeline stops before metrics are recorded, but error messages include details about the violating record.</p>
+<p>When a <code>fail</code> expectation triggers, the error message provides context to help you investigate:</p>
+<pre><code>[EXPECTATION_VIOLATION.VERBOSITY_ALL] Flow 'sensor-pipeline' failed to meet 
+the expectation. Violated expectations: 'temperature_in_valid_range'. 
+Input data: '{"id":"TEMP_001","temperature":-500,"timestamp_ms":"1710498600"}'.
+</code></pre>
+<p>You can also query expectation metrics programmatically through the Lakeflow Spark Declarative Pipelines event log. This approach enables you to build custom dashboards or trigger alerts based on data quality thresholds.</p>
+<p>Understanding when to use expectations sets you up to build pipelines that catch data quality issues before they affect downstream consumers. With the right combination of constraints and actions, you create a reliable data foundation for your analytics workloads.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/8-summary">https://learn.microsoft.com/en-us/training/modules/implement-manage-data-quality-constraints-unity-catalog/8-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Maintaining data quality requires a multi-layered approach that catches issues at every stage of your data pipeline. Throughout this module, you explored the tools Azure Databricks provides for implementing robust data quality constraints in Unity Catalog—from <strong>schema enforcement</strong> that validates data types automatically to <strong>pipeline expectations</strong> that monitor quality in real time.</p>
+<p>You learned how Delta Lake's built-in schema enforcement acts as a first line of defense, rejecting writes when data types cannot be safely cast. For more nuanced type handling, <strong>explicit casting</strong> with <code>cast()</code> and <code>try_cast()</code> gives you control over how mismatches are resolved. <strong>CHECK constraints</strong> enforce business rules directly on your tables, ensuring invalid data never enters production.</p>
+<p>Schema drift is inevitable when working with evolving data sources. You explored strategies for handling this reality—failing fast when changes require review, enabling <strong>schema evolution</strong> to adapt automatically, or using <strong>rescued data columns</strong> to preserve unexpected data for investigation. These options let you balance strictness with flexibility based on your pipeline's requirements.</p>
+<p><strong>Pipeline expectations</strong> in Lakeflow Spark Declarative Pipelines bring data quality validation directly into your ETL logic. You can <strong>warn</strong> about violations while still processing data, <strong>drop</strong> invalid records to ensure clean outputs, or <strong>fail</strong> pipelines when critical issues occur. The expectation metrics visible in the pipeline UI provide ongoing visibility into data quality trends.</p>
+<p>Apply these techniques incrementally in your data engineering workflows. Start with schema enforcement and CHECK constraints for fundamental type and value validation. Add pipeline expectations for streaming workloads where real-time quality monitoring matters. Use quarantine patterns to isolate problematic records without blocking your main data flows. Together, these practices create data pipelines that your organization can trust.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>

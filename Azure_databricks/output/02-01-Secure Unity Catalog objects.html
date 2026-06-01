@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Unity Catalog objects</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Secure Unity Catalog objects</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/1-introduction">https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/1-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Securing data is fundamental to enterprise data platforms, yet traditional approaches often fragment governance across multiple systems and require constant maintenance. As organizations scale their analytics workloads on Azure Databricks, they need unified security that protects sensitive information while maintaining operational efficiency. <strong>Unity Catalog</strong> addresses this challenge by providing centralized governance for data assets, compute resources, and access controls.</p>
+<p>When you work with Unity Catalog, security operates at multiple layers. You control who can access catalogs, schemas, and tables through <strong>granular permissions</strong>. You enforce <strong>row-level and column-level restrictions</strong> to ensure users see only the data they're authorized to view. You authenticate data access through <strong>service principals</strong> or <strong>managed identities</strong>, eliminating hardcoded credentials from your code. You retrieve sensitive configuration values from <strong>Azure Key Vault</strong> without exposing secrets in notebooks or job configurations.</p>
+<p>Understanding how these security mechanisms work together enables you to build data solutions that balance accessibility with protection. You need to know when inherited permissions simplify administration and when explicit grants provide necessary control. You must choose between row and column security functions versus dynamic views based on your governance requirements. You should recognize when managed identities offer advantages over service principals for authenticating storage access.</p>
+<p>This module guides you through Unity Catalog's security model, from understanding the <strong>query lifecycle</strong> to implementing <strong>authentication strategies</strong>. You explore access control patterns that scale across your organization, fine-grained filtering techniques that protect sensitive data, and credential management approaches that strengthen your security posture. By the end, you'll be equipped to design and implement comprehensive security for your Azure Databricks environment.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Understand query lifecycle</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/2-understand-query-lifecycle">https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/2-understand-query-lifecycle</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Understand query lifecycle</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Let's examine how Unity Catalog manages query execution, with particular attention to security and administrative controls. We'll walk step by step through what happens when a query is submitted against a Unity Catalog table, covering the interactions between compute, the control plane, the data plane, and cloud storage.</p>
+<h2 id="the-query-lifecycle-in-unity-catalog">The query lifecycle in Unity Catalog</h2>
+
+<p>The following diagram illustrates the overall flow of a query as it moves through different components in Unity Catalog.</p>
+<p><img alt="Diagram showing the query lifecycle in Unity Catalog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/query-lifecycle-unity-catalog.png"/></p>
+<h3 id="step-1-query-submission">Step 1: Query submission</h3>
+<p>The lifecycle begins when a principal (a user or service identity) issues a query. Queries can originate in different ways:</p>
+<ul>
+<li>A data scientist might use an <strong>all-purpose cluster</strong> for interactive Python or SQL workloads.</li>
+<li>A <strong>service principal</strong> might run a scheduled pipeline or job on a <strong>job cluster</strong>.</li>
+<li>A <strong>data analyst</strong> might send a query through <strong>Databricks SQL</strong>, using a SQL warehouse.</li>
+<li>A <strong>business intelligence (BI) tool</strong> connected to a SQL warehouse could also generate the request.</li>
+</ul>
+<p>In each case, the compute resource—cluster or warehouse—receives the query and begins execution.</p>
+<h3 id="step-2-request-validation-in-unity-catalog">Step 2: Request validation in Unity Catalog</h3>
+<p>The compute resource forwards the request to <strong>Unity Catalog</strong>. Unity Catalog acts as the control plane for security and governance. It records the request in the <strong>audit log</strong> and checks whether the principal has the necessary permissions to access the objects referenced in the query. If permissions are denied, the query is blocked and the denial is logged. If access is granted, the request moves forward.</p>
+<h3 id="step-3-assuming-cloud-credentials">Step 3: Assuming cloud credentials</h3>
+<p>For every object referenced in the query, Unity Catalog assumes the appropriate <strong>cloud credential</strong> associated with that object. These credentials are configured by a cloud administrator.</p>
+<ul>
+<li>For <strong>managed tables</strong>, the credential typically points to the cloud storage tied to the Unity Catalog metastore.</li>
+<li>For <strong>external tables or files</strong>, the credential corresponds to an external location governed by a defined storage credential.</li>
+</ul>
+<div class="NOTE">
+<p>Note</p>
+<p>In Azure, the preferred way to grant Unity Catalog access to Azure Data Lake Storage (ADLS Gen2) is via a <strong>Managed Identity + Access Connector</strong> (versus relying purely on service principals). They have the benefit of allowing Unity Catalog to access storage accounts protected by network rules, which isn’t possible using service principals, and they remove the need to manage and rotate secrets.</p>
+</div>
+<h3 id="step-4-issuing-scoped-tokens">Step 4: Issuing scoped tokens</h3>
+<p>Once credentials are validated, Unity Catalog generates a <strong>scoped temporary access token</strong> for each object. Along with the token, it provides a secure access URL. This allows the compute resource to read directly from storage without exposing long-lived credentials.</p>
+<h3 id="step-5-data-access-from-storage">Step 5: Data access from storage</h3>
+<p>The compute resource (cluster or SQL warehouse) uses the token and URL provided by Unity Catalog to request data directly from the underlying ADLS Gen2 endpoints (via <code>abfss://</code> or <code>dfs.core.windows.net</code> URL)</p>
+<div class="NOTE">
+<p>Note</p>
+<p>If your ADLS account has firewall or virtual network restrictions, you must explicitly allow the Azure Databricks access connector / managed identity to access the storage (in addition to allowing the compute nodes). If the storage account is locked down, even a valid token may be rejected if the identity is not allowed via firewall rules.</p>
+</div>
+<h3 id="step-6-data-transfer">Step 6: Data transfer</h3>
+<p>Cloud storage returns the requested data to the compute resource. This process is repeated for every object referenced in the query.</p>
+<h3 id="step-7-fine-grained-filtering">Step 7: Fine-grained filtering</h3>
+<p>Unity Catalog enforces <strong>row- and column-level filters</strong> on the compute resource itself. This ensures that principals only see the exact subset of data they're entitled to access.</p>
+<ul>
+<li><p><strong>Row-level filtering</strong> introduces conditions that are evaluated at query execution time inside the compute engine. Even though the underlying storage system may return a broader dataset, Unity Catalog ensures that only the rows matching the defined conditions are made visible to the requesting principal. This allows multiple users to query the same table but each receives a personalized, restricted view of the data. A row filter function is basically a predicate (a SQL expression or user-defined function) that is evaluated during query execution.</p>
+</li>
+<li><p><strong>Column-level filtering</strong> operates similarly but at the attribute level. Specific columns can be masked or transformed so that sensitive information is hidden or anonymized, depending on the privileges of the principal. This makes it possible to share datasets broadly while ensuring that confidential fields are only fully visible to those with appropriate authorization.</p>
+</li>
+</ul>
+<h3 id="step-8-returning-the-result">Step 8: Returning the result</h3>
+<p>The filtered query result is returned from the compute resource to the calling user, job, or application.</p>
+<h2 id="how-queries-work-with-apache-hive">How queries work with Apache Hive</h2>
+
+<p>Unity Catalog was designed to streamline governance, but it also maintains compatibility with the legacy Hive metastore. When a workspace is assigned to a Unity Catalog metastore, Hive appears as a special catalog named <strong>hive_metastore</strong>. Tables stored there can still be queried by referencing this catalog in the namespace.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Hive metastore table access control is a legacy data governance model.</p>
+</div>
+<p>The lifecycle of a query against a Hive table differs from Unity Catalog in several ways:</p>
+<ul>
+<li>Hive doesn't provide centralized, fine-grained governance. Instead, administrators often need to manage <strong>service accounts, secrets, or instance profiles</strong> for authentication and authorization.</li>
+<li>Access to data may involve setting up <strong>mount points, passthrough authentication, or storage policies</strong>, each requiring additional configuration.</li>
+<li>Audit logging and access controls are less integrated compared to Unity Catalog, which can lead to inconsistencies in security enforcement.</li>
+</ul>
+<p><img alt="Diagram showing the query lifecycle in Apache Hive." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/query-lifecycle-hive.png"/></p>
+<h3 id="step-1-query-submission-1">Step 1: Query submission</h3>
+<p>A principal (user or service) sends a query to a cluster or SQL endpoint. This is the starting point for all Hive queries.</p>
+<h3 id="step-2-access-check">Step 2: Access check</h3>
+<p>The cluster checks the query against <strong>table access control lists (ACLs)</strong>. These ACLs determine whether the requesting principal has the right to access the specified table.</p>
+<h3 id="step-3-location-lookup">Step 3: Location lookup</h3>
+<p>If access is granted, the cluster consults the <strong>Hive metastore</strong> to find the storage location of the table. The metastore contains metadata about tables, including their schemas and storage paths.</p>
+<h3 id="step-4-path-returned">Step 4: Path returned</h3>
+<p>The Hive metastore returns the <strong>storage path</strong> to the cluster, usually as a URI (for example, <code>abfss://...</code>). This path points to the physical location of the table data in cloud storage.</p>
+<h3 id="step-5-data-request">Step 5: Data request</h3>
+<p>The cluster attempts to read data from the cloud storage. At this stage, it must authenticate using one of several mechanisms, such as a <strong>service principal, passthrough authentication, or an instance profile</strong>. Administrators often need to configure these credentials in advance, along with secrets and mount points.</p>
+<h3 id="step-6-data-returned">Step 6: Data returned</h3>
+<p>Cloud storage sends the requested data back to the cluster.</p>
+<h3 id="step-7-enforcement-of-policies">Step 7: Enforcement of policies</h3>
+<p>The cluster enforces any last-mile filtering to remove data the principal shouldn't see. This may involve applying row- or column-level restrictions at query time.</p>
+<h3 id="step-8-result-delivery">Step 8: Result delivery</h3>
+<p>The final query result is sent back to the principal who issued the request.</p>
+<p>In practice, this means querying Hive involves more manual administrative steps and ongoing maintenance. Unity Catalog reduces this overhead by automating credential handling, providing scoped tokens, and enforcing policies consistently across all objects.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Implement access control strategies</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/3-implement-access-control-strategies">https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/3-implement-access-control-strategies</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Implement access control strategies</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Access control in Unity Catalog is built on four complementary models that work together to enforce secure, fine-grained access across your data environment.</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Applies to</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Privileges and ownership</strong></td>
+<td>Catalogs, schemas, tables</td>
+<td>Baseline access and delegation — who can access what</td>
+</tr>
+<tr>
+<td><strong>Attribute-based access control (ABAC)</strong></td>
+<td>Tagged objects across catalogs and schemas</td>
+<td>Centralized, tag-driven policies for dynamic enforcement</td>
+</tr>
+<tr>
+<td><strong>Table-level row and column filters</strong></td>
+<td>Individual tables</td>
+<td>Per-table filtering or masking using UDFs</td>
+</tr>
+<tr>
+<td><strong>Workspace bindings</strong></td>
+<td>Catalogs, external locations, storage credentials</td>
+<td>Restricting access to objects from specific workspaces</td>
+</tr>
+</tbody>
+</table>
+<p>This unit focuses on <strong>privileges and ownership</strong> — the foundation that all other models build on. Fine-grained row and column security is covered in the next two units. ABAC is covered in depth in the <em>Govern Unity Catalog objects</em> module.</p>
+<p>Unity Catalog uses a privilege model to control access to securable objects such as catalogs, schemas, tables, and views. Grants define <em>who</em> (the principal, such as a group or user) can perform <em>what action</em> (a privilege like SELECT, MODIFY, or CREATE) on <em>which object</em> (such as a table). Privileges can be assigned explicitly at each level of containment or inherited from higher levels like schemas or catalogs. Understanding these patterns is key to designing secure and maintainable permission structures.</p>
+<p>On Azure, a Unity Catalog <strong>metastore</strong> is a top-level container for all securable objects and is tightly integrated with Azure Databricks workspaces:</p>
+<ul>
+<li><strong>Region Bound</strong>: A metastore is created in a specific Azure region and can only be assigned to workspaces in the same region.</li>
+<li><strong>One per Workspace</strong>: Each Azure Databricks workspace can be linked to only one metastore at a time.</li>
+</ul>
+<p>Because of this region binding, organizations often create multiple metastores (one per region) if they operate across different Azure geographies. Data governance policies should account for this boundary.</p>
+<h2 id="querying-a-table-with-explicit-permissions-at-each-level">Querying a table with explicit permissions at each level</h2>
+<p>When a user or group needs to query a table, it isn't enough to grant SELECT directly on the table. Unity Catalog requires permissions at all levels of containment. That means the grantee needs:</p>
+<ol>
+<li><strong>USE CATALOG</strong> on the catalog that contains the schema,</li>
+<li><strong>USE SCHEMA</strong> on the schema that contains the table, and</li>
+<li><strong>SELECT</strong> on the table itself.</li>
+</ol>
+<p><img alt="Diagram showing permissions needed at each level in order to query a table." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/explicit-permissions-each-level.png"/></p>
+<p>If any of these privileges are missing, the user can't successfully query the table. This approach is called as the <em>explicit privilege model</em> because permissions are granted individually at each level. It's inherently secure because access to other objects is never granted unintentionally, but it requires more administrative effort. For example, if there are thousands of tables in a schema, each table must be explicitly granted, which is time-consuming to maintain.</p>
+<h2 id="querying-a-table-with-inherited-permissions-from-schema">Querying a table with inherited permissions from schema</h2>
+<p>Privilege inheritance reduces administrative overhead by granting permissions at a higher level. Instead of assigning SELECT on each table individually, an administrator can grant <strong>SELECT on the schema</strong>. Combined with <strong>USE SCHEMA</strong> and <strong>USE CATALOG</strong> privileges, this automatically gives the grantee SELECT on all tables and views within that schema, including any created in the future.</p>
+<p><img alt="Diagram showing permissions inherited from schema." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/inherited-permissions-schema.png"/></p>
+<p>This approach simplifies management, especially when large numbers of tables exist. However, it's less restrictive than the explicit model because all current and future objects within the schema become accessible. Access is still limited to that schema, though—other schemas remain inaccessible unless granted separately.</p>
+<h2 id="querying-a-table-with-inherited-permissions-from-catalog">Querying a table with inherited permissions from catalog</h2>
+<p>Inheritance can also extend from the catalog level. By granting <strong>USE CATALOG</strong> and <strong>ALL PRIVILEGES</strong> (or SELECT) on the catalog, the grantee automatically inherits the necessary permissions on all schemas, tables, and views within that catalog. This includes any schemas or objects created in the future.</p>
+<p><img alt="Diagram showing permissions inherited from catalog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/inherited-permissions-catalog.png"/></p>
+<p>This model is the most permissive because it opens access across the entire catalog. It's convenient when broad access is desired, such as giving a group of analysts the ability to query everything within a specific catalog. However, administrators need to carefully assess whether all objects in the catalog should be exposed in this way, since there's no granularity at the schema or table level when inheriting from the catalog.</p>
+<h2 id="creating-a-table-explicit-at-schema">Creating a table: explicit at schema</h2>
+<p>Creating new tables requires more than SELECT permissions. At a minimum, the grantee must have:</p>
+<ul>
+<li><strong>USE CATALOG</strong> on the containing catalog,</li>
+<li><strong>USE SCHEMA</strong> on the target schema, and</li>
+<li><strong>CREATE TABLE</strong> on that schema.</li>
+</ul>
+<p><img alt="Diagram showing permissions required in order to create a table." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/create-table-explicit-permissions.png"/></p>
+<p>With these permissions, the grantee can create new tables in that specific schema. This explicit setup restricts table creation to one schema and avoids granting unnecessary privileges elsewhere. It's a common choice when only certain schemas should allow new object creation.</p>
+<h2 id="creating-a-table-inherited-from-catalog">Creating a table: inherited from catalog</h2>
+<p>In more permissive environments, table creation rights can be inherited from the catalog level. By granting <strong>USE CATALOG</strong>, <strong>USE SCHEMA</strong>, and <strong>CREATE TABLE</strong> at the catalog, the grantee automatically has the ability to create tables in any schema within that catalog, including schemas that may be added later.</p>
+<p><img alt="Diagram showing permissions inherited from catalog, in order to create a table." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/create-table-inherited-permissions.png"/></p>
+<p>This approach is easier to maintain but comes with greater risk, since it enables table creation everywhere within the catalog. It's best suited for catalogs designed for collaborative or exploratory work, where unrestricted creation is acceptable.</p>
+<h3 id="granting-permissions-with-ansi-sql">Granting permissions with ANSI SQL</h3>
+<p>Unity Catalog follows the ANSI SQL Data Control Language (DCL) standard for granting and revoking privileges. This means you can manage permissions with familiar statements like <strong>GRANT</strong> and <strong>REVOKE</strong>. For example, if you want to allow the group <em>analysts</em> to query a specific table, you can issue:</p>
+<pre><code class="lang-sql">GRANT SELECT ON TABLE sales TO `analysts`;
+</code></pre>
+<p>If you want that same group to traverse the containing schema and catalog, you would also need:</p>
+<pre><code class="lang-sql">GRANT USE SCHEMA ON SCHEMA finance TO `analysts`;
+GRANT USE CATALOG ON CATALOG corpdata TO `analysts`;
+</code></pre>
+<p>To permit table creation within a schema, you can grant:</p>
+<pre><code class="lang-sql">GRANT CREATE TABLE ON SCHEMA finance TO `analysts`;
+</code></pre>
+<p>Permissions can be revoked in a similar way:</p>
+<pre><code class="lang-sql">REVOKE SELECT ON TABLE sales FROM `analysts`;
+</code></pre>
+<p>These SQL statements can be run from a Databricks notebook, the SQL editor in the workspace, or in Databricks SQL.</p>
+<h3 id="granting-permissions-with-the-azure-databricks-user-interface">Granting permissions with the Azure Databricks user interface</h3>
+<p>For those people who prefer a graphical approach, Unity Catalog permissions can also be managed directly in the Azure Databricks UI. In <strong>Catalog Explorer</strong> (previously referred to as Data Explorer), you can navigate through catalogs, schemas, and tables. Each object has a <strong>Permissions</strong> tab where you can add users, groups, or service principals as principals, and assign privileges like SELECT, USE SCHEMA, or ALL PRIVILEGES.</p>
+<p>For example, to grant SELECT on a table through the UI:</p>
+<ol>
+<li>Open <strong>Catalog Explorer</strong>.</li>
+<li>Navigate to the catalog and schema that contain the target table.</li>
+<li>Select the table, then go to the <strong>Permissions</strong> tab.</li>
+<li>Add the group (for example, <em>analysts</em>) and assign the <strong>SELECT</strong> privilege.</li>
+</ol>
+<p><img alt="Screenshot showing the Databricks Catalog Explorer, with a focus on granting SELECT permissions on table reseller_sales_targets." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/grant-select-on-table.png"/></p>
+<p>You can repeat the same process at the schema or catalog level to assign broader permissions. The UI also clearly shows inherited privileges, making it easier to audit access across levels.</p>
+<h2 id="verify-granted-privileges">Verify granted privileges</h2>
+<p>After granting privileges, you should verify that the correct permissions are in place. Unity Catalog provides the <strong>SHOW GRANTS</strong> command to display all privileges on an object or for a specific principal.</p>
+<p>To see all grants on a table, use the SHOW GRANTS command with the object type and name:</p>
+<pre><code class="lang-sql">-- Show all privileges granted on a table
+SHOW GRANTS ON TABLE sales.reporting.monthly_revenue;
+</code></pre>
+<p>This command returns a list showing each principal, the privileges they hold, and the object those privileges apply to. You can also check grants on schemas, catalogs, or other securable objects using the same pattern.</p>
+<p>If you want to see privileges for a specific principal, include the principal name in the command:</p>
+<pre><code class="lang-sql">-- Show privileges for a specific group
+SHOW GRANTS `finance-team` ON TABLE sales.reporting.monthly_revenue;
+</code></pre>
+<p>When reviewing privileges, remember that <strong>inherited grants</strong> might not appear in the output for the specific table. If a user has SELECT granted at the schema or catalog level, that privilege applies to the table through inheritance, but SHOW GRANTS on the table itself might not display it. To get a complete picture, check grants at all levels of the hierarchy.</p>
+<h2 id="understand-access-control-lists-acls">Understand Access Control Lists (ACLs)</h2>
+
+<p>Access Control Lists (ACLs) are the backbone of Unity Catalog’s authorization model: they explicitly associate a <em>principal</em> with a <em>privilege</em> on a <em>securable object</em>. To understand how ACLs work, we can break down those three pieces—privileges, securables, principals—and then see how they interact in a typical grant.</p>
+<p><img alt="Diagram showing how privileges, securables and principles help with access control lists." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/understand-access-control-lists.png"/></p>
+<h3 id="privileges">Privileges</h3>
+<p>Privileges are the specific operations or actions that can be performed on securable objects. In Unity Catalog, different kinds of objects support different privilege sets. For example, for a <strong>table</strong> the allowed privileges include <code>SELECT</code>, <code>MODIFY</code>, <code>MANAGE</code>, <code>ALL PRIVILEGES</code> (which expands to all applicable privileges) among others. For a <strong>schema</strong>, privileges like <code>USE SCHEMA</code>, <code>CREATE TABLE</code>, <code>ALL PRIVILEGES</code>, and <code>MANAGE</code> apply. At the <strong>catalog</strong> level, you see privileges such as <code>USE CATALOG</code>, <code>CREATE SCHEMA</code>, <code>BROWSE</code>, <code>ALL PRIVILEGES</code>, and more.</p>
+<p>Because not every privilege makes sense for every object (for example, <code>MODIFY</code> on a view is meaningless), Unity Catalog limits which privileges are valid on which securable types. The <code>ALL PRIVILEGES</code> shorthand is powerful in that it gives "every applicable privilege" on an object, and as new privileges are added over time, the <code>ALL PRIVILEGES</code> grant automatically covers those new privileges as well.</p>
+<h3 id="securables">Securables</h3>
+<p>Securables are the objects to which you can grant or revoke privileges. In Unity Catalog, securables are hierarchical: the metastore (or catalog) is at the top, followed by catalogs, then schemas, then tables/views, and other object types such as functions, volumes, external locations, etc.</p>
+<p>Because of this hierarchy, privileges can be inherited (if permitted) from higher levels down to lower levels.</p>
+<h3 id="principals">Principals</h3>
+<p>Principals are the "who" in an ACL—the identity to which privileges are granted. In Unity Catalog / Azure Databricks, a principal can be a <strong>user</strong>, a <strong>service principal</strong> (for programmatic identities), or a <strong>group</strong>. Groups are often preferred for manageability: you assign privileges to groups, and then users inherit those privileges by membership, rather than granting to each individual.</p>
+<p>The syntax for naming principals in SQL uses backticks when special characters exist (for example, an "@" in a user name or dashes in a service principal ID). For instance:</p>
+<pre><code class="lang-sql">GRANT SELECT ON TABLE t TO `alice@company.com`;
+</code></pre>
+<p>Or</p>
+<pre><code class="lang-sql">GRANT SELECT ON TABLE t TO `aaaaaaaa-bbbb-cccc-1111-222222222222`;  -- service principal  
+</code></pre>
+<p>Also worth noting: <code>account users</code> is a built-in principal representing all users of the account; you can grant privileges to <code>account users</code> (though not to the <code>users</code> workspace-local group) in Unity Catalog.</p>
+<p>When you put these pieces together, the ACL is simply a statement like: <em>grant this privilege to that principal on this securable object</em>. At runtime, when a user tries to perform an operation (say select from a table), the system checks the ACLs along the hierarchy (catalog, schema, table) and evaluates whether the user (via group membership, explicit grants, or inherited grants) has the required combination of permissions to succeed.</p>
+<h3 id="microsoft-entra-id-integration">Microsoft Entra ID integration</h3>
+<p>On Azure Databricks, Unity Catalog identities are managed through <strong>Microsoft Entra ID</strong>. This means that all users, service principals, and groups referenced in grants must exist in Microsoft Entra ID. Key points include:</p>
+<ul>
+<li><strong>Users and Groups</strong>: Unity Catalog does not support workspace-local users or groups. You must provision and manage them in Microsoft Entra ID, and Unity Catalog syncs them into the Azure Databricks account.</li>
+<li><strong>Service Principals</strong>: Programmatic identities are registered as Microsoft Entra applications and can be granted privileges in Unity Catalog. Credentials are typically stored in Azure Key Vault or accessed through managed identities.</li>
+<li><strong>Account Users</strong>: The special built-in principal <code>account users</code> represents all Microsoft Entra ID users in the Azure Databricks account, and can be used when broad access is acceptable.</li>
+</ul>
+<p>Because Unity Catalog relies on Microsoft Entra ID, administrators should coordinate closely with their Microsoft Entra ID administrators to ensure that group memberships and role assignments remain accurate.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Understand fine-grained access control</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/4-understand-fine-grained-access-control">https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/4-understand-fine-grained-access-control</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Understand fine-grained access control</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>In the previous module, you looked at granting or denying access to entire tables. That works when every authorized user can see every row and column, but in real scenarios you often need to expose only part of a dataset. You might need to hide rows that a user isn't entitled to view, redact or mask specific columns that contain sensitive attributes, or partially transform values so that they remain useful without leaking full detail. Rather than duplicating tables or maintaining multiple extract copies, you can apply fine-grained access control. In Databricks Unity Catalog, you implement fine-grained control using one of two approaches:</p>
+<ul>
+<li><strong>Row and Column Security</strong>: the preferred, modern method, composed of column masking and row filtering.</li>
+<li><strong>Dynamic Views</strong>: the earlier pattern that still has valid use cases.</li>
+</ul>
+<p><img alt="Diagram illustrating the two approaches to fine grained access control." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/fine-grained-access-control-two-approaches.png"/></p>
+<p>In this unit, you'll learn what each approach is, when to use it, and why one is generally favored today. You'll explore the specific SQL syntax in the next unit, so here we stay at the conceptual level.</p>
+<h2 id="why-fine-grained-control-matters">Why fine-grained control matters</h2>
+<p>You frequently have a single canonical table that must serve different audiences: application users, data analysts, compliance reviewers, or support staff. Creating separate physical tables for each audience leads to data duplication, stale copies, extra orchestration, and security drift. Views can help, but managing many views—each encoding slightly different masking or filtering—becomes difficult over time. Fine-grained access control lets you keep one authoritative table while tailoring what each principal actually sees at query time.</p>
+<p>Typical objectives you'll address:</p>
+<ul>
+<li><strong>Column masking</strong>: Show a column's presence but hide (or transform) its sensitive values for most users.</li>
+<li><strong>Row filtering</strong>: Suppress entire records that a user or group shouldn't see.</li>
+<li><strong>Partial transformation</strong>: Preserve analytical utility (for example, last two digits, domain of an email) without exposing full identifiers.</li>
+</ul>
+<p><img alt="Diagram illustrating commun use cases for fine-grained access control." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/fine-grained-access-control-common-use-cases.png"/></p>
+<h2 id="row-and-column-security">Row and column security</h2>
+<p>Row and Column Security is implemented through two core concepts:</p>
+<ul>
+<li><p><strong>Column masking</strong>: You associate a masking function with a specific column. When a user queries the table, Unity Catalog invokes that function to decide whether to return the real value, a redacted placeholder, or a transformed version. You typically define one function per masked column.</p>
+</li>
+<li><p><strong>Row filtering</strong>: You associate a filter function with the table. That function returns a boolean determining whether each row is visible to the querying principal. One function can govern all row-level rules for that table.</p>
+</li>
+</ul>
+<p>You create user-defined SQL functions that contain the decision logic (for example, checking the querying user's group membership). Because these functions are securable objects just like tables, you also decide where they live (schema/catalog) and who can alter or execute them. You then bind them directly to the table's metadata. At that point, anyone querying the table benefits from a single authoritative definition of masking and filtering—no extra layer required.</p>
+<p>Key characteristics you should internalize:</p>
+<ul>
+<li><strong>Centralized logic</strong>: Rules live alongside the table definition, reducing drift between data and policy.</li>
+<li><strong>Combinatorial flexibility</strong>: A single set of masking and filtering functions handles all user combinations; you don't create separate artifacts per audience.</li>
+<li><strong>Performance alignment</strong>: Operating at the table layer avoids the overhead of stacking multiple view abstractions.</li>
+<li><strong>Operational simplicity</strong>: Fewer named objects to permission, audit, and lifecycle.</li>
+</ul>
+<h2 id="dynamic-views">Dynamic views</h2>
+<p>Dynamic Views predate Row and Column Security. These have been with Azure Databricks for some time, and though they're no longer the preferred method for controlling access to rows and columns, they still have their place. You define a view that selects from one or more underlying tables and encodes conditional logic: CASE expressions to mask sensitive columns, predicates to exclude rows, or transformations that partially obfuscate values. Any user with permission on the view can query it without having direct access to the underlying tables, assuming the view owner has that access. This separation lets you shield source objects while presenting a curated projection.</p>
+<p><img alt="Diagram illustrating the concept of a dynamic view." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/dynamic-views.png"/></p>
+<p>You might create multiple dynamic views over the same table to serve different user cohorts (for example, a support view with partially masked identifiers and an analyst view with additional fields). Each view becomes its own securable object with its own ownership and grants.</p>
+<p>Characteristics to note:</p>
+<ul>
+<li><strong>Level of separation</strong>: Users can be isolated from source tables entirely.</li>
+<li><strong>Multi-table composition</strong>: You can assemble data from several tables and apply masking/filtering in one place.</li>
+<li><strong>Read-only exposure</strong>: Views can't themselves be updated; any data modification still requires access to the base tables.</li>
+<li><strong>Object proliferation risk</strong>: Each audience-specific variant typically requires a new view.</li>
+</ul>
+<h2 id="why-row-and-column-security-is-preferred-over-dynamic-views">Why row and column security is preferred over dynamic views</h2>
+<p>When choosing between these two manual approaches, you should default to Row and Column Security because:</p>
+<ul>
+<li><strong>Reduced object sprawl</strong>: One table plus a small set of functions replaces a potentially expanding family of views.</li>
+<li><strong>Easier maintenance</strong>: Policy changes occur where the data resides, lowering chances of unsynchronized logic across parallel views.</li>
+<li><strong>Performance advantages</strong>: Enforcement happens at the source, avoiding extra resolution layers and enabling better optimization.</li>
+<li><strong>Clearer governance</strong>: Auditing and lineage focus on the primary table rather than a web of derivative objects.</li>
+<li><strong>Flexible combinations</strong>: You avoid creating a new physical or logical artifact for every unique mix of masking and filtering rules.</li>
+</ul>
+<div class="NOTE">
+<p>Note</p>
+<p>Both Row and Column Security and Dynamic Views are <em>manual</em>, per-table approaches. Databricks also provides <strong>Attribute-Based Access Control (ABAC)</strong>, which lets you define centralized policies that apply automatically to all tables matching a governed tag across an entire schema or catalog — without any per-table configuration. ABAC is now the recommended approach for most use cases. It is covered in detail in the <em>Govern Unity Catalog objects</em> module.</p>
+</div>
+<h2 id="when-dynamic-views-still-make-sense">When dynamic views still make sense</h2>
+<p>You should consider dynamic views instead (or in addition) when:</p>
+<ul>
+<li>Source tables are intentionally treated as <strong>read-only interfaces</strong>; you want an explicit contract boundary between producers and consumers.</li>
+<li>You need to present a logical dataset assembled from <strong>multiple tables</strong> with consistent masking and filtering logic applied across joins.</li>
+<li><strong>Organizational policy</strong> requires strict separation such that consumers shouldn't even know the exact structure or existence of underlying tables.</li>
+<li><strong>Existing legacy patterns</strong> already use dynamic views and a phased migration strategy is necessary.</li>
+</ul>
+<h2 id="comparing-row-and-column-security-with-dynamic-views">Comparing row and column security with dynamic views</h2>
+<p>Here's a comparison of the two manual approaches side by side, so you can see the trade-offs and decide which best fits your needs. For a three-way comparison that includes ABAC, see the <em>Govern Unity Catalog objects</em> module.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Dimension</strong></th>
+<th><strong>Row and Column Security</strong></th>
+<th><strong>Dynamic Views</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Maintainability</strong></td>
+<td>Minimizes moving parts by enforcing security at the table level.</td>
+<td>More objects to manage if multiple views are created.</td>
+</tr>
+<tr>
+<td><strong>Flexibility</strong></td>
+<td>Limited to what's stored in the table.</td>
+<td>Can combine multiple tables directly for flexible compositions.</td>
+</tr>
+<tr>
+<td><strong>Object governance</strong></td>
+<td>Fewer objects overall; simplifies grants and audits.</td>
+<td>More objects to govern; grants may need to be managed at both view and table level.</td>
+</tr>
+<tr>
+<td><strong>Read/write patterns</strong></td>
+<td>Supports seamless querying and updating with masking or filtering applied at the table.</td>
+<td>Typically read-only; write patterns require direct table access.</td>
+</tr>
+<tr>
+<td><strong>Abstraction boundary</strong></td>
+<td>Exposes storage design more directly.</td>
+<td>Provides a presentation layer decoupled from underlying storage.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="typical-workflow">Typical workflow</h2>
+<p>Follow these steps to design the right approach and keep your model both secure and maintainable:</p>
+<ol>
+<li>Identify sensitive columns and row-level segmentation rules (for example, region-based, role-based).</li>
+<li>Decide if you truly need multi-table assembly or strict abstraction. If not, prefer Row and Column Security.</li>
+<li>For Row and Column Security: design minimal user-defined functions—one per masked column and optionally one row-filter function—that evaluate the querying principal.</li>
+<li>Attach these functions to the table so that queries automatically enforce the logic.</li>
+<li>For Dynamic Views (when justified): craft a single view that applies CASE expressions and WHERE predicates; create additional views only when audiences require materially different exposures.</li>
+<li>Periodically review whether evolving requirements still justify each dynamic view or whether consolidation into Row and Column Security is now feasible.</li>
+</ol>
+<h2 id="common-pitfalls">Common pitfalls</h2>
+<p>A few common pitfalls can undermine the effectiveness of a security model. One of the most frequent mistakes is <strong>duplicating tables</strong> for each audience. This approach quickly creates synchronization challenges and complicates governance, as any schema or data change must be applied consistently across all copies. Another recurring issue is the creation of <strong>multiple, nearly identical views</strong> instead of implementing generalizable masking logic. This not only increases maintenance overhead but also makes the system harder to audit and reason about.
+It's also important to be deliberate about where business logic resides.</p>
+<p><strong>Embedding complex transformations</strong> inside masking functions can blur responsibilities; these rules typically belong in upstream transformation pipelines, not in security enforcement. Equally critical is ensuring that the <strong>masking and filtering functions themselves are properly secured</strong>. If they're altered or bypassed, the entire protection model can be weakened. Finally, organizations should be cautious of <strong>over-masking</strong>, which removes more information than necessary and can inadvertently block legitimate analytical tasks that depend on those fields.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Implement row filtering and column masking</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/5-implement-row-filtering-column-masking">https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/5-implement-row-filtering-column-masking</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Implement row filtering and column masking</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When working with sensitive information in a data lakehouse, you need more than just role-based permissions. Unity Catalog allows you to enforce <strong>fine-grained access control</strong> so that different users can query the same tables but see only the data they're allowed to. Two approaches are commonly used, as explained in the previous unit:</p>
+<ul>
+<li><strong>Row and Column Security</strong> – restricts which rows and columns a user can see at the table level.</li>
+<li><strong>Dynamic Views</strong> – encapsulates filtering and masking logic in a view definition that adapts automatically to user context.</li>
+</ul>
+<p>Both strategies depend on group membership checks, such as <code>is_account_group_member()</code>, to determine whether a user should see protected values.</p>
+<h2 id="row-and-column-security">Row and column security</h2>
+<p>Row and column security lets you define rules directly on a table. Two operations are available: <strong>column masking</strong> and <strong>row filtering</strong>.</p>
+<h3 id="column-masking">Column masking</h3>
+<p>Column masking ensures that sensitive values are hidden unless a user belongs to an authorized group. For example, the <code>c_phone</code> column in a <strong>customers</strong> table can be masked with a function:</p>
+<pre><code class="lang-sql">CREATE OR REPLACE FUNCTION phone_mask(c_phone STRING)
+  RETURN CASE WHEN is_account_group_member('metastore_admins') 
+    THEN c_phone 
+    ELSE 'REDACTED PHONE NUMBER' 
+  END;
+</code></pre>
+<p>The masking function is then applied to the column:</p>
+<pre><code class="lang-sql">ALTER TABLE customers 
+  ALTER COLUMN c_phone 
+  SET MASK phone_mask;
+</code></pre>
+<p>From this point forward, queries against the table return actual phone numbers only to <code>metastore_admins</code>. Other users always see <code>REDACTED PHONE NUMBER</code>.</p>
+<h3 id="row-filtering">Row filtering</h3>
+<p>Row filtering removes rows from query results for users who aren't authorized. You define a function that returns <code>true</code> only when a row should be visible. For example:</p>
+<pre><code class="lang-sql">CREATE OR REPLACE FUNCTION nation_filter(c_nationkey INT)
+  RETURN IF(is_account_group_member('admin'), true, c_nationkey = 21);
+</code></pre>
+<p>When applied as a row filter:</p>
+<pre><code class="lang-sql">ALTER TABLE customers 
+SET ROW FILTER nation_filter ON (c_nationkey);
+</code></pre>
+<p>This ensures that non-admins only see rows where <code>c_nationkey = 21</code>. Admin users continue to see all rows.</p>
+<p>Together, column masking and row filtering provide a way to enforce restrictions directly on the base table.</p>
+<h2 id="dynamic-views">Dynamic views</h2>
+<p>An alternative to modifying a table is to create a <strong>dynamic view</strong>. Views allow you to express row and column restrictions in SQL, and every user querying the view automatically sees the appropriate subset of the data.</p>
+<p>Consider a <strong>customers_new</strong> table with sensitive information. A dynamic view can redact phone numbers and limit rows in one definition:</p>
+<pre><code class="lang-sql">CREATE OR REPLACE VIEW vw_customers AS
+SELECT 
+  c_custkey, 
+  c_name, 
+  c_address, 
+  c_nationkey,
+  CASE 
+    WHEN is_account_group_member('admins') THEN c_phone
+    ELSE 'REDACTED PHONE NUMBER'
+  END as c_phone,
+  c_acctbal, 
+  c_mktsegment, 
+  c_comment
+FROM customers_new
+WHERE
+  CASE WHEN
+    is_account_group_member('admins') THEN TRUE
+    ELSE c_nationkey = 21
+  END;
+</code></pre>
+<p>When users query this view, the rules apply automatically:</p>
+<ul>
+<li>Phone numbers are shown only for members of the <code>admins</code> group.</li>
+<li>Non-admins see only rows with <code>c_nationkey = 21</code>.</li>
+</ul>
+<p>Access to the view can then be granted with standard SQL permissions:</p>
+<pre><code class="lang-sql">GRANT SELECT ON VIEW vw_customers TO `account users`;
+</code></pre>
+<p>The underlying table remains untouched, while the view enforces security logic.</p>
+<h2 id="choosing-between-the-two-approaches">Choosing between the two approaches</h2>
+<p>Both approaches achieve fine-grained security, but they differ in scope:</p>
+<ul>
+<li><strong>Row and Column Security</strong> is embedded at the table level and guarantees that restrictions apply everywhere the table is used.</li>
+<li><strong>Dynamic Views</strong> provide flexibility: you can create multiple views with different rules for different audiences, while keeping the base table unrestricted.</li>
+</ul>
+<p><a data-linktype="relative-path" href="media/choose-between-approaches.png#lightbox">
+<img alt="Diagram helping you choose between the two approaches." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/choose-between-approaches.png"/>
+</a>
+</p>
+<p>In practice, you use table-level controls when you need strict enforcement, and dynamic views when you want adaptable, shareable abstractions.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Access Azure Key Vault secrets</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/6-access-azure-key-vault">https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/6-access-azure-key-vault</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Access Azure Key Vault secrets</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>When you work with Azure Databricks, you often need to connect to external data sources, APIs, or services that require authentication credentials. Storing passwords, connection strings, or API keys directly in notebooks creates security risks and makes credential management difficult. Azure Key Vault integration solves this challenge by providing a secure, centralized way to manage secrets in your Databricks workflows.</p>
+
+<p>As a data engineer working in Azure, you typically use Azure Key Vault rather than Databricks-backed secret scopes. This approach aligns with enterprise security practices and provides better integration with other Azure services. You can reference secrets stored in Azure Key Vault from your notebooks, jobs, and cluster configurations without exposing sensitive values.</p>
+<h2 id="understanding-secret-scopes-in-azure-databricks">Understanding secret scopes in Azure Databricks</h2>
+<p>Azure Databricks uses secret scopes to organize and control access to secrets. A secret scope is a named collection of secrets that you reference in your code. Each scope can contain multiple secrets, and you assign permissions at the scope level.</p>
+<p>The following diagram shows the overall workflow for using Azure Key Vault-backed secret scopes in Databricks:</p>
+<p><img alt="Diagram showing Azure Key Vault-backed secret scopes in Databricks." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/key-vault-backed-secret-scopes.png"/></p>
+<p>Azure Databricks supports two types of secret scopes:</p>
+<ul>
+<li><p><strong>Databricks-backed scopes</strong> store secrets in an encrypted database managed by Azure Databricks. You create and manage these secrets using the Databricks CLI or API.</p>
+</li>
+<li><p><strong>Azure Key Vault-backed scopes</strong> provide a read-only interface to secrets stored in an Azure Key Vault instance. You manage the actual secrets in Azure Key Vault, while the scope in Azure Databricks provides controlled access.</p>
+</li>
+</ul>
+<p>For production workloads, Azure Key Vault-backed scopes offer several advantages. They integrate with your organization's existing Azure security infrastructure. They support network restrictions that Databricks-backed scopes cannot. They eliminate the need to synchronize secrets across multiple systems. When you update a secret in Key Vault, all Azure Databricks workspaces that reference that scope automatically use the updated value after you restart your clusters.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Permissions on Azure Key Vault-backed scopes apply to all secrets in the linked Key Vault instance. If you need to restrict access to specific secrets, create separate Key Vault instances and link them to different secret scopes.</p>
+</div>
+<h2 id="creating-an-azure-key-vault-backed-secret-scope">Creating an Azure Key Vault-backed secret scope</h2>
+<p>Before you create an Azure Key Vault-backed scope, you need an Azure Key Vault instance configured correctly. Your Key Vault must use the <strong>Vault access policy</strong> permission model rather than Azure role-based access control — Azure Databricks does not support the RBAC permission model for Key Vault-backed secret scopes.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>As of 2026, Azure Key Vault API version 2026-02-01 and later create new vaults with <strong>Azure RBAC</strong> as the default permission model. If you create a Key Vault through the Azure portal, Azure CLI, or SDK without explicitly setting the permission model, it defaults to RBAC and Databricks secret scope creation fails with a 403 authorization error. Before creating the Databricks scope, verify your Key Vault uses the Vault access policy model: in the Azure portal, go to your Key Vault → <strong>Settings</strong> → <strong>Access configuration</strong> → <strong>Permission model</strong> and confirm it is set to <strong>Vault access policy</strong>. You can change this setting before creating the secret scope.</p>
+</div>
+<p>Under the Key Vault's networking settings, you must allow trusted Microsoft services to bypass the firewall, even if you restrict access to specific virtual networks.</p>
+<p>You create the secret scope using a special URL in your Azure Databricks workspace. Navigate to <code>https://&lt;databricks-instance&gt;#secrets/createScope</code>, replacing <code>&lt;databricks-instance&gt;</code> with your workspace URL. This URL is case-sensitive—the <code>S</code> in <code>createScope</code> must be uppercase.</p>
+<p>When you create the scope, you provide a descriptive name and specify who can manage it. The <strong>Manage Principal</strong> setting determines whether only the creator or all workspace users have MANAGE permission on the scope. MANAGE permission allows reading secrets, writing new secrets, and controlling who else can access the scope. Restricting management to the creator requires the Premium plan.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/create-secret-scope.png#lightbox">
+<img alt="Screenshot of the Azure Databricks Create Secret Scope feature." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/create-secret-scope.png"/>
+</a>
+</span>
+</p>
+<p>You also need two pieces of information from your Azure Key Vault: the <strong>DNS Name</strong> (for example, <code>https://databrickskv.vault.azure.net/</code>) and the <strong>Resource ID</strong> (for example, <code>/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/databricks-rg/providers/Microsoft.KeyVault/vaults/databricksKV</code>). You can find both values in the <strong>Properties</strong> section of your Key Vault in the Azure portal.</p>
+<p>When you create the scope, Databricks automatically grants the Azure Databricks service principal the <strong>Get</strong> and <strong>List</strong> permissions on your Key Vault. This allows the service to retrieve secret values on behalf of authorized users. Your account must have the Key Vault Contributor, Contributor, or Owner role to complete this configuration.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>After creating the scope, you manage the actual secrets in Azure Key Vault, not in Databricks. You use the Azure portal or Azure CLI to add, update, or delete secrets in the Key Vault instance.</p>
+</div>
+<h2 id="retrieving-secrets-in-notebooks-and-jobs">Retrieving secrets in notebooks and jobs</h2>
+<p>Once you create a secret scope, you access secrets in your notebooks using the <code>dbutils.secrets.get()</code> function. This function takes two parameters: the scope name and the secret key name. The function returns the secret value, which Azure Databricks automatically redacts in notebook outputs.</p>
+<pre><code class="lang-python">username = dbutils.secrets.get(scope="jdbc", key="username")
+password = dbutils.secrets.get(scope="jdbc", key="password")
+
+df = (spark.read
+  .format("jdbc")
+  .option("url", "jdbc:sqlserver://server.database.windows.net:1433")
+  .option("dbtable", "customers")
+  .option("user", username)
+  .option("password", password)
+  .load()
+)
+</code></pre>
+<p>In this example, you retrieve database credentials from a secret scope named <code>jdbc</code>. The <code>username</code> and <code>password</code> variables contain the actual secret values, but if you print these variables or display them in notebook output, Azure Databricks replaces the values with <code>[REDACTED]</code>.</p>
+<p>This redaction provides protection against accidental exposure, but it doesn't prevent intentional access by authorized users. Any user with permission to run code on the cluster can access secret values programmatically. You control access to secrets by managing permissions on the secret scope and the cluster.</p>
+<p>You can also list the secrets available in a scope to discover what keys exist:</p>
+<pre><code class="lang-python">dbutils.secrets.list("jdbc")
+</code></pre>
+<p>This returns metadata about the secrets, including their key names, but not the actual values. This helps you verify that the secrets you need exist in the scope before you reference them.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Name your secrets descriptively so that their purpose is clear when you list them. For example, use <code>database-username</code> instead of <code>user1</code>, or <code>storage-account-key</code> instead of <code>key</code>.</p>
+</div>
+<h2 id="using-the-secret-function-in-sql">Using the secret() function in SQL</h2>
+<p>In addition to <code>dbutils.secrets.get()</code>, you can retrieve secrets directly in SQL queries using the <code>secret()</code> function. This function is available in Databricks SQL and Spark SQL, making it convenient when working with SQL notebooks or queries.</p>
+<pre><code class="lang-sql">SELECT secret('jdbc', 'username') AS db_username;
+</code></pre>
+<p>You can also use the <code>secret()</code> function in SQL statements that configure connections or perform operations:</p>
+<pre><code class="lang-sql">CREATE TABLE customer_data
+USING jdbc
+OPTIONS (
+  url "jdbc:sqlserver://server.database.windows.net:1433",
+  dbtable "customers",
+  user secret('jdbc', 'username'),
+  password secret('jdbc', 'password')
+);
+</code></pre>
+<p>The <code>secret()</code> function provides the same redaction behavior as <code>dbutils.secrets.get()</code>—secret values are replaced with <code>[REDACTED]</code> in query outputs. For cases where you want to return <code>NULL</code> instead of raising an error when a secret doesn't exist, use the <code>try_secret()</code> function.</p>
+<h2 id="using-secrets-in-spark-configurations">Using secrets in Spark configurations</h2>
+<p>Sometimes you need to reference secrets in cluster configurations rather than in notebook code. This is useful when you want to set Spark properties or environment variables that multiple notebooks on the cluster can access.</p>
+<p>You reference a secret in a <strong>Spark configuration property</strong> using double curly braces:</p>
+<pre><code class="lang-txt">spark.storage.key {{secrets/storage/account-key}}
+</code></pre>
+<p>This syntax tells Databricks to retrieve the secret named <code>account-key</code> from the scope named <code>storage</code> and assign it to the <code>spark.storage.key</code> configuration property. You configure this in the <strong>Advanced Options</strong> section when you create or edit a cluster.</p>
+<p>In your notebook, you retrieve the value using:</p>
+<pre><code class="lang-python">storage_key = spark.conf.get("spark.storage.key")
+</code></pre>
+<h2 id="reference-secrets-in-environment-variables">Reference secrets in environment variables</h2>
+<p>You can also reference secrets in environment variables. This is particularly useful for init scripts that run before notebooks execute:</p>
+<pre><code class="lang-ini">STORAGE_KEY={{secrets/storage/account-key}}
+</code></pre>
+<p>In an init script, you access this environment variable like any other:</p>
+<pre><code class="lang-bash">if [ -n "$STORAGE_KEY" ]; then
+  echo "Configuring storage with key"
+fi
+</code></pre>
+<p>Keep in mind that any user with CAN ATTACH TO permissions on the cluster can read environment variables and Spark configuration properties. This means they can access secrets even if they don't have direct permission to read from the secret scope. Use this approach only when the secrets need to be available to all cluster users.</p>
+<p>When you update a secret in Azure Key Vault, you must restart your cluster for Azure Databricks to fetch the new value. The cluster caches secret values when it starts, and it doesn't automatically detect changes in Key Vault.</p>
+<h2 id="managing-secret-scope-permissions">Managing secret scope permissions</h2>
+<p>Access to secrets is controlled through permissions on the secret scope. When you create a scope, you receive MANAGE permission by default. This allows you to read secrets, add new secrets (in Databricks-backed scopes), and control who else can access the scope.</p>
+<p>You assign permissions using the Databricks CLI. Three permission levels exist: <strong>READ</strong> allows retrieving secret values, <strong>WRITE</strong> allows adding or updating secrets (only for Databricks-backed scopes, not Key Vault-backed scopes), and <strong>MANAGE</strong> allows reading secrets and controlling permissions.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>For Azure Key Vault-backed scopes, you can only manage who has access to the scope through Databricks ACLs. You cannot add or update secrets through Databricks—secrets must be managed directly in Azure Key Vault. The WRITE permission is not applicable to Key Vault-backed scopes.</p>
+</div>
+<p>To grant the READ permission to a group:</p>
+<pre><code class="lang-bash">databricks secrets put-acl jdbc data-engineers READ
+</code></pre>
+<p>This command grants the <code>data-engineers</code> group permission to retrieve secrets from the <code>jdbc</code> scope. You can grant permissions to individual users by using their email addresses or to service principals using their application IDs.</p>
+<p>You can view all permissions on a scope:</p>
+<pre><code class="lang-bash">databricks secrets list-acls jdbc
+</code></pre>
+<p>This shows which principals have access and their permission levels. You can also check the permissions for a specific principal:</p>
+<pre><code class="lang-bash">databricks secrets get-acl jdbc data-engineers
+</code></pre>
+<p>To remove a principal's access to a scope:</p>
+<pre><code class="lang-bash">databricks secrets delete-acl jdbc data-engineers
+</code></pre>
+<div class="NOTE">
+<p>Note</p>
+<p>The ability to restrict MANAGE permission to only the creator (rather than all workspace users) requires the Premium plan. On the Standard plan, you must grant MANAGE permission to all workspace users when creating an Azure Key Vault-backed secret scope.</p>
+</div>
+<p>With these capabilities, you can securely access Azure Key Vault secrets in your Databricks workflows while maintaining control over who can use those secrets. This integration strengthens your security posture and aligns with enterprise governance requirements.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>7. Authenticate data access with service principals</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/7-authenticate-data-access-service-principals">https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/7-authenticate-data-access-service-principals</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Authenticate data access with service principals</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>As a data engineer working with Azure Databricks, you often need to access data stored in Azure Data Lake Storage or other cloud storage services. Service principals provide a secure, automated way to authenticate these data access requests without using personal credentials.</p>
+
+<h2 id="understanding-service-principals-for-data-access">Understanding service principals for data access</h2>
+<p>A service principal is an identity created for applications and services to access Azure resources. Think of it as an automated user account specifically designed for applications rather than humans.</p>
+<p>When your Databricks notebooks or jobs need to read data from Azure storage, they can authenticate using a service principal. This approach offers several advantages over using personal credentials. The authentication happens automatically without manual login, works consistently across different users and environments, and allows precise control over which storage locations the principal can access.</p>
+<p>A service principal consists of three key components you'll work with:</p>
+<ul>
+<li><strong>Application (client) ID</strong>: A unique identifier for the service principal</li>
+<li><strong>Directory (tenant) ID</strong>: The Microsoft Entra ID tenant where the service principal exists</li>
+<li><strong>Client secret</strong>: A password-like credential that proves the identity of the service principal</li>
+</ul>
+<div class="NOTE">
+<p>Note</p>
+<p>While service principals remain a valid authentication method, Microsoft recommends using <strong>managed identities</strong> for Unity Catalog storage credentials when possible. Managed identities eliminate the need to manage and rotate secrets and can access storage accounts protected by network rules. However, service principals are still useful in scenarios where managed identities aren't available or when you need more explicit control over credentials.</p>
+<p>We will cover managed identities in the next unit.</p>
+</div>
+<h2 id="using-service-principals-with-unity-catalog">Using service principals with Unity Catalog</h2>
+<p>Unity Catalog provides a centralized way to manage data access using service principals through storage credentials and external locations.</p>
+<p>A <strong>storage credential</strong> in Unity Catalog encapsulates a service principal's authentication details. Instead of embedding credentials directly in your code, you reference the storage credential by name. Unity Catalog handles the authentication behind the scenes, generating temporary tokens that allow your queries to access the underlying storage.</p>
+<p>Here's how the workflow operates in practice:</p>
+<p>When you query a table or read from an external location governed by Unity Catalog, the system checks which storage credential is associated with that location. Unity Catalog assumes the service principal identity, requests a temporary access token from Microsoft Entra ID, and provides that token to your compute resources. Your cluster or SQL warehouse then uses the token to access the storage directly.</p>
+<p><img alt="Diagram showing service principals for data access." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/service-principals-for-data-access.png"/></p>
+<p>This approach offers important benefits. Your sensitive credentials never appear in notebook code or job configurations. Unity Catalog audit logs record which principal accessed which data and when. You can grant and revoke access to storage locations through Unity Catalog permissions without changing any code.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>As a data engineer, you typically won't create the storage credential itself—that's an administrative task. You'll work with existing storage credentials that have been configured by your workspace administrators or metastore admins. Your role focuses on using these credentials through external locations and tables.</p>
+</div>
+<p>To access data through a Unity Catalog-managed external location, you simply query the table or reference the external location path. Unity Catalog handles the authentication automatically:</p>
+<pre><code class="lang-sql">-- Query a table in an external location secured by a service principal
+SELECT * FROM catalog_name.schema_name.external_table;
+</code></pre>
+<p>No explicit credential configuration is needed in your code. The table's metadata includes the external location reference, which points to a storage credential containing the service principal details.</p>
+<h2 id="using-service-principals-in-notebooks">Using service principals in notebooks</h2>
+<p>You might encounter scenarios where you need to configure service principal authentication directly in your notebook code. This pattern is common when working with storage that isn't registered in Unity Catalog or when using legacy configurations.</p>
+<p>To authenticate to Azure Data Lake Storage using a service principal, you configure Spark session properties. The service principal's client secret should always come from a secure secret store, never hardcoded in your notebook.</p>
+<p>Here's how you retrieve a secret and configure Spark to use service principal authentication:</p>
+<pre><code class="lang-python"># Retrieve the client secret from Databricks secrets
+service_credential = dbutils.secrets.get(scope="storage-secrets", key="sp-client-secret")
+
+# Configure Spark to authenticate using the service principal
+spark.conf.set("fs.azure.account.auth.type.&lt;storage-account&gt;.dfs.core.windows.net", "OAuth")
+spark.conf.set("fs.azure.account.oauth.provider.type.&lt;storage-account&gt;.dfs.core.windows.net", 
+               "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
+spark.conf.set("fs.azure.account.oauth2.client.id.&lt;storage-account&gt;.dfs.core.windows.net", 
+               "&lt;application-id&gt;")
+spark.conf.set("fs.azure.account.oauth2.client.secret.&lt;storage-account&gt;.dfs.core.windows.net", 
+               service_credential)
+spark.conf.set("fs.azure.account.oauth2.client.endpoint.&lt;storage-account&gt;.dfs.core.windows.net", 
+               "https://login.microsoftonline.com/&lt;directory-id&gt;/oauth2/token")
+</code></pre>
+<p>With these configurations in place, you can read data using the standard ABFS (Azure Blob File System) protocol:</p>
+<pre><code class="lang-python"># Read data from ADLS Gen2 using the service principal for authentication
+df = spark.read.parquet("abfss://&lt;container&gt;@&lt;storage-account&gt;.dfs.core.windows.net/path/to/data")
+</code></pre>
+<p>The authentication happens transparently. Spark uses the OAuth 2.0 client credentials flow to obtain an access token from Microsoft Entra ID, then presents that token when accessing the storage account.</p>
+<h2 id="security-considerations-and-best-practices">Security considerations and best practices</h2>
+<p>When working with service principals for data access, several security practices help protect your credentials and data.</p>
+<p><strong>Never hardcode secrets in notebooks or code</strong>. Client secrets are sensitive credentials that grant access to your data. Always retrieve them from a secure secret store like Azure Key Vault or Databricks secrets. This practice prevents accidental exposure if you share notebooks or commit code to version control.</p>
+<p><strong>Understand that secrets require rotation</strong>. Unlike managed identities, service principal client secrets have expiration dates and must be rotated periodically. As a data engineer, you should be aware that if a secret expires, your data access will fail. Work with your administrators to understand the rotation schedule and know who to contact if authentication suddenly stops working.</p>
+<p><strong>Apply the principle of least privilege</strong>. Each service principal should have access only to the specific storage locations and data it needs. If a service principal is compromised, limited permissions reduce the potential impact. When requesting access, specify exactly which storage accounts and containers you need rather than requesting broad permissions.</p>
+<p>As you move forward in your work with Unity Catalog, you'll discover that managed identities offer a more streamlined approach to authenticating data access. In the next unit, we'll explore how managed identities eliminate many of the challenges associated with service principals while providing enhanced security and simplified operations.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>8. Authenticate resource access with managed identities</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/8-authenticate-resource-access-managed-identities">https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/8-authenticate-resource-access-managed-identities</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Authenticate resource access with managed identities</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Managed identities provide a secure, automated way to authenticate your Unity Catalog workspaces to storage resources without managing credentials in your code or configuration files.</p>
+
+<p>As a data engineer, you use managed identities to create <strong>storage credentials</strong> in Unity Catalog. These credentials form the foundation for accessing external data through external tables or reading files directly from cloud storage. Unlike traditional authentication methods that require you to create, store, and rotate secrets, managed identities eliminate credential management overhead while providing enterprise-grade security.</p>
+<h2 id="understanding-managed-identities-for-unity-catalog">Understanding managed identities for Unity Catalog</h2>
+<p>Managed identities are Azure resources that provide an identity for your applications when connecting to services that support Microsoft Entra ID authentication. Azure manages the lifecycle of these identities automatically, removing the burden of credential rotation and secret management from your team.</p>
+<p>With Unity Catalog, you use managed identities through an <strong>Azure Databricks access connector</strong>. This first-party Azure resource acts as a bridge between your managed identity and your Azure Databricks account. The access connector can contain either a <strong>system-assigned managed identity</strong> that Azure creates automatically, or one or more <strong>user-assigned managed identities</strong> that you create and manage separately.</p>
+<p>Two primary use cases exist for managed identities in Unity Catalog. First, you use them to connect to the metastore's root storage account where Unity Catalog stores managed tables. Second, you use them to access external storage accounts for reading files or creating external tables. Both scenarios use the same configuration approach but serve different purposes in your data architecture.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>System-assigned managed identities are tied to the lifecycle of the access connector. If you delete the access connector, Azure automatically deletes the system-assigned managed identity. User-assigned managed identities persist independently and can be attached to multiple access connectors.</p>
+</div>
+<h2 id="creating-storage-credentials-with-managed-identities">Creating storage credentials with managed identities</h2>
+<p>Storage credentials in Unity Catalog encapsulate the authentication information needed to access cloud storage. When you create a storage credential using a managed identity, you establish a secure connection pathway that Unity Catalog can use to access data on behalf of authorized users.</p>
+<p>The process begins in the Azure portal where you create an access connector for Azure Databricks. You select the same Azure region as your storage account to minimize latency and avoid cross-region data transfer costs. During creation, you choose whether to enable a system-assigned managed identity or attach user-assigned managed identities. The resource receives a unique identifier in the format <code>/subscriptions/{subscription-id}/resourceGroups/{resource-group}/providers/Microsoft.Databricks/accessConnectors/{connector-name}</code>.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/create-access-connector-for-azure-databricks.png#lightbox">
+<img alt="Screenshot showing the Azure portal Create an Access Connector for Azure Databricks." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/create-access-connector-for-azure-databricks.png"/>
+</a>
+</span>
+</p>
+<p>After creating the access connector, you grant the managed identity permissions on your Azure Data Lake Storage account. The <strong>Storage Blob Data Contributor</strong> role provides read and write access to blob data, which is typically what you need for Unity Catalog operations. You assign this role at either the storage account level for broad access or at the container level for more granular control.</p>
+<p>For optimal performance, you should also grant the <strong>Storage Queue Data Contributor</strong> role to enable file event notifications. This configuration allows Azure Databricks to subscribe to change notifications from your storage account, making file processing operations more efficient. When files are added or modified in your storage containers, Unity Catalog receives immediate notifications rather than scanning for changes.</p>
+<p>With the Azure configuration complete, you create the storage credential in Unity Catalog. In Catalog Explorer, you navigate to the Credentials tab and create a new storage credential. You select <strong>Azure Managed Identity</strong> as the credential type and provide the access connector's resource ID. If you're using a user-assigned managed identity, you also include its resource ID. The storage credential receives a unique name that you reference when creating external locations.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/create-new-storage-credential.png#lightbox">
+<img alt="Screenshot of Azure Databricks Create a new credential dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/media/create-new-storage-credential.png"/>
+</a>
+</span>
+</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>To create storage credentials, you need the <strong>CREATE STORAGE CREDENTIAL</strong> privilege on the Unity Catalog metastore. Account admins and metastore admins have this privilege by default. Without this privilege, you can't create new storage credentials but can still use existing ones that you have permissions to access.</p>
+</div>
+<h2 id="accessing-external-storage-through-storage-credentials">Accessing external storage through storage credentials</h2>
+<p>Storage credentials work together with <strong>external locations</strong> to provide governed access to your cloud storage. An external location combines a storage credential with a specific cloud storage path, creating a managed access point that you can grant permissions on.</p>
+<p>When you create an external location, you specify a path in your Azure Data Lake Storage account using the <code>abfss://</code> protocol. For example, <code>abfss://data@mystorageaccount.dfs.core.windows.net/raw/</code> points to the raw folder in the data container. You associate this path with your storage credential, which provides the authentication mechanism. Users who have privileges on the external location can read from or write to that path, depending on their specific permissions.</p>
+<p>This architecture provides several benefits for data engineering teams. You can create multiple external locations that use the same storage credential but point to different paths, allowing you to organize access to different datasets or environments. You can grant different sets of users access to different external locations, even when they all use the same underlying storage account. You can mark storage credentials as read-only, which prevents creation of external locations that allow write access.</p>
+<p>External locations also support <strong>workspace binding</strong>, which restricts access to specific workspaces in your metastore. This feature is valuable when you use workspaces to separate production and development environments. An external location pointing to production data can be bound to only the production workspace, ensuring that development workspaces can't accidentally access or modify production data. You can also bind storage credentials themselves to specific workspaces, controlling which workspaces can use those credentials to create new external locations.</p>
+<pre><code class="lang-python"># Create an external table using a managed identity-backed external location
+CREATE EXTERNAL TABLE sales_data
+USING DELTA
+LOCATION 'abfss://data@mystorageaccount.dfs.core.windows.net/sales/';
+
+# Query the external table
+SELECT * FROM sales_data WHERE sale_date &gt;= '2024-01-01';
+</code></pre>
+<p>When your Unity Catalog workspace accesses data through a storage credential, the managed identity authenticates to Azure Data Lake Storage. The workspace doesn't need to know the actual credentials—it simply presents the managed identity. Azure verifies the identity and checks whether the assigned roles allow the requested operation. This happens transparently in the background, requiring no additional code or configuration in your notebooks.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>When you work with network-restricted storage accounts, ensure your workspace's virtual network can reach the storage account. Managed identities handle authentication, but network connectivity must already be established through private endpoints or service endpoints.</p>
+</div>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>9. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/11-summary">https://learn.microsoft.com/en-us/training/modules/secure-unity-catalog-objects/11-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Security in <strong>Unity Catalog</strong> extends beyond simple permission checks to encompass the entire lifecycle of data access. Throughout this module, you explored how Unity Catalog enforces security at multiple layers—from validating permissions and issuing <strong>scoped tokens</strong> during query execution, to controlling table and schema access through <strong>inherited and explicit grants</strong>, to protecting sensitive data through <strong>fine-grained row and column filtering</strong>.</p>
+<p>You learned practical approaches for managing credentials and authentication. <strong>Azure Key Vault</strong> integration lets you retrieve secrets securely without exposing sensitive values in your code. <strong>Service principals</strong> provide programmatic access to storage resources with explicit credential control. <strong>Managed identities</strong> eliminate credential management overhead entirely while enabling access to network-protected storage accounts. Each authentication method serves specific scenarios, and choosing the right approach depends on your security requirements and operational constraints.</p>
+<p>The access control strategies you encountered—from hierarchical permissions that simplify administration to fine-grained masking functions that protect individual columns—form a comprehensive security framework. <strong>Row and Column Security</strong> offers centralized enforcement with minimal object sprawl, while <strong>dynamic views</strong> provide flexibility when you need to compose data from multiple sources. Understanding when to apply each pattern helps you build solutions that balance governance with usability.</p>
+<p>As you implement these security practices in your own environments, start with clear requirements for who should access what data. Design your permission model to scale with your organization, using groups and inherited permissions where appropriate. Test your row and column filtering logic thoroughly to ensure users see exactly what they should. Regularly review your storage credentials and secret scope permissions to maintain a strong security posture. Unity Catalog provides the tools—your role is to apply them thoughtfully to protect your data assets while enabling productive analytics workflows.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Govern Unity Catalog objects</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Govern Unity Catalog objects</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/1-introduction">https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/1-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Effective data governance requires more than just controlling access—it demands visibility into your data assets, accountability for how they're used, and enforcement mechanisms that scale with your organization. As data platforms grow in complexity, managing table definitions, tracking data lineage, enforcing retention policies, and sharing data securely become increasingly challenging. <strong>Unity Catalog</strong> in Azure Databricks provides the foundation for comprehensive governance that addresses these challenges through centralized metadata management and policy enforcement.</p>
+<p>When you govern Unity Catalog objects, you work across several interconnected capabilities. You document tables and columns with <strong>comments and tags</strong> that help data consumers discover and understand your assets. You implement <strong>attribute-based access control (ABAC)</strong> using governed tags and policies that automatically enforce fine-grained permissions. You configure <strong>data retention policies</strong> using Delta Lake's <code>VACUUM</code> and predictive optimization to manage storage costs and meet compliance requirements.</p>
+<p>Beyond access control, governance extends to <strong>data lineage tracking</strong> that shows how data flows through your pipelines, enabling impact analysis and troubleshooting. <strong>Audit logging</strong> captures who did what and when, supporting security investigations and regulatory compliance. For external collaboration, <strong>Delta Sharing</strong> lets you share data with partners and customers while maintaining governance controls over what they can access.</p>
+<p>This module guides you through implementing these governance capabilities in your Azure Databricks environment. You explore techniques for preserving metadata, enforcing policies at scale, managing data lifecycle, and sharing data securely. By mastering these concepts, you position yourself to build data platforms that balance accessibility with control, enabling your organization to derive value from data while meeting its governance obligations.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Create and preserve table definitions</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/2-preserve-table-column-definitions">https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/2-preserve-table-column-definitions</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Create and preserve table definitions</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p><strong>Well-documented table and column definitions</strong> are the foundation of effective data governance. When you create and preserve comprehensive <strong>metadata</strong> for your data assets, you enable data consumers to discover, understand, and trust the data they need. This becomes especially important as AI-driven data discovery tools rely on high-quality metadata to surface relevant information.</p>
+<p>In this unit, you learn how to create tables with descriptive comments and tags, and use discovery tools to explore your data assets in Unity Catalog.</p>
+
+<h2 id="add-comments-to-tables-and-columns">Add comments to tables and columns</h2>
+<p><strong>Comments</strong> provide human-readable descriptions that help data consumers understand the purpose and content of your data assets. You can add comments to any securable object in Unity Catalog, including catalogs, schemas, tables, views, and columns.</p>
+<p>Consider the following example, where we add comments directly to columns as part of the <code>profiles</code> table definition:</p>
+<pre><code class="lang-sql">CREATE TABLE sales.customers.profiles (
+    customer_id   BIGINT COMMENT 'Unique identifier for each customer',
+    email         STRING COMMENT 'Customer primary email address',
+    created_date  DATE   COMMENT 'Date when customer account was created',
+    preferences   STRUCT&lt;notifications: BOOLEAN, language: STRING&gt; 
+                         COMMENT 'Customer preference settings'
+);
+</code></pre>
+<h3 id="add-comments-using-sql">Add comments using SQL</h3>
+<p>Use the <code>COMMENT ON</code> statement to add or update comments on existing objects:</p>
+<pre><code class="lang-sql">-- Add a comment to a table
+COMMENT ON TABLE sales.customers.profiles 
+IS 'Contains customer profile information including contact details and preferences';
+
+-- Add a comment to a column
+ALTER TABLE sales.customers.profiles 
+ALTER COLUMN email COMMENT 'Primary email address used for account notifications';
+</code></pre>
+<p>You can also use markdown formatting in your comments to add structure:</p>
+<pre><code class="lang-sql">COMMENT ON TABLE sales.orders.transactions IS 
+'## Order Transactions
+Contains all customer orders with the following key fields:
+- **order_id**: Unique order identifier
+- **customer_id**: Foreign key to customers table
+- **order_date**: Date order was placed';
+</code></pre>
+<h3 id="use-ai-generated-comments">Use AI-generated comments</h3>
+<p>Unity Catalog can automatically generate comments using AI-powered suggestions. This feature analyzes your table schema and column names to create initial descriptions. To generate AI comments in Catalog Explorer:</p>
+<ol>
+<li>Open Catalog Explorer and select your table.</li>
+<li>In the <strong>About this table</strong> panel, select <strong>AI generate</strong>.</li>
+<li>Review the suggested comment and select <strong>Accept</strong> or <strong>Edit</strong> to modify it.</li>
+</ol>
+<p>For column comments, select <strong>AI generate</strong> above the column list to generate suggestions for all columns.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/2-use-ai-generated-comments.png#lightbox">
+<img alt="Screenshot of AI-generated comments." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/2-use-ai-generated-comments.png"/>
+</a>
+</span>
+</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p><strong>AI-generated comments</strong> are suggestions based on schema analysis. Always review these comments before saving, as AI models might generate inaccurate descriptions. Don't rely on AI comments for data classification tasks like detecting personally identifiable information (PII).</p>
+</div>
+<h3 id="required-permissions-for-comments">Required permissions for comments</h3>
+<p>To add or edit comments, you need:</p>
+<ul>
+<li>Ownership of the object, or</li>
+<li><code>MODIFY</code> and <code>SELECT</code> privileges on the table</li>
+<li><code>USE CATALOG</code> and <code>USE SCHEMA</code> on the parent catalog and schema</li>
+</ul>
+<p>After adding comments, any user with the <code>BROWSE</code> privilege can view them in Catalog Explorer.</p>
+<h2 id="apply-tags-for-organization-and-discovery">Apply tags for organization and discovery</h2>
+<p><strong>Tags</strong> are key-value pairs that help you organize and categorize data assets in Unity Catalog. Unlike comments, which provide descriptive text, tags enable structured classification and improve search functionality.</p>
+
+<h3 id="add-tags-using-sql">Add tags using SQL</h3>
+<p>Use the <code>ALTER</code> command with <code>SET TAGS</code> to apply tags:</p>
+<pre><code class="lang-sql">-- Add tags to a table
+ALTER TABLE sales.customers.profiles
+SET TAGS ('domain' = 'sales', 'data_classification' = 'internal');
+
+-- Add tags to a specific column
+ALTER TABLE sales.customers.profiles
+ALTER COLUMN email
+SET TAGS ('pii' = 'email', 'sensitivity' = 'high');
+</code></pre>
+<p>To remove tags, use <code>UNSET TAGS</code>:</p>
+<pre><code class="lang-sql">ALTER TABLE sales.customers.profiles
+UNSET TAGS ('domain');
+</code></pre>
+<h3 id="use-governed-tags">Use governed tags</h3>
+<p><strong>Governed tags</strong> provide centralized control over tag definitions. With governed tags, administrators define allowed keys and values at the account level, ensuring consistent classification across the organization. Governed tags appear with a lock icon in Catalog Explorer.</p>
+<p>System tags are a special type of governed tag predefined by Azure Databricks for common use cases like data classification, ownership tracking, and lifecycle management.</p>
+<h3 id="tag-constraints">Tag constraints</h3>
+<p>Keep these constraints in mind when working with tags:</p>
+<ul>
+<li>Maximum 50 tags per securable object</li>
+<li>Maximum 1,000 column tags per table</li>
+<li>Tag keys have a 255-character limit</li>
+<li>Tag values have a 1,000-character limit</li>
+<li>Tag keys are case-sensitive</li>
+</ul>
+<h2 id="explore-and-discover-database-objects">Explore and discover database objects</h2>
+<p>After you create and document your data assets, you need ways to find and explore them. Unity Catalog provides several tools for data discovery.</p>
+<h3 id="use-catalog-explorer">Use Catalog Explorer</h3>
+<p><strong>Catalog Explorer</strong> provides a visual interface for navigating your data assets. When you select a table, you can:</p>
+<ul>
+<li>View the <strong>Columns</strong> tab to see column names, data types, and comments</li>
+<li>Select the <strong>Sample Data</strong> tab to preview table contents</li>
+<li>Check the <strong>Details</strong> tab for table properties and metadata</li>
+<li>Review the <strong>History</strong> tab for Delta table version history</li>
+</ul>
+<p>The <strong>Insights</strong> tab shows frequent queries and users who accessed the table in the past 30 days, helping you understand how data is being used.</p>
+<h3 id="explore-objects-using-sql">Explore objects using SQL</h3>
+<p>Use SQL commands to programmatically explore your catalog:</p>
+<pre><code class="lang-sql">-- List all catalogs available to you
+SHOW CATALOGS;
+
+-- List schemas in a catalog
+SHOW SCHEMAS IN sales;
+
+-- List tables in a schema
+SHOW TABLES IN sales.customers;
+
+-- View table details including comments
+DESCRIBE TABLE EXTENDED sales.customers.profiles;
+
+-- View table columns
+SHOW COLUMNS IN sales.customers.profiles;
+
+-- View table properties
+SHOW TBLPROPERTIES sales.customers.profiles;
+</code></pre>
+<p>You can filter results using pattern matching:</p>
+<pre><code class="lang-sql">-- Find tables matching a pattern
+SHOW TABLES IN sales.customers LIKE 'profiles_*';
+</code></pre>
+<h3 id="search-using-tags">Search using tags</h3>
+<p>Use the workspace search bar to find tables and views by their tags. Enter tag keys or values to locate matching objects. Only objects you have at least the <code>BROWSE</code> privilege on appear in search results.</p>
+<h3 id="view-table-relationships">View table relationships</h3>
+<p>For tables with defined foreign keys, select <strong>View relationships</strong> in Catalog Explorer to display an Entity Relationship Diagram (ERD). This diagram visualizes how tables connect through primary and foreign key relationships.</p>
+<h3 id="integrate-with-aibi-tools">Integrate with AI/BI tools</h3>
+<p>AI-powered discovery tools like <strong>AI/BI Genie</strong> use your table comments and tags to provide natural language search and question answering. High-quality metadata directly improves the accuracy of AI-assisted data exploration.</p>
+<p>Maintaining comprehensive table and column definitions is an ongoing responsibility. As your data evolves, update your comments and tags to keep them accurate. This investment in metadata quality pays dividends through improved discoverability, governance compliance, and AI-readiness.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Configure ABAC with tags and policies</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/3-configure-attribute-based-access-control-tags-policies">https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/3-configure-attribute-based-access-control-tags-policies</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Configure ABAC with tags and policies</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Attribute-based access control (ABAC) provides a flexible, scalable approach to data governance in Unity Catalog. Instead of managing individual permissions for every table and user combination, you define policies based on attributes. When you tag data assets with meaningful classifications, ABAC policies automatically enforce the right access controls.</p>
+<p>In this unit, you learn how to use governed tags and ABAC policies to implement dynamic, centralized access control across your Unity Catalog environment.</p>
+<h2 id="understand-governed-tags">Understand governed tags</h2>
+<p>Governed tags differ from the standard tags you've already encountered. While standard tags help with organization and discovery, governed tags add enforcement and consistency at the account level. Administrators define governed tags with specific allowed values, and only authorized users can assign them.</p>
+<p><a data-linktype="relative-path" href="media/3-understand-governed-tags.png#lightbox">
+<img alt="Diagram explaining standard and governed tags." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/3-understand-governed-tags.png"/>
+</a>
+</p>
+<p>Consider the following differences between tag types:</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard tags</th>
+<th>Governed tags</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scope</td>
+<td>Any key-value pair</td>
+<td>Predefined keys and allowed values</td>
+</tr>
+<tr>
+<td>Control</td>
+<td>Any user with <code>APPLY TAG</code> privilege</td>
+<td>Only users with <code>ASSIGN</code> permission</td>
+</tr>
+<tr>
+<td>Purpose</td>
+<td>Organization and discovery</td>
+<td>Policy enforcement and compliance</td>
+</tr>
+<tr>
+<td>Visual indicator</td>
+<td>None</td>
+<td>Lock icon in Catalog Explorer</td>
+</tr>
+</tbody>
+</table>
+<p>Governed tags serve as the foundation for ABAC policies. When you tag a table with <code>sensitivity=high</code>, you can then create a policy that masks certain columns for all tables with that tag. This approach scales efficiently because adding the tag to new tables automatically applies the policy.</p>
+<h3 id="create-governed-tags">Create governed tags</h3>
+<p>To create a governed tag, select <strong>Catalog</strong> &gt; <strong>Governance</strong> &gt; <strong>Governed Tags</strong>, then select <strong>Create governed tag</strong>. Enter a tag key, an optional description, and define the allowed values. Only these predefined values can be assigned to objects with this tag key.</p>
+<p>For example, you might create a governed tag with key <code>pii</code> and allowed values <code>ssn</code>, <code>email</code>, and <code>address</code>. This ensures consistent classification of personally identifiable information across your organization.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/3-create-governed-tag.png#lightbox">
+<img alt="Screenshot showing the create governed tag dialog box." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/3-create-governed-tag.png"/>
+</a>
+</span>
+</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Tag data is stored as plain text. Don't use tag names or values that contain sensitive information.</p>
+</div>
+<h3 id="assign-governed-tags-to-objects">Assign governed tags to objects</h3>
+<p>After creating a governed tag, apply it to columns, tables, schemas, or catalogs using the <code>SET TAGS</code> command:</p>
+<pre><code class="lang-sql">-- Tag a column as containing SSN data
+ALTER TABLE customers.profiles
+ALTER COLUMN SSN
+SET TAGS ('pii' = 'ssn');
+
+-- Tag an entire table as containing sensitive data
+ALTER TABLE customers.profiles
+SET TAGS ('sensitivity' = 'high');
+</code></pre>
+<p>Governed tags applied to catalogs or schemas automatically inherit to all objects within them. This inheritance simplifies governance across large data estates.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Tag inheritance applies only at the catalog and schema levels. Tags on individual table columns aren't inherited.</p>
+</div>
+<h2 id="create-row-filter-policies">Create row filter policies</h2>
+<p>Row filter policies control which rows users can see based on governed tags. You define a user-defined function (UDF) that returns <code>TRUE</code> for rows the user should see and <code>FALSE</code> for rows to hide.</p>
+<p>Before creating a policy, you need a UDF that implements your filtering logic. The following example creates a function that filters out European addresses:</p>
+<pre><code class="lang-sql">CREATE OR REPLACE FUNCTION filter_non_eu(address STRING)
+RETURNS BOOLEAN
+RETURN NOT (
+    LOWER(address) LIKE '%eu%' OR
+    LOWER(address) LIKE '%europe%'
+);
+</code></pre>
+<p>Now create a row filter policy that uses this function:</p>
+<pre><code class="lang-sql">CREATE POLICY hide_eu_customers
+ON CATALOG sales
+ROW FILTER filter_non_eu
+TO `analysts`
+FOR TABLES
+MATCH COLUMNS
+    has_tag_value('pii', 'address') AS addr
+USING COLUMNS (addr);
+</code></pre>
+<p>This policy applies the <code>filter_non_eu</code> function to any table in the <code>sales</code> catalog that has a column tagged with <code>pii=address</code>. The <code>analysts</code> group only sees rows where the function returns <code>TRUE</code>.</p>
+<p>You can also create policies using Catalog Explorer. Select the catalog or schema, choose the <strong>Policies</strong> tab, and select <strong>New policy</strong>. The visual interface guides you through selecting principals, scope, and conditions.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/3-create-policy.png#lightbox">
+<img alt="Screenshot for creating policies using Catalog Explorer." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/3-create-policy.png"/>
+</a>
+</span>
+</p>
+<h2 id="create-column-mask-policies">Create column mask policies</h2>
+<p>Column mask policies control what values users see in specific columns. Like row filters, these policies rely on UDFs to implement the masking logic.</p>
+<p>Create a masking function that returns a redacted value:</p>
+<pre><code class="lang-sql">CREATE OR REPLACE FUNCTION mask_ssn(ssn STRING)
+RETURNS STRING
+DETERMINISTIC
+RETURN '***-**-****';
+</code></pre>
+<p>Then create a column mask policy:</p>
+<pre><code class="lang-sql">CREATE POLICY mask_sensitive_ssn
+ON SCHEMA customers
+COLUMN MASK mask_ssn
+TO `all_users`
+EXCEPT `compliance_team`
+FOR TABLES
+MATCH COLUMNS
+    has_tag_value('pii', 'ssn') AS ssn_col
+ON COLUMN ssn_col;
+</code></pre>
+<p>This policy masks SSN values for all users except the compliance team. Any column in the <code>customers</code> schema tagged with <code>pii=ssn</code> displays <code>***-**-****</code> instead of the actual value.</p>
+<h2 id="follow-udf-best-practices">Follow UDF best practices</h2>
+<p>The functions that power your ABAC policies run on every query against protected tables. Poorly designed UDFs can significantly impact query performance.</p>
+<p>Follow these guidelines when writing UDFs for ABAC:</p>
+<ul>
+<li><strong>Keep logic simple</strong>: Use basic <code>CASE</code> statements and boolean expressions</li>
+<li><strong>Stay deterministic</strong>: The same input should always produce the same output</li>
+<li><strong>Avoid external calls</strong>: Don't make API calls or lookups to other databases</li>
+<li><strong>Reference only table columns</strong>: This enables query optimization and predicate pushdown</li>
+<li><strong>Test at scale</strong>: Validate performance with at least 1 million rows</li>
+</ul>
+<p>Avoid common performance pitfalls:</p>
+<ul>
+<li>Calling <code>is_account_group_member()</code> or <code>is_member()</code> inside UDFs</li>
+<li>Using complex subqueries or joins within the function</li>
+<li>Performing heavy regex operations on large text fields</li>
+<li>Including non-deterministic logic that prevents caching</li>
+</ul>
+<p>Keep access control decisions in the policy definition, not the UDF. The policy specifies who the rules apply to; the UDF specifies how to transform the data.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>When a user queries a view or function that accesses an ABAC-protected table, row filters and column masks are evaluated using the <strong>session user's identity</strong>—the identity of the person running the query, not the view or function owner. Users querying through views still don't need direct privileges on the underlying tables, but policies must be designed with the caller's identity in mind rather than assuming the view owner's permissions.</p>
+</div>
+<h2 id="understand-policy-inheritance-and-scope">Understand policy inheritance and scope</h2>
+<p>ABAC policies follow an inheritance model that simplifies governance at scale. A policy defined at the catalog level automatically applies to all schemas and tables within that catalog. Similarly, schema-level policies apply to all tables in the schema.</p>
+<p>Policy quotas limit how many policies you can create:</p>
+<ul>
+<li>100 policies per catalog</li>
+<li>100 policies per schema</li>
+<li>50 policies per table</li>
+<li>10,000 policies per metastore</li>
+<li>20 principals per policy (<code>TO</code> and <code>EXCEPT</code> clauses combined)</li>
+</ul>
+<p>Only one row filter can apply to any given table, and only one column mask can apply to any given column. If multiple policies would result in multiple filters or masks, Azure Databricks blocks access and throws an error.</p>
+<p><a data-linktype="relative-path" href="media/3-understand-policy-inheritance-scope.png#lightbox">
+<img alt="Diagram explaining policy inheritance and scope." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/3-understand-policy-inheritance-scope.png"/>
+</a>
+</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>You must use Databricks Runtime 16.4 or above, or serverless compute, to access tables secured by ABAC policies. Users not subject to the policy can use any runtime.</p>
+</div>
+<p>When you configure ABAC effectively, you create a governance model that scales with your organization. Adding the appropriate governed tag to a new table immediately brings it under the protection of existing policies, without requiring additional configuration.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Apply data retention policies</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/4-apply-data-retention-policies">https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/4-apply-data-retention-policies</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Apply data retention policies</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Every organization faces the challenge of balancing data availability with compliance requirements and storage costs. When you implement <strong>data retention policies</strong> in Azure Databricks, you ensure that data is kept only as long as necessary while remaining accessible for legitimate business needs. This becomes especially critical when regulations require you to delete personal data upon request.</p>
+<p>In this unit, you learn how to configure retention settings, use <strong><code>VACUUM</code></strong> to remove obsolete data, handle deletion requests for compliance, and automate maintenance with <strong>predictive optimization</strong>.</p>
+<h2 id="configure-delta-lake-retention-settings">Configure Delta Lake retention settings</h2>
+<p><strong>Delta Lake</strong> maintains table history through <strong>transaction logs</strong> and <strong>data files</strong>. Two key properties control how long this historical data remains available:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>delta.logRetentionDuration</code></td>
+<td>30 days</td>
+<td>Controls how long transaction log history is kept</td>
+</tr>
+<tr>
+<td><code>delta.deletedFileRetentionDuration</code></td>
+<td>7 days</td>
+<td>Determines when <code>VACUUM</code> can remove unreferenced data files</td>
+</tr>
+</tbody>
+</table>
+<p><a data-linktype="relative-path" href="media/5-understand-data-retention-settings.png#lightbox">
+<img alt="Diagram explaining Delta Lake retention settings." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/5-understand-data-retention-settings.png"/>
+</a>
+</p>
+<p>These settings work together to define your <strong>time travel</strong> capabilities. For example, if you need 30 days of historical data access, you must configure both properties accordingly:</p>
+<pre><code class="lang-sql">ALTER TABLE sales.customers.transactions 
+SET TBLPROPERTIES (
+    'delta.logRetentionDuration' = 'interval 30 days',
+    'delta.deletedFileRetentionDuration' = 'interval 30 days'
+);
+</code></pre>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Increasing retention duration increases storage costs because more data files are preserved. Before adjusting these settings, evaluate your compliance requirements against storage budget constraints.</p>
+<p>You must set both of these properties to ensure table history is retained for longer duration for tables with frequent <code>VACUUM</code> operations</p>
+</div>
+<p>To view current retention settings for a table, use the following command:</p>
+<pre><code class="lang-sql">SHOW TBLPROPERTIES sales.customers.transactions;
+</code></pre>
+<h2 id="remove-obsolete-data-with-vacuum">Remove obsolete data with VACUUM</h2>
+<p>The <code>VACUUM</code> command removes data files that are no longer referenced by your Delta table and are older than the retention threshold. This operation permanently deletes historical data, so run it carefully.</p>
+<pre><code class="lang-sql">-- Remove files older than the default retention period (7 days)
+VACUUM sales.customers.transactions;
+
+-- Remove files older than a specific retention period
+VACUUM sales.customers.transactions RETAIN 168 HOURS;
+</code></pre>
+<p>When you run <code>VACUUM</code>, Delta Lake identifies files associated with versions older than the retention threshold and removes them from storage. After this operation, time travel queries to those older versions fail because the underlying data no longer exists.</p>
+<p>For tables with <strong>deletion vectors</strong> enabled, you must also run <code>REORG TABLE ... APPLY (PURGE)</code> after deleting records to permanently remove the underlying data. <code>VACUUM</code> by itself does not remove data that deletion vectors have marked for deletion.</p>
+<div class="NOTE">
+<p>Note</p>
+<p><strong>Deletion vectors</strong> are a storage optimization feature you can enable on Delta Lake tables. By default, when a single row in a data file is deleted, the entire Parquet file containing the record must be rewritten. With deletion vectors enabled, it marks rows as deleted without rewriting the entire file.</p>
+</div>
+<h2 id="handle-compliance-deletion-requests">Handle compliance deletion requests</h2>
+<p>Privacy regulations grant individuals the "<strong>right to be forgotten</strong>," requiring you to delete their personal data upon request. Delta Lake's <strong>ACID transactions</strong> make these deletions straightforward.</p>
+<h3 id="delete-individual-records">Delete individual records</h3>
+<p>Use the <code>DELETE</code> statement to remove specific records:</p>
+<pre><code class="lang-sql">DELETE FROM bronze.users 
+WHERE user_id = 12345;
+</code></pre>
+<h3 id="process-bulk-deletion-requests">Process bulk deletion requests</h3>
+<p>For multiple deletion requests, use a <code>MERGE</code> statement with a control table that tracks pending requests:</p>
+<pre><code class="lang-sql">MERGE INTO bronze.users AS target
+USING (
+    SELECT user_id
+    FROM compliance.deletion_requests
+    WHERE status = 'pending'
+) AS source
+ON target.user_id = source.user_id
+WHEN MATCHED THEN DELETE;
+</code></pre>
+<p>After executing deletions, update your control table to mark requests as completed and run maintenance operations to permanently remove the data.</p>
+<h3 id="propagate-deletions-through-your-data-layers">Propagate deletions through your data layers</h3>
+<p>When you delete data in your bronze layer, you must also remove it from silver and gold layers:</p>
+<ul>
+<li><strong>Materialized views</strong> automatically reflect deletions after a refresh.</li>
+<li><strong>Streaming tables</strong> require special handling because they expect append-only data. Add the <code>skipChangeCommits</code> option to ignore upstream deletions:</li>
+</ul>
+<pre><code class="lang-python">spark.readStream.option('skipChangeCommits', 'true').table("bronze.users")
+</code></pre>
+<p>After running deletion operations, execute <code>VACUUM</code> to permanently remove the data files from storage.</p>
+<h2 id="automate-retention-with-predictive-optimization">Automate retention with predictive optimization</h2>
+<p>Manually scheduling <code>VACUUM</code> and <code>OPTIMIZE</code> operations across many tables is time-consuming and error-prone. <strong>Predictive optimization</strong> in Unity Catalog automates these maintenance tasks for managed tables.</p>
+<p>When enabled, predictive optimization automatically:</p>
+<ul>
+<li>Runs <code>VACUUM</code> to remove unreferenced files</li>
+<li>Runs <code>OPTIMIZE</code> to improve file layout and query performance</li>
+<li>Runs <code>ANALYZE</code> to update table statistics</li>
+</ul>
+<p>Enable predictive optimization at the schema level:</p>
+<pre><code class="lang-sql">ALTER SCHEMA sales.customers ENABLE PREDICTIVE OPTIMIZATION;
+</code></pre>
+<div class="TIP">
+<p>Tip</p>
+<p>Before enabling predictive optimization, set your desired <code>delta.deletedFileRetentionDuration</code> on tables that require longer retention periods. The default <code>VACUUM</code> retention is 7 days, which might be shorter than your compliance requirements.</p>
+</div>
+<p>To check whether predictive optimization is enabled for a table:</p>
+<pre><code class="lang-sql">DESCRIBE TABLE EXTENDED sales.customers.transactions;
+</code></pre>
+<p>You can monitor predictive optimization operations through the system table <code>system.storage.predictive_optimization_operations_history</code>, which shows when maintenance ran, what operations completed, and associated costs.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Predictive optimization is enabled by default if your account was created on or after November 11, 2024.</p>
+</div>
+<h2 id="integrate-with-azure-storage-lifecycle-policies">Integrate with Azure Storage lifecycle policies</h2>
+
+<p>For data stored in Azure Blob Storage, you can complement Delta Lake retention with <strong>Azure Storage lifecycle management policies</strong>. These policies automatically transition data to cooler storage tiers or delete blobs based on access patterns and age.</p>
+<p>Consider using Azure lifecycle policies to:</p>
+<ul>
+<li>Move infrequently accessed historical data to <strong>cool</strong> or <strong>archive</strong> tiers</li>
+<li><strong>Delete</strong> temporary files or staging data after a defined period</li>
+<li>Reduce storage costs for data that remains accessible but rarely queried</li>
+</ul>
+<p>Lifecycle policies operate at the storage layer, while Delta Lake retention operates at the table layer. Use both together for a comprehensive data retention strategy.</p>
+<h3 id="challenges-with-archiving-delta-tables">Challenges with archiving Delta tables</h3>
+<p>When implementing storage lifecycle policies with Delta Lake, you must account for how Delta Lake manages files:</p>
+<ul>
+<li><p><strong>File creation time vs. modification time</strong>: Azure Databricks typically relies on file creation time for lifecycle management. Operations like <code>UPDATE</code>, <code>MERGE</code>, <code>DELETE</code>, and <code>OPTIMIZE</code> rewrite Parquet files, which resets their creation time and can delay archival.</p>
+</li>
+<li><p><strong>Querying archived data</strong>:</p>
+<ul>
+<li><strong>Offline tiers (Archive)</strong>: Querying files in offline tiers fails unless they're restored</li>
+<li><strong>Online tiers (Cool, Cold)</strong>: Queries succeed but may incur higher access costs if data is frequently accessed.</li>
+</ul>
+</li>
+<li><p><strong>Preventing frequent access</strong>: It can be challenging to ensure users don't accidentally query archived data, which would trigger costly retrieval or failures.</p>
+</li>
+</ul>
+<h3 id="strategies-for-effective-archiving">Strategies for effective archiving</h3>
+<p>To overcome these challenges and implement a cost-effective archival strategy:</p>
+<ul>
+<li><p><strong>Partition data by date</strong>: Partitioning tables by ingestion date or transaction date makes it easier to identify and manage older data files.</p>
+</li>
+<li><p><strong>Define storage lifecycle policies</strong>: Configure Azure Storage lifecycle management rules to move older files to cool or archive tiers based on their age (for example, move to Cool after 30 days, Archive after 365 days).</p>
+</li>
+<li><p><strong>Set the <code>delta.timeUntilArchived</code> property</strong>: Configure this table property to match your storage lifecycle policy. This informs Azure Databricks that files older than the specified period are archived, preventing the query optimizer from assuming they're immediately available.</p>
+<pre><code class="lang-sql">ALTER TABLE sales_data 
+SET TBLPROPERTIES (delta.timeUntilArchived = '365 days');
+</code></pre>
+</li>
+<li><p><strong>Use views to restrict access</strong>: Create views that filter out archived data to prevent users from accidentally querying it.</p>
+<pre><code class="lang-sql">CREATE VIEW active_sales_data AS 
+SELECT * FROM sales_data
+WHERE ingestion_date &gt; CURRENT_DATE() - INTERVAL 365 DAYS;
+</code></pre>
+</li>
+<li><p><strong>Optimize and Vacuum with predicates</strong>: When running maintenance commands, use predicates to avoid touching archived partitions, which would trigger retrieval.</p>
+<pre><code class="lang-sql">OPTIMIZE sales_data 
+WHERE ingestion_date &gt;= current_timestamp() - INTERVAL 30 days;
+</code></pre>
+</li>
+</ul>
+<p>Implementing data retention policies requires ongoing attention as business requirements and regulations evolve. Establish clear processes for reviewing and updating your retention settings, and document your compliance procedures so your team can respond quickly to deletion requests.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Set up and manage data lineage</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/5-manage-data-lineage-tracking">https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/5-manage-data-lineage-tracking</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Set up and manage data lineage</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Understanding where your data comes from, how it transforms, and where it flows is essential for effective data governance. When you set up and manage <strong>data lineage tracking</strong> in Unity Catalog, you gain visibility into data dependencies, ownership, and history. This visibility helps you perform <strong>impact analysis</strong> before making changes, troubleshoot data quality issues, and meet compliance requirements.</p>
+<p>In this unit, you learn how to use Catalog Explorer to view and manage data lineage, explore table history and ownership, and understand the connections between your data assets.</p>
+<h2 id="understand-data-lineage-in-unity-catalog">Understand data lineage in Unity Catalog</h2>
+<p>Unity Catalog automatically captures <strong>runtime data lineage</strong> across queries run on Azure Databricks. This lineage tracking works across all languages and captures relationships down to the <strong>column level</strong>. Lineage data includes the notebooks, jobs, and dashboards that interact with your tables.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/6-understand-lineage.png#lightbox">
+<img alt="Screenshot of Unity Catalog lineage." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/6-understand-lineage.png"/>
+</a>
+</span>
+</p>
+<p>Consider a scenario where a sales analytics dashboard suddenly shows incorrect revenue figures. With lineage tracking, you can trace back through the data flow to identify which upstream table or transformation caused the issue. This capability transforms troubleshooting from guesswork into a systematic investigation.</p>
+<h3 id="configure-compute-to-capture-lineage">Configure compute to capture lineage</h3>
+<p>For Unity Catalog to capture lineage automatically, queries must run on <strong>Unity Catalog-enabled compute</strong>. This includes:</p>
+<ul>
+<li><strong>Compute clusters</strong> configured with Unity Catalog access mode (shared, single user, or serverless)</li>
+<li><strong>SQL warehouses</strong> that have Unity Catalog enabled</li>
+<li><strong>Jobs</strong> running on Unity Catalog-enabled clusters</li>
+</ul>
+<p>When you create a cluster with access to Unity Catalog, the compute automatically captures lineage for all queries that read from or write to Unity Catalog tables. This happens without requiring additional configuration or code changes, making lineage capture seamless and requiring minimal administrative effort.</p>
+<p>Clusters that are not Unity Catalog-enabled, or queries that access tables by direct file path instead of catalog names, do not generate lineage data. To ensure comprehensive lineage coverage, configure all production workloads to use Unity Catalog-enabled compute and reference tables using their three-level namespace (<code>catalog.schema.table</code>).</p>
+<p>Lineage is aggregated across all workspaces attached to a Unity Catalog metastore. When you capture lineage in one workspace, users in other workspaces that share the same metastore can view that lineage information. This <strong>cross-workspace visibility</strong> is particularly valuable for organizations with distributed data teams.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Lineage data retention varies by access method. <strong>Catalog Explorer and the lineage API</strong> retain data indefinitely for events captured after September 1, 2024. <strong>Lineage system tables</strong> (<code>system.access.table_lineage</code> and <code>system.access.column_lineage</code>) retain a rolling one-year window; events older than one year are removed on a rolling basis. Use Catalog Explorer or the lineage API when you need access to historical lineage beyond one year.</p>
+</div>
+<h2 id="view-data-lineage-using-catalog-explorer">View data lineage using Catalog Explorer</h2>
+<p><strong>Catalog Explorer</strong> provides a visual interface for exploring lineage relationships. To view lineage for a table:</p>
+<ol>
+<li>In your Azure Databricks workspace, select <strong>Catalog</strong> in the sidebar.</li>
+<li>Search or browse to locate your table.</li>
+<li>Select the <strong>Lineage</strong> tab to display related tables in the lineage panel.</li>
+<li>Select <strong>See Lineage Graph</strong> to open an interactive visualization of the data flow.</li>
+</ol>
+<p>The lineage graph displays tables as nodes with arrows showing data flow direction. By default, one level of connections is visible. Select the <strong>+</strong> icon on any node to reveal more upstream or downstream connections.</p>
+<p>When you select an arrow connecting two nodes, the <strong>Lineage connection</strong> panel opens. This panel shows details about the connection, including source and target tables, the notebooks that created the relationship, and the jobs that ran the transformations.</p>
+<h3 id="explore-column-level-lineage">Explore column-level lineage</h3>
+<p><strong>Column-level lineage</strong> shows how individual columns derive from source columns. This granularity helps you understand complex transformations and identify which source fields contribute to a calculated column.</p>
+<p>To view column-level lineage, select a column in the lineage graph. The visualization highlights the upstream columns that contribute to your selected column and the downstream columns that depend on it.</p>
+<h3 id="view-job-and-dashboard-lineage">View job and dashboard lineage</h3>
+<p>Beyond table relationships, Catalog Explorer shows which jobs and dashboards consume your data:</p>
+<ul>
+<li><p>To view <strong>job lineage</strong>, go to the table's <strong>Lineage</strong> tab, select <strong>Jobs</strong>, and choose <strong>Downstream</strong> to see jobs that consume the table.</p>
+</li>
+<li><p>To view <strong>dashboard lineage</strong>, select <strong>Dashboards</strong> in the <strong>Lineage</strong> tab to see which dashboards query the table.</p>
+</li>
+</ul>
+<p>This information supports impact analysis. Before modifying a table schema, you can identify which downstream jobs and dashboards might be affected.</p>
+<h2 id="manage-table-ownership">Manage table ownership</h2>
+<p>Every securable object in Unity Catalog has an <strong>owner</strong>. The owner has full privileges on the object and can grant permissions to other users. Understanding and managing ownership is essential for governance accountability.</p>
+<p>To view or change ownership in Catalog Explorer:</p>
+<ol>
+<li>Navigate to the table in Catalog Explorer.</li>
+<li>On the <strong>Overview</strong> tab, locate the current owner.</li>
+<li>Select the edit icon next to <strong>Owner</strong>.</li>
+<li>Search for and select a user, group, or service principal.</li>
+<li>Select <strong>Save</strong>.</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/6-manage-table-ownership.png#lightbox">
+<img alt="Screenshot of the set owner dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/6-manage-table-ownership.png"/>
+</a>
+</span>
+</p>
+<p>Only the current owner or a <strong>metastore admin</strong> can transfer ownership. After transfer, the previous owner loses ownership privileges unless explicitly granted.</p>
+<p>To view lineage, users need at least the <code>BROWSE</code> privilege on the parent catalog. Objects that a user doesn't have permission to access appear as <strong>masked nodes</strong> in the lineage graph. This security model ensures that lineage visibility respects your access control policies.</p>
+<h2 id="view-table-history-and-version-changes">View table history and version changes</h2>
+<p>For <strong>Delta tables</strong>, Catalog Explorer displays a complete history of all operations. The <strong>History</strong> tab shows each version with timestamps, operation types, and the user who made the change.</p>
+<p>You can also query table history using SQL:</p>
+<pre><code class="lang-sql">-- View full table history
+DESCRIBE HISTORY sales.customers.orders;
+
+-- View only the most recent operation
+DESCRIBE HISTORY sales.customers.orders LIMIT 1;
+</code></pre>
+<p>The history includes detailed information about each operation:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>version</code></td>
+<td>Table version number</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td>When the operation occurred</td>
+</tr>
+<tr>
+<td><code>operation</code></td>
+<td>Type of operation (WRITE, UPDATE, DELETE, MERGE)</td>
+</tr>
+<tr>
+<td><code>userName</code></td>
+<td>User who performed the operation</td>
+</tr>
+<tr>
+<td><code>operationMetrics</code></td>
+<td>Metrics like rows affected and files modified</td>
+</tr>
+</tbody>
+</table>
+<p>This history supports auditing and compliance by providing a complete record of who changed what and when.</p>
+<h2 id="query-lineage-data-programmatically">Query lineage data programmatically</h2>
+<p>For reporting and advanced analysis, you can query the <strong>lineage system tables</strong> directly. Unity Catalog provides two lineage tables:</p>
+<ul>
+<li><code>system.access.table_lineage</code> records read and write events at the table level</li>
+<li><code>system.access.column_lineage</code> tracks column-level dependencies</li>
+</ul>
+<p>The following query finds the most frequently accessed tables in the past week:</p>
+<pre><code class="lang-sql">SELECT
+  source_table_full_name,
+  COUNT(DISTINCT event_id) AS query_count
+FROM system.access.table_lineage
+WHERE event_date &gt; CURRENT_DATE() - INTERVAL 7 DAYS
+  AND source_table_full_name IS NOT NULL
+GROUP BY source_table_full_name
+ORDER BY query_count DESC
+LIMIT 10;
+</code></pre>
+<p>You can also use <em>Genie Code</em> to explore lineage interactively. From Catalog Explorer, select Genie Code icon and type:</p>
+<ul>
+<li><code>/getTableLineages</code> to view upstream and downstream dependencies</li>
+<li><code>/getTableInsights</code> to access metadata-driven insights like user activity patterns</li>
+</ul>
+<p>These queries help answer questions such as "who queries this table most often" or "what are the downstream consumers of this data."</p>
+<h2 id="understand-lineage-limitations">Understand lineage limitations</h2>
+<p>Lineage tracking has certain constraints you should be aware of:</p>
+<ul>
+<li><p>Lineage is <strong>not preserved for renamed objects</strong>. If you rename a table, the lineage connection to its previous name is lost.</p>
+</li>
+<li><p>Tables accessed by path rather than name (for example, <code>delta.'abfss://...'</code>) show only the path in lineage, not the table name.</p>
+</li>
+<li><p>Global temporary views and system tables under <code>system.information_schema</code> are not captured in lineage.</p>
+</li>
+<li><p>Some user-defined functions can obscure column-level lineage by hiding the mapping between source and target columns.</p>
+</li>
+</ul>
+<p>Despite these limitations, lineage tracking provides comprehensive visibility for most data engineering workflows. By understanding these constraints, you can design your pipelines to maximize lineage capture.</p>
+<p>Effective data lineage management transforms how you govern and troubleshoot your data platform. With the visibility that Catalog Explorer and system tables provide, you can confidently manage dependencies, assess change impact, and maintain accountability across your data assets.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Configure audit logging</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/6-configure-audit-logging">https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/6-configure-audit-logging</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Configure audit logging</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Tracking who did what, when, and to which data objects is essential for governance, security, and compliance. When you configure <strong>audit logging</strong> in Azure Databricks, you gain visibility into every significant action across your workspace and account. This visibility helps you meet regulatory requirements, investigate security incidents, and maintain accountability across your data platform.</p>
+<p>Unity Catalog audit logging is <strong>configured at the account level</strong> and automatically applies to all workspaces within that account. This account-level configuration ensures consistent audit capture across your entire Databricks environment without requiring per-workspace setup.</p>
+<p>In this unit, you learn how to access and query audit logs, understand what events are captured, and use these logs for common governance scenarios.</p>
+<h2 id="understand-the-audit-log-system-table">Understand the audit log system table</h2>
+<div class="NOTE">
+<p>Note</p>
+<p>The audit log system table (<code>system.access.audit</code>) is currently in <strong>Public Preview</strong>. An account admin must enable system tables before you can query audit logs. See <a data-linktype="absolute-path" href="/en-us/azure/databricks/admin/system-tables/#enable">Enable system tables</a>.</p>
+</div>
+<p>Azure Databricks automatically captures audit events and stores them in the <strong>audit log system table</strong> located at <code>system.access.audit</code>. This table records actions across all workspaces attached to your Unity Catalog metastore, providing a <strong>centralized view</strong> of activity across your organization.</p>
+<p>Consider a scenario where your security team needs to investigate unauthorized data access. Rather than searching through multiple log files, you query a single table that contains every tracked event. This centralized approach transforms compliance investigations from manual searches into straightforward SQL queries.</p>
+<p>The audit log system table uses a consistent schema that includes the following key columns:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event_time</code></td>
+<td>Timestamp when the action occurred</td>
+</tr>
+<tr>
+<td><code>event_date</code></td>
+<td>Calendar date of the action</td>
+</tr>
+<tr>
+<td><code>user_identity</code></td>
+<td>Identity of the user who initiated the action</td>
+</tr>
+<tr>
+<td><code>workspace_id</code></td>
+<td>The Azure Databricks workspace in which the audit event took place</td>
+</tr>
+<tr>
+<td><code>service_name</code></td>
+<td>Service category (for example, <code>unityCatalog</code>, <code>notebook</code>, <code>clusters</code>)</td>
+</tr>
+<tr>
+<td><code>action_name</code></td>
+<td>Specific action performed (for example, <code>getTable</code>, <code>createTable</code>)</td>
+</tr>
+<tr>
+<td><code>request_params</code></td>
+<td>Parameters included in the request</td>
+</tr>
+<tr>
+<td><code>response</code></td>
+<td>Response details including status codes and results</td>
+</tr>
+<tr>
+<td><code>source_ip_address</code></td>
+<td>IP address where the request originated</td>
+</tr>
+</tbody>
+</table>
+<p>Account-level events record <code>workspace_id</code> as <code>0</code>, while workspace-level events include the actual workspace identifier. This distinction helps you filter events by scope when investigating issues.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Azure Databricks retains audit logs for up to <strong>one year</strong> for security and fraud analysis purposes. Plan your long-term retention strategy if you need logs beyond this period.</p>
+</div>
+<h2 id="identify-tracked-events-and-services">Identify tracked events and services</h2>
+<p>The audit log captures events across numerous services within Azure Databricks. Understanding which actions are logged helps you design effective monitoring and compliance strategies.</p>
+<p><strong>Workspace-level services</strong> log events for actions taken within a specific workspace:</p>
+<ul>
+<li><strong>Unity Catalog</strong>: Table creation, deletion, updates, and permission changes</li>
+<li><strong>Notebooks</strong>: Commands executed, notebooks created, modified, or deleted</li>
+<li><strong>Clusters</strong>: Cluster creation, resizing, and termination</li>
+<li><strong>Jobs</strong>: Job creation, runs, and failures</li>
+<li><strong>Databricks SQL</strong>: Query execution, warehouse management, and alert activity</li>
+<li><strong>Accounts</strong>: User logins, token generation, and access control changes</li>
+</ul>
+<p><strong>Account-level services</strong> capture events that span <strong>multiple workspaces</strong>:</p>
+<ul>
+<li><strong>Account management</strong>: User and group management across the account</li>
+<li><strong>Billable usage</strong>: Access to usage reports and aggregated metrics</li>
+<li><strong>Delta Sharing</strong>: Provider and recipient actions for shared data</li>
+</ul>
+<p>For example, when a user queries a table in Unity Catalog, the <code>unityCatalog</code> service logs a <code>getTable</code> action. If the same user runs a command in a notebook, the <code>notebook</code> service logs a <code>runCommand</code> action. Each service provides specific action names that describe precisely what occurred.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>For a comprehensive reference of audit log services and events, consult this article <a data-linktype="absolute-path" href="/en-us/azure/databricks/admin/account-settings/audit-logs">Diagnostic log reference</a></p>
+</div>
+<h2 id="query-audit-logs-for-common-scenarios">Query audit logs for common scenarios</h2>
+<p>You can write SQL queries against the audit log system table to answer common governance questions. The following examples demonstrate patterns you can adapt for your organization's needs.</p>
+<h3 id="find-who-accessed-a-specific-table">Find who accessed a specific table</h3>
+<p>This query identifies users who accessed a particular table in the past seven days:</p>
+<pre><code class="lang-sql">SELECT
+  user_identity.email AS user_email,
+  action_name AS access_type,
+  event_time AS access_time
+FROM system.access.audit
+WHERE
+  request_params.full_name_arg = 'catalog.schema.table_name'
+  AND action_name IN ('getTable', 'createTable', 'deleteTable')
+  AND event_date &gt; CURRENT_DATE() - INTERVAL 7 DAYS
+ORDER BY event_time DESC;
+</code></pre>
+<h3 id="track-permission-changes-across-your-metastore">Track permission changes across your metastore</h3>
+<p>This query shows all permission modifications, helping you audit access control changes:</p>
+<pre><code class="lang-sql">SELECT
+  event_time,
+  user_identity.email AS changed_by,
+  request_params.securable_type,
+  request_params.securable_full_name,
+  request_params.changes
+FROM system.access.audit
+WHERE
+  service_name = 'unityCatalog'
+  AND action_name = 'updatePermissions'
+ORDER BY event_time DESC;
+</code></pre>
+<h3 id="identify-failed-login-attempts">Identify failed login attempts</h3>
+<p>Security investigations often require finding authentication failures. This query surfaces denied access attempts:</p>
+<pre><code class="lang-sql">SELECT
+  event_time,
+  user_identity.email AS user_email,
+  source_ip_address,
+  action_name,
+  response.error_message
+FROM system.access.audit
+WHERE
+  service_name = 'accounts'
+  AND response.status_code != 200
+  AND event_date &gt; CURRENT_DATE() - INTERVAL 30 DAYS
+ORDER BY event_time DESC;
+</code></pre>
+<p>These queries form a foundation for your monitoring strategy. You can extend them to create alerts, build dashboards, or export data to external security information and event management (SIEM) platforms.</p>
+<h2 id="enable-verbose-audit-logs">Enable verbose audit logs</h2>
+<p>By default, Azure Databricks logs high-level events but doesn't capture the full text of commands executed in notebooks. When you need detailed visibility into exactly what code ran and when, enable <strong>verbose audit logs</strong>.</p>
+<p>With verbose logging enabled, the audit log captures additional events:</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Action</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>notebook</code></td>
+<td><code>runCommand</code></td>
+<td>Logs the full command text executed in a notebook cell</td>
+</tr>
+<tr>
+<td><code>jobs</code></td>
+<td><code>runCommand</code></td>
+<td>Logs commands executed by job runs</td>
+</tr>
+<tr>
+<td><code>databrickssql</code></td>
+<td><code>commandSubmit</code></td>
+<td>Logs SQL commands submitted to warehouses</td>
+</tr>
+</tbody>
+</table>
+<p>To enable verbose audit logs:</p>
+<ol>
+<li>Sign in to your Azure Databricks workspace as an administrator.</li>
+<li>Navigate to <strong>Admin Settings</strong> by selecting your username and choosing <strong>Admin Settings</strong>.</li>
+<li>Select the <strong>Advanced</strong> tab.</li>
+<li>Locate <strong>Verbose Audit Logs</strong> and enable the feature.</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/7-verbose-audit-logs.png#lightbox">
+<img alt="Screenshot of the Workspace admin advanced settings." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/7-verbose-audit-logs.png"/>
+</a>
+</span>
+</p>
+<p>When you enable or disable verbose logging, Azure Databricks logs this configuration change as an auditable event. This creates accountability for who modified the logging configuration and when.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Verbose logs capture command text, which might include sensitive information such as query parameters or hardcoded values. Ensure your security policies account for this additional data exposure.</p>
+</div>
+<h2 id="configure-log-delivery-to-external-systems">Configure log delivery to external systems</h2>
+
+<p>While the audit log system table provides direct access within Databricks, many organizations route logs to external systems for centralized monitoring. Azure Databricks integrates with Azure diagnostic settings to deliver logs to multiple destinations, each optimized for different use cases:</p>
+<ul>
+<li><strong>Azure Log Analytics</strong>: Provides near-real-time ingestion (typically within 15 minutes), centralized storage, and powerful querying using Kusto Query Language (KQL). This makes it ideal for fast analysis, interactive investigations, and building custom dashboards for auditing Unity Catalog access events.</li>
+<li><strong>Azure Storage accounts</strong>: Offers low-cost, long-term archival and batch analysis. Best suited for compliance scenarios where logs are accessed infrequently but must be retained for extended periods.</li>
+<li><strong>Azure Event Hubs</strong>: Enables real-time streaming to downstream consumers and processing systems. Ideal when you need to integrate audit logs with existing event-driven architectures or SIEM platforms.</li>
+</ul>
+<p>Platform administrators configure log delivery at the account level through the Azure portal. When building monitoring solutions, account for typical ingestion latency of approximately <strong>15 minutes</strong> in your alerting thresholds.</p>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/7-diagnostic-setting.png#lightbox">
+<img alt="Screenshot of Azure portal, showing diagnostic setting for Azure Databricks." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/7-diagnostic-setting.png"/>
+</a>
+</span>
+</p>
+<p>The combination of the system table for interactive queries and external delivery for operational monitoring provides comprehensive coverage. You can use the system table for ad-hoc investigations while relying on your SIEM platform for continuous security monitoring.</p>
+<p>Understanding audit logging capabilities positions you to support compliance requirements and respond quickly to security incidents. With the audit log system table, you have a powerful tool for tracking activity, investigating issues, and demonstrating governance controls to stakeholders.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>7. Design secure Delta Sharing strategy</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/7-secure-delta-sharing-strategy">https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/7-secure-delta-sharing-strategy</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Design secure Delta Sharing strategy</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Sharing data securely with external partners, other teams, or across organizational boundaries requires a deliberate strategy. <strong>Delta Sharing</strong> in Azure Databricks lets you share live data without copying it, while maintaining full control over who accesses what. Designing a secure sharing strategy means choosing the right authentication method, applying appropriate access controls, and establishing monitoring practices that keep your data governance intact.</p>
+<p>In this unit, you learn how to evaluate sharing protocols, implement security controls, and design fine-grained access patterns that align with your organization's compliance requirements.</p>
+<h2 id="choose-the-right-sharing-protocol">Choose the right sharing protocol</h2>
+<p>Delta Sharing offers two primary protocols, each suited for different recipient scenarios. Your choice affects how authentication works and what assets you can share.</p>
+<p><a data-linktype="relative-path" href="media/8-scenarios-delta-sharing.png#lightbox">
+<img alt="Diagram explaining the different scenarios of Delta sharing." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/media/8-scenarios-delta-sharing.png"/>
+</a>
+</p>
+<p><strong>Databricks-to-Databricks sharing</strong> is the preferred option when recipients have access to a Unity Catalog-enabled Azure Databricks workspace. This protocol handles all security automatically through the platform. Recipients provide their <strong>sharing identifier</strong>—a string containing their metastore's cloud, region, and unique ID—and the connection establishes without token management. You can share tables, views, volumes, notebook files, and AI models through this approach.</p>
+<p><strong>Open sharing</strong> works when recipients use platforms other than Azure Databricks or lack access to Unity Catalog. You manage authentication by generating <strong>bearer tokens</strong> or configuring <strong>OIDC (OpenID Connect) federation</strong>. While more flexible, this approach requires careful token lifecycle management and supports only tabular data.</p>
+<p>Consider these factors when selecting your protocol:</p>
+<table>
+<thead>
+<tr>
+<th>Factor</th>
+<th>Databricks-to-Databricks</th>
+<th>Open sharing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Recipient platform</td>
+<td>Databricks with Unity Catalog</td>
+<td>Any platform</td>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>Platform-managed</td>
+<td>Token or OIDC</td>
+</tr>
+<tr>
+<td>Shareable assets</td>
+<td>Tables, views, volumes, notebook files, models</td>
+<td>Tables only</td>
+</tr>
+<tr>
+<td>Token management</td>
+<td>Not required</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Optimized with history sharing</td>
+<td>Standard</td>
+</tr>
+</tbody>
+</table>
+<p>When recipients exist on both Databricks and non-Databricks platforms, you can create multiple recipient objects for the same logical organization—one for each access pattern.</p>
+<h2 id="design-authentication-and-access-controls">Design authentication and access controls</h2>
+<p>A secure sharing strategy starts with proper authentication configuration and follows the principle of <strong>least privilege</strong>.</p>
+<p>For <strong>open sharing recipients</strong>, configure <strong>token expiration</strong> to limit exposure if credentials are compromised. Set the default token lifetime at the metastore level:</p>
+<ol>
+<li>Navigate to the account console and select your metastore.</li>
+<li>Enable <strong>Allow Delta Sharing with parties outside your organization</strong>.</li>
+<li>Set an expiration period rather than allowing tokens to live indefinitely.</li>
+</ol>
+<p>For recipients who shouldn't rotate tokens frequently, consider <strong>OIDC federation</strong> instead. This approach grants short-lived Databricks OAuth tokens in exchange for JWT tokens from the recipient's identity provider, removing long-lived credentials entirely.</p>
+<p><strong>Restrict network access</strong> for sensitive shares by assigning <strong>IP access lists</strong> to open sharing recipients. You can limit access to specific IP addresses or CIDR ranges (Classless Inter-Domain Routing):</p>
+<pre><code class="lang-sql">-- View recipient details including IP restrictions
+DESCRIBE RECIPIENT finance_partner;
+</code></pre>
+<p>Each recipient supports up to 100 IP/CIDR values. When a request originates from an unlisted address, Delta Sharing denies access and logs the attempt.</p>
+<p><strong>Delegate sharing privileges carefully</strong>. Rather than granting metastore admin access broadly, use specific privileges:</p>
+<ul>
+<li><code>CREATE SHARE</code>: Allows creating new shares</li>
+<li><code>CREATE RECIPIENT</code>: Allows creating new recipients</li>
+<li><code>USE SHARE</code> and <code>SET SHARE PERMISSION</code>: Together allow granting share access to recipients</li>
+<li><code>USE RECIPIENT</code>: Allows viewing recipient details</li>
+</ul>
+<p>Assign these privileges to groups representing your data stewardship team rather than individuals.</p>
+<h2 id="configure-shares-and-recipients">Configure shares and recipients</h2>
+<p>After designing your security approach, you need to create the actual share and recipient objects in Unity Catalog. This section walks through the configuration steps for both sharing protocols.</p>
+<h3 id="create-a-share">Create a share</h3>
+<p>A <strong>share</strong> is a securable object that contains a collection of tables, views, volumes, notebooks, and models you want to share. Create a share using SQL or Catalog Explorer:</p>
+<pre><code class="lang-sql">-- Create a new share
+CREATE SHARE IF NOT EXISTS partner_analytics
+COMMENT 'Sales analytics data for partner integration';
+</code></pre>
+<h3 id="add-assets-to-a-share">Add assets to a share</h3>
+<p>Once created, add the data assets recipients should access. You can share individual tables, views, or entire schemas:</p>
+<pre><code class="lang-sql">-- Add a table to the share
+ALTER SHARE partner_analytics ADD TABLE catalog.schema.sales_summary;
+
+-- Add a table with an alias (useful when internal naming differs from external)
+ALTER SHARE partner_analytics ADD TABLE catalog.schema.internal_metrics
+AS external_catalog.analytics.metrics;
+
+-- Share a table with history for time travel queries
+ALTER SHARE partner_analytics ADD TABLE catalog.schema.transactions
+WITH HISTORY;
+
+-- Add an entire schema (includes all current and future assets)
+ALTER SHARE partner_analytics ADD SCHEMA catalog.analytics_schema;
+</code></pre>
+<p>For Databricks-to-Databricks sharing, you can also add volumes and views:</p>
+<pre><code class="lang-sql">-- Add a volume
+ALTER SHARE partner_analytics ADD VOLUME catalog.schema.documentation;
+
+-- Add a view
+ALTER SHARE partner_analytics ADD VIEW catalog.schema.aggregated_sales;
+</code></pre>
+<div class="NOTE">
+<p>Note</p>
+<p>To add notebook files to a share, use Catalog Explorer. Navigate to <strong>Delta Sharing &gt; Shared by me</strong>, select your share, click <strong>Manage assets &gt; Add notebook file</strong>, and browse for the notebook you want to share.</p>
+</div>
+<h3 id="create-a-recipient-for-databricks-to-databricks-sharing">Create a recipient for Databricks-to-Databricks sharing</h3>
+<p>For recipients with Unity Catalog-enabled workspaces, request their <strong>sharing identifier</strong> first. This string contains their metastore's cloud, region, and UUID:</p>
+<pre><code class="lang-sql">-- Create a recipient using their sharing identifier
+CREATE RECIPIENT IF NOT EXISTS contoso_analytics
+USING ID 'azure:westeurope:a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+COMMENT 'Contoso data analytics team';
+</code></pre>
+<p>The recipient can find their sharing identifier by running:</p>
+<pre><code class="lang-sql">SELECT CURRENT_METASTORE();
+</code></pre>
+<h3 id="create-a-recipient-for-open-sharing">Create a recipient for open sharing</h3>
+<p>For recipients without Databricks access, create a token-authenticated recipient:</p>
+<pre><code class="lang-sql">-- Create an open sharing recipient
+CREATE RECIPIENT IF NOT EXISTS external_partner
+COMMENT 'External analytics platform integration';
+</code></pre>
+<p>After creation, retrieve the <strong>activation link</strong> to send to your recipient:</p>
+<pre><code class="lang-sql">DESCRIBE RECIPIENT external_partner;
+</code></pre>
+<p>The activation link allows the recipient to download their credential file once. Share this link through a secure channel.</p>
+<h3 id="grant-recipients-access-to-shares">Grant recipients access to shares</h3>
+<p>After creating both the share and recipient, grant access:</p>
+<pre><code class="lang-sql">-- Grant a recipient access to a share
+GRANT SELECT ON SHARE partner_analytics TO RECIPIENT contoso_analytics;
+
+-- View current grants on a share
+SHOW GRANT ON SHARE partner_analytics;
+
+-- View shares accessible to a recipient
+SHOW GRANTS TO RECIPIENT contoso_analytics;
+</code></pre>
+<h3 id="manage-shares-and-recipients">Manage shares and recipients</h3>
+<p>Use these commands to view and manage your sharing configuration:</p>
+<pre><code class="lang-sql">-- List all shares
+SHOW SHARES;
+
+-- View share details including assets
+DESCRIBE SHARE partner_analytics;
+SHOW ALL IN SHARE partner_analytics;
+
+-- List all recipients
+SHOW RECIPIENTS;
+
+-- Remove a table from a share
+ALTER SHARE partner_analytics REMOVE TABLE catalog.schema.deprecated_table;
+
+-- Revoke recipient access
+REVOKE SELECT ON SHARE partner_analytics FROM RECIPIENT former_partner;
+
+-- Delete a recipient
+DROP RECIPIENT former_partner;
+</code></pre>
+<h2 id="implement-fine-grained-access-with-dynamic-views">Implement fine-grained access with dynamic views</h2>
+<p>Standard table sharing grants recipients access to all rows and columns. When you need to restrict what specific recipients see, use <strong>dynamic views</strong> that filter data based on recipient properties.</p>
+<p>Attach <strong>custom properties</strong> to recipients that correspond to your data segmentation:</p>
+<pre><code class="lang-sql">-- Set country_region property for partition filtering
+ALTER RECIPIENT regional_partner SET PROPERTIES ('country_region' = 'US');
+</code></pre>
+<p>Create a dynamic view that filters rows based on the recipient's property:</p>
+<pre><code class="lang-sql">CREATE VIEW catalog.schema.regional_sales AS
+SELECT * FROM catalog.schema.all_sales
+WHERE region = CURRENT_RECIPIENT('country_region');
+</code></pre>
+<p>For column-level security, mask sensitive data for recipients who shouldn't see it:</p>
+<pre><code class="lang-sql">CREATE VIEW catalog.schema.customer_data AS
+SELECT
+  customer_id,
+  CASE
+    WHEN CURRENT_RECIPIENT('access_level') = 'full' THEN email
+    ELSE 'REDACTED'
+  END AS email,
+  purchase_history
+FROM catalog.schema.customers;
+</code></pre>
+<p>When you share this dynamic view, each recipient sees only the data their properties permit. The provider can't query views using <code>CURRENT_RECIPIENT()</code> directly—test by sharing with yourself as a recipient.</p>
+<p>For simpler scenarios, <strong>partition filtering</strong> lets you share specific slices of a table without creating views:</p>
+<pre><code class="lang-sql">ALTER SHARE partner_share ADD TABLE inventory
+PARTITION (region = CURRENT_RECIPIENT('region'));
+</code></pre>
+<h2 id="monitor-sharing-activity-through-audit-logs">Monitor sharing activity through audit logs</h2>
+<p>Tracking who accesses shared data and when is essential for compliance and security investigations. Azure Databricks captures Delta Sharing events in the <strong>audit log system table</strong>.</p>
+<p>Query the audit logs to understand sharing patterns:</p>
+<pre><code class="lang-sql">-- Track share and recipient creation
+SELECT
+  event_time,
+  user_identity.email AS performed_by,
+  action_name,
+  request_params
+FROM system.access.audit
+WHERE service_name = 'unityCatalog'
+  AND action_name IN ('createShare', 'createRecipient', 'grantOnShare')
+ORDER BY event_time DESC;
+</code></pre>
+<p>Monitor recipient access to shared tables:</p>
+<pre><code class="lang-sql">-- View recipient data access events
+SELECT
+  event_time,
+  request_params.recipient_name,
+  request_params.share_name,
+  action_name
+FROM system.access.audit
+WHERE service_name = 'unityCatalog'
+  AND action_name IN ('deltaSharingQueriedTable', 'generateTemporaryTableCredential')
+  AND event_date &gt; CURRENT_DATE() - INTERVAL 7 DAYS;
+</code></pre>
+<p>The <code>deltaSharingQueriedTable</code> event appears for open sharing queries, while <code>generateTemporaryTableCredential</code> appears for Databricks-to-Databricks access with <strong>history sharing</strong>. Both events include details about what was accessed and by whom.</p>
+<p><strong>Establish regular review cycles</strong> for your sharing configuration:</p>
+<ul>
+<li>Audit active recipients monthly to confirm continued business need</li>
+<li>Review share contents to ensure only necessary data is exposed</li>
+<li>Verify token expiration settings haven't been modified</li>
+<li>Check for failed access attempts that might indicate credential compromise</li>
+</ul>
+<div class="TIP">
+<p>Tip</p>
+<p>Configure log delivery to <strong>Azure Event Hubs</strong> or <strong>Log Analytics</strong> if you need real-time alerting on suspicious sharing activity.</p>
+</div>
+<h2 id="apply-security-best-practices">Apply security best practices</h2>
+<p>Building a robust Delta Sharing strategy requires combining technical controls with operational practices.</p>
+<p><strong>Document sharing agreements</strong> before configuring access. Establish what data is shared, for what purpose, and for how long. This documentation supports compliance audits and helps when reviewing whether shares should continue.</p>
+<p><strong>Share only what's necessary</strong>. When adding tables to a share, consider whether recipients need the entire table or just specific partitions. Use schema sharing with caution—it automatically includes future tables added to that schema.</p>
+<p><strong>Combine controls for defense in depth</strong>. A sensitive share might include:</p>
+<ul>
+<li>Databricks-to-Databricks authentication for platform-managed security</li>
+<li>Dynamic views for row-level filtering</li>
+<li>Recipient properties for parameterized access</li>
+<li>Regular audit log reviews</li>
+</ul>
+<p><strong>Plan for credential rotation</strong>. For open sharing recipients, implement processes to <strong>rotate tokens</strong> before expiration. Rotating a token invalidates the previous one after the old token's expiration, giving recipients time to update their configuration.</p>
+<p><strong>Review shares when personnel changes</strong>. When a recipient organization restructures, verify that the current sharing identifier still represents the appropriate metastore and that access should continue.</p>
+<p>By designing your Delta Sharing strategy around these principles, you create a framework for secure collaboration that scales with your organization's needs while maintaining the governance controls your compliance requirements demand.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>8. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/10-summary">https://learn.microsoft.com/en-us/training/modules/govern-unity-catalog-objects/10-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Governing Unity Catalog objects requires a comprehensive approach that spans metadata management, access control, compliance, and collaboration. Throughout this module, you explored the tools and techniques that enable effective data governance in Azure Databricks—from documenting your data assets with <strong>comments and tags</strong> to enforcing access policies through <strong>attribute-based access control (ABAC)</strong>. You learned how <strong>governed tags</strong> enable policies that scale automatically as new tables are added to your catalog.</p>
+<p>Data lifecycle management emerged as a critical governance capability. You configured <strong>Delta Lake retention settings</strong> and used <strong>VACUUM</strong> to remove obsolete data files. You handled <strong>compliance deletion requests</strong>, propagating deletions through bronze, silver, and gold data layers. <strong>Predictive optimization</strong> automates these maintenance tasks, reducing operational overhead while ensuring storage efficiency.</p>
+<p>Understanding your data's journey proved essential for both troubleshooting and compliance. <strong>Data lineage tracking</strong> in Catalog Explorer reveals how data flows through your pipelines, enabling impact analysis before making changes. <strong>Audit logging</strong> through the system table provides visibility into who accessed what data and when, supporting security investigations and regulatory audits. For external collaboration, <strong>Delta Sharing</strong> offers secure data exchange with partners and customers, with options for both Databricks-to-Databricks sharing and open protocol sharing.</p>
+<p>Apply these governance practices incrementally as you build your data platform. Start by documenting tables and columns with meaningful comments and tags. Implement ABAC policies for sensitive data classifications. Configure retention policies that balance compliance requirements with storage costs. Review lineage and audit logs regularly to maintain visibility into your data operations. These foundational practices create a governance framework that scales with your organization's data needs.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>

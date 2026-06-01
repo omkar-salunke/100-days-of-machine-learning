@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implement development lifecycle processes in Azure Databricks</title>
+    <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 2px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-top: 0px; margin-bottom: 0px; }
+    .section { margin-bottom: 40px; }
+    .section-header { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .section-header a { color: #0078d4; text-decoration: none; }
+    .section-header a:hover { text-decoration: underline; }
+    img { max-width: 100%; height: auto; }
+    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .NOTE, .TIP, .IMPORTANT { padding: 12px 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid; }
+    .IMPORTANT { background-color: #e7f3ff; border-color: #0078d4; }
+    .IMPORTANT > p:first-child { font-weight: bold; color: #0078d4; margin-top: 0; }
+    .TIP { background-color: #e8f5e9; border-color: #4caf50; }
+    .TIP > p:first-child { font-weight: bold; color: #2e7d32; margin-top: 0; }
+    .NOTE { background-color: #f3e5f5; border-color: #9c27b0; }
+    .NOTE > p:first-child { font-weight: bold; color: #7b1fa2; margin-top: 0; }
+</style>
+</head>
+<body>
+    <h1>Implement development lifecycle processes in Azure Databricks</h1>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>1. Introduction</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/1-introduction">https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/1-introduction</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Introduction</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Building reliable data engineering solutions in Azure Databricks requires more than writing code that works—it demands processes that enable collaboration, ensure quality, and support consistent deployments across environments. When data pipelines grow in complexity and team members contribute simultaneously, you need systematic approaches to track changes, validate code, and move work from development to production reliably.</p>
+<p>Azure Databricks integrates with established development practices through <strong>Git folders</strong>, which bring version control directly into your workspace. This integration lets you clone repositories, create branches, commit changes, and collaborate with team members without leaving your development environment. Combined with <strong>Declarative Automation Bundles (DABs)</strong>, you gain an infrastructure-as-code approach for defining and deploying jobs, pipelines, and other resources consistently across workspaces.</p>
+<p>Effective development lifecycle management also depends on robust testing strategies. The <strong>testing pyramid</strong>—spanning unit tests, integration tests, end-to-end tests, and user acceptance testing—helps you catch issues early, validate component interactions, and confirm business requirements are met before production deployment. By automating these tests and incorporating them into your deployment workflows, you reduce risk and build confidence in your data solutions.</p>
+<p>Throughout this module, you work with Git version control practices, branching strategies and pull request workflows, comprehensive testing approaches, and bundle configuration with CLI deployment. These skills enable you to implement professional development lifecycle processes that scale with your team and project complexity.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>2. Apply Git version control best practices</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/2-apply-version-control-git">https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/2-apply-version-control-git</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Apply Git version control best practices</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Data engineering projects require systematic tracking of code changes, collaboration across teams, and the ability to <strong>reproduce work reliably</strong>. When you apply version control best practices using Git within Azure Databricks, you establish a foundation for professional development workflows. <strong>Git folders</strong> integrate directly into your workspace, providing a visual interface for managing repositories without leaving your development environment.</p>
+<h2 id="understand-git-folders-in-azure-databricks">Understand Git folders in Azure Databricks</h2>
+<p>Git folders bring version control capabilities into your Azure Databricks workspace through a <strong>visual Git client</strong> and API. This integration lets you perform standard Git operations such as <strong>cloning repositories</strong>, <strong>creating branches</strong>, <strong>committing changes</strong>, and <strong>pushing updates</strong> directly from the workspace interface. You don't need to switch between external tools and your development environment.</p>
+<p><a data-linktype="relative-path" href="media/2-understand-git-folders-azure-databricks.png#lightbox">
+<img alt="Diagram explaining git folders in Azure Databricks." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/media/2-understand-git-folders-azure-databricks.png"/>
+</a>
+</p>
+<p>When you create a Git folder, you connect it to a <strong>remote repository</strong> hosted by providers like Azure DevOps, GitHub, GitLab, or Bitbucket. The folder mirrors your repository structure, allowing you to work with notebooks, Python files, SQL scripts, and other supported assets while maintaining version control. All team members can have their own Git folders mapped to the same remote repository, enabling <strong>collaboration through shared branches</strong> and coordinated commits.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Each team member should work in their own Git folder connected to the shared repository. This practice prevents accidental branch switches or conflicts that can occur when multiple users perform Git operations on the same workspace folder.</p>
+</div>
+<h2 id="clone-a-repository-to-start-working">Clone a repository to start working</h2>
+<p>Before you can work with version-controlled code in Databricks, you need to <strong>clone your team's repository</strong>. Cloning creates a <strong>local copy</strong> of the remote repository in your workspace, giving you access to the latest codebase.</p>
+<p>To clone a repository:</p>
+<ol>
+<li>In the sidebar, select <strong>Workspace</strong> and navigate to where you want to create the Git folder.</li>
+<li>Select <strong>Create</strong> &gt; <strong>Git folder</strong>.</li>
+<li>Enter the Git repository URL in the format <code>https://example.com/organization/project.git</code>.</li>
+<li>Select your Git provider from the dropdown menu.</li>
+<li>Provide a name for the folder in your workspace.</li>
+<li>Select <strong>Create Git folder</strong>.</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/2-create-git-folder.png#lightbox">
+<img alt="Screenshot of the Create Git folder dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/media/2-create-git-folder.png"/>
+</a>
+</span>
+</p>
+<p>After cloning, the repository contents appear in your workspace. You can open notebooks, edit files, and begin development immediately.</p>
+<h2 id="pull-changes-from-the-remote-repository">Pull changes from the remote repository</h2>
+<p>When collaborating with a team, others push changes to the shared repository that you need to incorporate into your local work. <strong>Pulling updates</strong> ensures you're working with the <strong>latest version</strong> of the codebase.</p>
+<p>To pull changes:</p>
+<ol>
+<li>Open the Git dialog.</li>
+<li>Select <strong>Pull</strong> to fetch and merge changes from the remote repository.</li>
+<li>If conflicts exist between remote changes and your local modifications, resolve them using the <strong>conflict resolution interface</strong>.</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/2-commit-push.png#lightbox">
+<img alt="Screenshot of the git dialog in Azure Databricks." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/media/2-commit-push.png"/>
+</a>
+</span>
+</p>
+<p><strong>Pull regularly</strong>, especially before starting new work, to minimize integration issues. When you pull changes that modify notebook source code, the <strong>notebook state resets</strong>. This means cell outputs, comments, and version history for that notebook clear to reflect the updated content.</p>
+<h2 id="keep-your-repository-organized">Keep your repository organized</h2>
+<p>A well-organized repository makes collaboration easier and reduces confusion. Apply these practices to maintain a clean, navigable codebase:</p>
+<ul>
+<li><strong>Use <code>.gitignore</code> files</strong> to exclude files that shouldn't be tracked, such as temporary outputs, credentials, or environment-specific configurations. Files already tracked by Git require explicit removal before <code>.gitignore</code> applies to them.</li>
+<li><strong>Structure folders logically</strong> by grouping related notebooks, libraries, and configuration files. Git folders support creating structures at any depth under your user directory.</li>
+<li><strong>Remove stale branches</strong> from your Git provider after merging to keep the branch list manageable. Local branches persist for up to 30 days after the remote branch is deleted.</li>
+</ul>
+<div class="NOTE">
+<p>Note</p>
+<p>Git folders have size constraints. Working branches are limited to 1 GB, and Databricks recommends keeping the total number of assets below 20,000. For large repositories, consider using <strong>sparse checkout</strong> to work with only the directories you need.</p>
+</div>
+<p>When everyone follows consistent organization practices, team members can find what they need quickly and understand how the codebase fits together.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>3. Manage branching and pull requests</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/3-manage-branching-pull-requests-conflicts">https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/3-manage-branching-pull-requests-conflicts</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Manage branching and pull requests</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Collaborative development in Azure Databricks relies on effective <strong>version control practices</strong>. When multiple team members work on notebooks and code files simultaneously, you need a structured approach to <strong>isolate changes</strong>, <strong>review code</strong>, and <strong>integrate work</strong> without disrupting production workflows.</p>
+<p><a data-linktype="relative-path" href="media/3-manage-branching-pull-requests-conflicts.png#lightbox">
+<img alt="Diagram showing how to manage branching, pull requests and conflicts." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/media/3-manage-branching-pull-requests-conflicts.png"/>
+</a>
+</p>
+<p>Azure Databricks Git folders provide a visual Git client that integrates directly with your workspace. This integration lets you perform common Git operations—branching, committing, and merging—without leaving the Azure Databricks environment.</p>
+<h2 id="create-and-manage-branches">Create and manage branches</h2>
+<p><strong>Feature branches</strong> isolate your work from the main codebase. When you create a branch in Azure Databricks, you can develop and test changes independently before merging them into shared branches.</p>
+<p>To create a new branch:</p>
+<ol>
+<li>Open the Git dialog by selecting the branch button next to your notebook name.</li>
+<li>Select <strong>Create branch</strong> and enter a descriptive name.</li>
+<li>Base your branch on the appropriate source branch, typically <code>main</code>.</li>
+</ol>
+<p><span class="mx-imgBorder">
+<a data-linktype="relative-path" href="media/3-create-branch.png#lightbox">
+<img alt="Screenshot of the create branch dialog." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/media/3-create-branch.png"/>
+</a>
+</span>
+</p>
+<p>Use a <strong>consistent naming convention</strong> for branches to identify work clearly. Common patterns include:</p>
+<ul>
+<li><code>feature/feature-name</code> for new functionality</li>
+<li><code>bugfix/issue-description</code> for fixes</li>
+<li><code>users/username/description</code> for personal development work</li>
+</ul>
+<p>When you switch branches, <strong>uncommitted changes carry over</strong> to the new branch if they don't conflict with existing code. Discard changes before switching if you don't intend to carry them to the new branch.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Switching branches may delete workspace assets when the new branch doesn't contain those assets. Verify the asset exists on the target branch before switching, especially if you've shared or bookmarked notebooks.</p>
+</div>
+<h2 id="commit-and-push-changes">Commit and push changes</h2>
+<p>After modifying notebooks or files, <strong>commit your changes</strong> to create a snapshot in your branch history. The Git folders UI highlights modified files and shows <strong>visual diffs</strong> so you can review changes before committing.</p>
+<p>To commit and push changes:</p>
+<ol>
+<li>Open the Git dialog from your notebook or the workspace browser.</li>
+<li>Review the list of changed files in the dialog.</li>
+<li>Enter a descriptive commit message that explains what changed and why.</li>
+<li>Select <strong>Commit &amp; Push</strong> to save changes and sync with the remote repository.</li>
+</ol>
+<p>If you lack permission to commit directly to <strong>protected branches</strong> like <code>main</code>, create a feature branch first. You can then use your Git provider's interface to create a pull request for merging.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Notebook outputs aren't included in commits by default when notebooks use source file formats like <code>.py</code>, <code>.scala</code>, <code>.sql</code>, or <code>.r</code>. Use the IPYNB format if you need to version control outputs.</p>
+</div>
+<h2 id="work-with-pull-requests">Work with pull requests</h2>
+<p><strong>Pull requests</strong> let team members <strong>review code changes</strong> before merging them into shared branches. While Azure Databricks provides the Git operations for branching and committing, you create and review pull requests through your Git provider's interface—GitHub, Azure DevOps, GitLab, or Bitbucket.</p>
+<p>A typical collaboration workflow follows these steps:</p>
+<ol>
+<li>Clone the repository to your Azure Databricks workspace.</li>
+<li>Create a feature branch from <code>main</code>.</li>
+<li>Make modifications to notebooks and files.</li>
+<li>Commit and push changes to the remote repository.</li>
+<li>Open your Git provider's website and create a pull request.</li>
+<li>Review code with your team and address feedback.</li>
+<li>Merge the pull request into the deployment branch.</li>
+</ol>
+<p>Databricks recommends that each developer <strong>work on their own branch</strong> to minimize conflicts. When contributors push to the same Git folder, one user switching branches affects everyone sharing that folder.</p>
+<p>After a pull request merges, you can sync the changes to your local workspace by pulling the updated branch.</p>
+<h2 id="resolve-merge-conflicts">Resolve merge conflicts</h2>
+<p><strong>Merge conflicts</strong> occur when multiple users modify the same lines of a file, and Git can't automatically determine which changes to keep. Conflicts can arise during <strong>pull</strong>, <strong>merge</strong>, or <strong>rebase</strong> operations.</p>
+<p>When a conflict occurs, the Git folders UI displays a list of conflicting files with resolution options:</p>
+<p><strong>Keep current or take incoming changes</strong>: Use this approach when you know you want all changes from one side. Select the kebab menu next to the file and choose <strong>Keep all current changes</strong> or <strong>Take all incoming changes</strong>.</p>
+<p><strong>Manual resolution</strong>: For complex conflicts, edit the file directly. Git marks conflicting sections with markers:</p>
+<pre><code class="lang-text">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+Your current changes
+=======
+Incoming changes
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; branch-name
+</code></pre>
+<p>Remove the markers and edit the content to keep the correct code. Select <strong>Mark As Resolved</strong> when finished.</p>
+<p>After resolving all conflicts, select <strong>Continue Merge</strong> or <strong>Continue Rebase</strong> to complete the operation. If you made incorrect choices, select <strong>Abort</strong> to cancel and return to the previous state.</p>
+<div class="TIP">
+<p>Tip</p>
+<p><strong>Pull changes frequently</strong> from the remote repository to catch conflicts early. Small, frequent merges are easier to resolve than large, complex ones.</p>
+</div>
+<p>With these branching and conflict resolution skills, you can participate effectively in team development workflows. Your next step is understanding how these practices integrate with broader CI/CD processes for deploying code across environments.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>4. Implement testing strategy</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/4-implement-testing-strategy">https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/4-implement-testing-strategy</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Implement testing strategy</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>Testing forms a critical foundation of reliable data engineering solutions. When you implement a <strong>comprehensive testing strategy</strong>, you catch problems early, validate assumptions, and ensure your pipelines deliver consistent, trustworthy results. As data volumes grow and pipelines become more complex, <strong>automated testing</strong> becomes essential for maintaining quality and reducing the risk of production failures.</p>
+<p>In this unit, you learn how to implement a testing strategy that covers <strong>unit tests</strong>, <strong>integration tests</strong>, <strong>end-to-end tests</strong>, and <strong>user acceptance testing (UAT)</strong> in Azure Databricks.</p>
+<h2 id="understand-the-testing-pyramid">Understand the testing pyramid</h2>
+<p>A well-designed testing strategy follows the <strong>testing pyramid</strong> concept. At the base, you have many fast, isolated unit tests. Moving up, you have fewer integration tests that verify component interactions. At the top, you have a small number of comprehensive end-to-end tests and UAT scenarios.</p>
+<p><a data-linktype="relative-path" href="media/4-understand-test-pyramid.png#lightbox">
+<img alt="Diagram showing the testing pyramid." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/media/4-understand-test-pyramid.png"/>
+</a>
+</p>
+<p>This structure exists because different test types serve different purposes:</p>
+<table>
+<thead>
+<tr>
+<th>Test type</th>
+<th>Purpose</th>
+<th>Scope</th>
+<th>Speed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unit tests</strong></td>
+<td>Verify individual functions work correctly</td>
+<td>Single function or class</td>
+<td>Fast (milliseconds)</td>
+</tr>
+<tr>
+<td><strong>Integration tests</strong></td>
+<td>Validate components work together</td>
+<td>Multiple components</td>
+<td>Moderate (seconds)</td>
+</tr>
+<tr>
+<td><strong>End-to-end tests</strong></td>
+<td>Confirm complete workflows produce expected results</td>
+<td>Full pipeline</td>
+<td>Slower (minutes)</td>
+</tr>
+<tr>
+<td><strong>UAT</strong></td>
+<td>Ensure solution meets business requirements</td>
+<td>Business scenarios</td>
+<td>Varies</td>
+</tr>
+</tbody>
+</table>
+<p>Starting with unit tests, you build confidence in your code's fundamental building blocks. Integration tests then confirm those blocks connect properly. End-to-end tests validate the entire system delivers correct results. UAT ensures stakeholders approve the solution before production deployment.</p>
+<h2 id="implement-unit-tests-with-pytest">Implement unit tests with pytest</h2>
+<p>Unit tests focus on testing <strong>individual functions in isolation</strong>. In Azure Databricks, the <strong>pytest</strong> framework provides a powerful way to write and run unit tests for your Python code.</p>
+<p>Consider a data transformation function that filters records by country/region:</p>
+<pre><code class="lang-python">def filter_country_region(df, country_region="USA"):
+    return df[df.iso_code == country_region]
+</code></pre>
+<p>To test this function, create a test file that follows pytest <strong>naming conventions</strong>. Files should start with <code>test_</code> or end with <code>_test.py</code>:</p>
+<pre><code class="lang-python">import pytest
+import pandas as pd
+from transforms import filter_country_region
+
+@pytest.fixture
+def sample_data():
+    """Create test data that mimics production structure."""
+    return pd.DataFrame({
+        'iso_code': ['USA', 'USA', 'CAN', 'GBR'],
+        'value': [100, 200, 150, 175]
+    })
+
+def test_filter_country_region_default(sample_data):
+    result = filter_country_region(sample_data)
+    assert len(result) == 2
+    assert all(result.iso_code == 'USA')
+
+def test_filter_country_region_specific(sample_data):
+    result = filter_country_region(sample_data, country_region='CAN')
+    assert len(result) == 1
+    assert result.iloc[0]['value'] == 150
+</code></pre>
+<p>The <code>@pytest.fixture</code> decorator creates <strong>reusable test data</strong>. This approach protects production data by using <strong>synthetic datasets</strong> that mirror your actual data structure without exposing sensitive information.</p>
+<p>To run these tests in a Databricks notebook, install pytest and execute it:</p>
+<pre><code class="lang-python">%pip install pytest
+
+import pytest
+retcode = pytest.main([".", "-v", "-p", "no:cacheprovider"])
+assert retcode == 0, "Tests failed. Check the output above."
+</code></pre>
+<div class="TIP">
+<p>Tip</p>
+<p>Design functions to return predictable, single-type outputs. A function that returns either a DataFrame or <code>False</code> becomes difficult to test. Instead, have it always return a DataFrame, even if empty.</p>
+</div>
+<h2 id="design-integration-tests">Design integration tests</h2>
+<p>Integration tests verify that <strong>multiple components work together</strong> correctly. In data pipelines, these tests confirm that data flows properly between ingestion, transformation, and storage stages.</p>
+<p>Unlike unit tests that use mocked data, integration tests often run against <strong>actual Databricks resources</strong>. You might read from a test table, apply transformations, and verify the output format:</p>
+<pre><code class="lang-python">def test_pipeline_integration(spark):
+    """Test that transformation pipeline produces expected schema."""
+    # Read from test table
+    input_df = spark.sql("SELECT * FROM test_catalog.test_schema.raw_data")
+    
+    # Apply transformation pipeline
+    result_df = transform_pipeline(input_df)
+    
+    # Verify output structure
+    expected_columns = ['id', 'processed_date', 'category', 'amount']
+    assert result_df.columns == expected_columns
+    
+    # Verify data types
+    assert result_df.schema['amount'].dataType.simpleString() == 'decimal(10,2)'
+</code></pre>
+<p>Integration tests require more setup than unit tests. Create <strong>dedicated test schemas or catalogs</strong> that contain representative data samples. This isolation prevents tests from affecting production data while still validating real component interactions.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Never run integration tests against production tables. Create separate test environments with data that mirrors production structure but contains no sensitive information.</p>
+</div>
+<h2 id="create-end-to-end-tests">Create end-to-end tests</h2>
+<p>End-to-end tests simulate <strong>complete workflows</strong> from start to finish. These tests validate that your entire pipeline produces the expected results when given specific inputs.</p>
+<p>Structure end-to-end tests to cover <strong>realistic scenarios</strong>:</p>
+<pre><code class="lang-python">def test_daily_processing_pipeline():
+    """Validate complete daily data processing workflow."""
+    # Setup: Create test input files
+    test_date = "2024-01-15"
+    setup_test_input_files(test_date)
+    
+    # Execute: Run the complete pipeline
+    run_daily_pipeline(test_date)
+    
+    # Verify: Check final output table
+    result = spark.sql(f"""
+        SELECT COUNT(*) as row_count, 
+               SUM(amount) as total_amount
+        FROM production.daily_summary
+        WHERE process_date = '{test_date}'
+    """)
+    
+    row = result.first()
+    assert row.row_count == 1000, f"Expected 1000 rows, got {row.row_count}"
+    assert abs(row.total_amount - 50000.00) &lt; 0.01
+    
+    # Cleanup: Remove test data
+    cleanup_test_data(test_date)
+</code></pre>
+<p>End-to-end tests take longer to run than unit or integration tests. Schedule them to run during <strong>off-peak hours</strong> or as part of your <strong>deployment pipeline</strong> rather than on every code change.</p>
+<h2 id="plan-user-acceptance-testing">Plan user acceptance testing</h2>
+<p>User acceptance testing (UAT) involves <strong>stakeholders validating</strong> that your solution meets <strong>business requirements</strong>. While the previous test types focus on technical correctness, UAT confirms the solution delivers business value.</p>
+<p>Effective UAT requires careful planning:</p>
+<ul>
+<li><strong>Define acceptance criteria</strong> with stakeholders before development begins</li>
+<li><strong>Create a staging environment</strong> that mirrors production</li>
+<li><strong>Prepare test scenarios</strong> that reflect actual business use cases</li>
+<li><strong>Document expected outcomes</strong> for each scenario</li>
+<li><strong>Establish a feedback process</strong> for reporting issues</li>
+</ul>
+<p>UAT often runs in a <strong>staging environment</strong> where business users can interact with the solution using realistic data. Consider creating notebooks that stakeholders can execute to validate specific scenarios:</p>
+<pre><code class="lang-python"># UAT Scenario: Monthly revenue reconciliation
+# Expected outcome: Total matches finance system within 1%
+
+finance_total = 1_250_000.00  # From finance system
+
+pipeline_result = spark.sql("""
+    SELECT SUM(revenue) as total_revenue
+    FROM reporting.monthly_revenue
+    WHERE month = '2024-01'
+""").first()
+
+variance = abs(pipeline_result.total_revenue - finance_total) / finance_total
+print(f"Variance: {variance:.2%}")
+
+if variance &lt; 0.01:
+    print("✓ UAT PASSED: Revenue totals match within tolerance")
+else:
+    print("✗ UAT FAILED: Revenue variance exceeds 1% threshold")
+</code></pre>
+<h2 id="organize-your-test-structure">Organize your test structure</h2>
+<p>A <strong>well-organized test structure</strong> makes tests easier to maintain and run. Follow these conventions for your Azure Databricks projects:</p>
+<pre><code>project/
+├── src/
+│   └── transforms.py
+├── tests/
+│   ├── unit/
+│   │   └── test_transforms.py
+│   ├── integration/
+│   │   └── test_pipeline.py
+│   └── e2e/
+│       └── test_daily_workflow.py
+├── notebooks/
+│   └── run_tests.py
+└── requirements.txt
+</code></pre>
+<p>Databricks recommends storing functions and their unit tests <strong>outside of notebooks</strong> for Python projects. This approach enables better <strong>code reuse</strong> and makes testing more straightforward. Store your functions in <code>.py</code> files within a Git folder, and import them into notebooks as needed.</p>
+<p>For running tests, create a dedicated notebook that executes pytest:</p>
+<pre><code class="lang-python">%pip install -r ../requirements.txt
+
+import pytest
+import sys
+
+# Prevent pytest from caching to readonly filesystem
+sys.dont_write_bytecode = True
+
+# Run all tests with verbose output
+retcode = pytest.main([
+    "tests/",
+    "-v",
+    "-p", "no:cacheprovider"
+])
+
+assert retcode == 0, "Test suite failed"
+</code></pre>
+<p><strong>Automate test execution</strong> by creating a Databricks job that runs your test notebook before deploying changes to production. This automation ensures that code changes don't introduce <strong>regressions</strong>.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>5. Configure and package Declarative Automation Bundles</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/5-configure-package-databricks-asset-bundles">https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/5-configure-package-databricks-asset-bundles</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Configure and package Declarative Automation Bundles</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>When you work on data engineering projects, you need a systematic way to define, package, and deploy your Databricks resources across environments. <strong>Declarative Automation Bundles</strong> (formerly known as Databricks Asset Bundles) provide an <strong>infrastructure-as-code</strong> approach that lets you describe jobs, pipelines, and other resources in YAML configuration files. By configuring and customizing these bundles, you can <strong>automate deployments</strong> and ensure consistency between development and production workspaces.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>Bundle configuration can also be expressed in Python (Public Preview), which lets you define jobs and resources as Python code instead of YAML. This unit focuses on YAML-based configuration, which is the most common approach. To learn more, see <a data-linktype="absolute-path" href="/en-us/azure/databricks/dev-tools/bundles/python/">Bundle configuration in Python</a>.</p>
+</div>
+<p><a data-linktype="relative-path" href="media/5-configure-package-databricks-asset-bundles.png#lightbox">
+<img alt="Diagram explaining Declarative Automation Bundles." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/media/5-configure-package-databricks-asset-bundles.png"/>
+</a>
+</p>
+<h2 id="understand-the-bundle-configuration-structure">Understand the bundle configuration structure</h2>
+<p>A Declarative Automation Bundle consists of <strong>YAML configuration files</strong> that define your project's resources and deployment settings. The primary configuration file, <code>databricks.yml</code>, must exist at the <strong>root of your bundle project</strong>. This file establishes the bundle's identity and can reference additional configuration files for better organization.</p>
+<p>The <code>databricks.yml</code> file contains several key sections that control how your bundle behaves:</p>
+<pre><code class="lang-yaml">bundle:
+  name: my-data-pipeline
+
+include:
+  - resources/*.yml
+
+workspace:
+  host: https://adb-1234567890123456.7.azuredatabricks.net
+
+resources:
+  jobs:
+    daily-ingestion-job:
+      name: daily-ingestion-job
+      tasks:
+        - task_key: ingest-data
+          notebook_task:
+            notebook_path: ./notebooks/ingest.py
+
+targets:
+  dev:
+    default: true
+  prod:
+    workspace:
+      host: https://adb-9876543210987654.3.azuredatabricks.net
+</code></pre>
+<p>The <strong>bundle</strong> mapping defines the bundle's programmatic name. The <strong>resources</strong> mapping specifies the Databricks resources you want to deploy, such as jobs and pipelines. The <strong>targets</strong> mapping defines different <strong>deployment environments</strong>, each potentially pointing to different workspaces with different configurations.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Split your configuration into separate files for resources and targets to keep configurations manageable. Use the <code>include</code> mapping to reference additional YAML files in your bundle.</p>
+</div>
+<h2 id="customize-deployment-parameters-with-variables">Customize deployment parameters with variables</h2>
+<p><strong>Variables</strong> make your bundle configurations flexible and reusable across environments. Rather than hardcoding values like cluster IDs or job names, you define variables that can be set differently for each deployment target.</p>
+<p>To define a variable, add it to the <strong>variables</strong> section of your configuration:</p>
+<pre><code class="lang-yaml">variables:
+  cluster_id:
+    description: The cluster to use for job execution
+    default: 1234-567890-abcde123
+  environment:
+    description: The deployment environment name
+    default: development
+
+resources:
+  jobs:
+    my-job:
+      name: ${var.environment}-data-pipeline
+      tasks:
+        - task_key: process-data
+          existing_cluster_id: ${var.cluster_id}
+          notebook_task:
+            notebook_path: ./notebooks/process.py
+</code></pre>
+<p>The <strong>substitution syntax</strong> <code>${var.variable_name}</code> inserts the variable's value wherever you reference it. This approach allows you to use the same bundle configuration while adjusting specific parameters for different environments.</p>
+<p>You can provide variable values in several ways:</p>
+<ul>
+<li>Set default values in the variable definition</li>
+<li>Override values in target-specific configurations</li>
+<li>Pass values through command-line options: <code>--var="cluster_id=5678-901234-fghij567"</code></li>
+<li>Use environment variables with the <code>BUNDLE_VAR_</code> prefix</li>
+</ul>
+<p>When deploying to different targets, you can override variable values for each environment:</p>
+<pre><code class="lang-yaml">targets:
+  dev:
+    default: true
+    variables:
+      cluster_id: 1234-567890-abcde123
+      environment: development
+  prod:
+    variables:
+      cluster_id: 9876-543210-zyxwv987
+      environment: production
+</code></pre>
+<h2 id="configure-resources-and-task-definitions">Configure resources and task definitions</h2>
+<p>The <strong>resources</strong> section defines the Databricks objects your bundle manages. <strong>Jobs</strong> are the most common resource type, and you can configure various task types within each job.</p>
+<p>A job definition includes the job name, tasks, and optional settings like schedules and notifications:</p>
+<pre><code class="lang-yaml">resources:
+  jobs:
+    etl-pipeline:
+      name: etl-pipeline
+      tasks:
+        - task_key: extract-task
+          notebook_task:
+            notebook_path: ./notebooks/extract.py
+        - task_key: transform-task
+          depends_on:
+            - task_key: extract-task
+          notebook_task:
+            notebook_path: ./notebooks/transform.py
+            base_parameters:
+              source_table: ${var.source_table}
+</code></pre>
+<p>Each task specifies its type, such as <strong>notebook_task</strong> for running notebooks or <strong>spark_python_task</strong> for Python scripts. The <code>depends_on</code> setting creates <strong>task dependencies</strong>, ensuring tasks run in the correct order. Parameters passed through <code>base_parameters</code> let you customize task behavior at runtime.</p>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>When configuring tasks, use paths relative to the bundle's root directory. The Databricks CLI resolves these paths when deploying the bundle to your workspace.</p>
+</div>
+<p>For compute configuration, you can reference existing clusters or define job clusters:</p>
+<pre><code class="lang-yaml">resources:
+  jobs:
+    my-job:
+      job_clusters:
+        - job_cluster_key: shared-cluster
+          new_cluster:
+            spark_version: 14.3.x-scala2.12
+            node_type_id: Standard_DS3_v2
+            num_workers: 2
+      tasks:
+        - task_key: my-task
+          job_cluster_key: shared-cluster
+          notebook_task:
+            notebook_path: ./notebooks/analysis.py
+</code></pre>
+<h2 id="set-up-deployment-targets">Set up deployment targets</h2>
+<p><strong>Targets</strong> represent different deployment environments, each with its own configuration overrides. A typical bundle includes development and production targets with distinct workspace URLs and settings.</p>
+<p><strong>Development mode</strong> automatically applies behaviors that simplify testing:</p>
+<pre><code class="lang-yaml">targets:
+  dev:
+    default: true
+    mode: development
+</code></pre>
+<p>When you deploy with <code>mode: development</code>, the CLI <strong>prefixes resource names</strong> with <code>[dev username]</code>, <strong>pauses all schedules</strong>, and enables <strong>concurrent job runs</strong>. These defaults help prevent development resources from interfering with production workloads.</p>
+<p><strong>Production mode</strong> enforces stricter validation:</p>
+<pre><code class="lang-yaml">targets:
+  prod:
+    mode: production
+    workspace:
+      host: https://adb-prod.7.azuredatabricks.net
+</code></pre>
+<p>In production mode, the CLI validates that your local Git branch matches the specified branch and recommends using <strong>service principals</strong> for deployments. You can customize these behaviors with the <strong>presets</strong> mapping:</p>
+<pre><code class="lang-yaml">targets:
+  staging:
+    presets:
+      name_prefix: staging_
+      trigger_pause_status: PAUSED
+      tags:
+        environment: staging
+</code></pre>
+<p>Presets let you fine-tune deployment behaviors without relying solely on the development or production mode defaults. This flexibility is useful for staging environments or specialized deployment scenarios.</p>
+<p>With your bundle configuration complete, you're ready to validate and deploy your resources. The <code>databricks bundle validate</code> command checks your configuration for errors before deployment, while <code>databricks bundle deploy</code> pushes your resources to the target workspace.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>6. Deploy bundle with Databricks CLI</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/6-deploy-bundle-databricks-cli">https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/6-deploy-bundle-databricks-cli</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Deploy bundle with Databricks CLI</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+
+<p>After your team configures a Declarative Automation Bundle, deploying it to Azure Databricks becomes your next responsibility. The <strong>Databricks CLI</strong> provides a direct path from your local development environment to production workspaces. You control when and where your pipelines, jobs, and other resources go live. Understanding this <strong>deployment workflow</strong> enables you to move code reliably across environments while maintaining consistency.</p>
+<div class="NOTE">
+<p>Note</p>
+<p>This unit focuses on CLI-based deployment, which is the recommended approach for CI/CD automation. Declarative Automation Bundles can also be managed through the Azure Databricks workspace UI (Public Preview), useful for ad-hoc collaboration without installing the CLI. See <a data-linktype="absolute-path" href="/en-us/azure/databricks/dev-tools/bundles/workspace">Collaborate on bundles in the workspace</a>.</p>
+</div>
+<p><a data-linktype="relative-path" href="media/6-deploy-bundle-databricks-cli.png#lightbox">
+<img alt="Diagram explaining the different steps when deploying a bundle with Databricks CLI." data-linktype="relative-path" src="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/media/6-deploy-bundle-databricks-cli.png"/>
+</a>
+</p>
+<h2 id="validate-bundle-configuration">Validate bundle configuration</h2>
+<p>Before deploying, confirm that your bundle configuration is <strong>syntactically correct</strong> and complete. The <code>bundle validate</code> command checks your configuration files and reports any issues that would prevent successful deployment.</p>
+<pre><code class="lang-bash">databricks bundle validate
+</code></pre>
+<p>When validation succeeds, you see a summary of your bundle identity:</p>
+<pre><code class="lang-output">Name: my_data_pipeline
+Target: dev
+Workspace:
+  Host: https://adb-1234567890123456.7.azuredatabricks.net
+  User: someone@example.com
+  Path: /Users/someone@example.com/.bundle/my_data_pipeline/dev
+
+Validation OK!
+</code></pre>
+<p>This output confirms the <strong>bundle name</strong>, <strong>target environment</strong>, and <strong>workspace details</strong>. If your configuration contains errors, such as missing required fields or invalid property names, the command outputs warnings or errors that you need to address before proceeding.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Run <code>bundle validate</code> after making changes to your bundle configuration files. Catching syntax errors early saves time compared to discovering them during deployment.</p>
+</div>
+<h2 id="preview-deployment-changes">Preview deployment changes</h2>
+<p>After validation, you can <strong>preview exactly what the deployment will create, update, or remove</strong> without making actual changes. The <code>bundle plan</code> command builds your bundle and displays the planned actions.</p>
+<pre><code class="lang-bash">databricks bundle plan
+</code></pre>
+<p>The output shows what resources will be affected:</p>
+<pre><code class="lang-output">Building python_artifact...
+create jobs.data_ingestion_job
+create pipelines.transform_pipeline
+</code></pre>
+<p>This preview lets you verify that the deployment matches your expectations. If you see unexpected changes, such as resources being removed that you intended to keep, adjust your configuration before committing to the deployment. For targets other than the default, specify the target:</p>
+<pre><code class="lang-bash">databricks bundle plan -t production
+</code></pre>
+<h2 id="deploy-bundle-to-a-target-workspace">Deploy bundle to a target workspace</h2>
+<p>With validation complete and the plan reviewed, you deploy the bundle using the <code>bundle deploy</code> command. This command <strong>uploads your artifacts</strong> and <strong>creates or updates resources</strong> in the target workspace.</p>
+<pre><code class="lang-bash">databricks bundle deploy
+</code></pre>
+<p>By default, deployment uses the <strong>default target</strong> defined in your bundle configuration. To deploy to a specific target such as development, staging, or production, use the <code>-t</code> flag:</p>
+<pre><code class="lang-bash">databricks bundle deploy -t dev
+</code></pre>
+<p>During deployment, the CLI <strong>tracks which resources it creates</strong> by storing state in the workspace. This tracking enables several behaviors:</p>
+<ul>
+<li><strong>New resources</strong> defined in your configuration are created in the workspace</li>
+<li><strong>Existing resources</strong> that you previously deployed are updated to match your current configuration</li>
+<li><strong>Removed resources</strong> that no longer appear in your configuration are deleted from the workspace</li>
+</ul>
+<div class="IMPORTANT">
+<p>Important</p>
+<p>Each bundle deployment has a unique identity based on the bundle name, target name, and the deploying user's identity. If multiple team members deploy the same bundle to the same target, their deployments will conflict. Coordinate with your team to establish who deploys to shared environments.</p>
+</div>
+<p>For automated deployments in <strong>CI/CD pipelines</strong>, add the <code>--auto-approve</code> flag to skip confirmation prompts:</p>
+<pre><code class="lang-bash">databricks bundle deploy -t production --auto-approve
+</code></pre>
+<h2 id="verify-deployed-resources">Verify deployed resources</h2>
+<p>After deployment completes, verify that your resources are available and configured correctly in the workspace. The <code>bundle summary</code> command outputs information about <strong>deployed resources</strong>, including <strong>direct links</strong> to view them in the Azure Databricks UI:</p>
+<pre><code class="lang-bash">databricks bundle summary
+</code></pre>
+<pre><code class="lang-output">Name: my_data_pipeline
+Target: dev
+Workspace:
+  Host: https://adb-1234567890123456.7.azuredatabricks.net
+  User: someone@example.com
+  Path: /Users/someone@example.com/.bundle/my_data_pipeline/dev
+Resources:
+  Jobs:
+    data_ingestion_job:
+      Name: [dev someone] data_ingestion_job
+      URL:  https://adb-1234567890123456.7.azuredatabricks.net/jobs/123456789?o=1234567890123456
+  Pipelines:
+    transform_pipeline:
+      Name: [dev someone] transform_pipeline
+      URL:  https://adb-1234567890123456.7.azuredatabricks.net/pipelines/abc-123-def?o=1234567890123456
+</code></pre>
+<p>You can also navigate directly to a specific resource using the <code>bundle open</code> command:</p>
+<pre><code class="lang-bash">databricks bundle open data_ingestion_job
+</code></pre>
+<p>This command opens your browser to the resource in the Azure Databricks workspace.</p>
+<h2 id="troubleshoot-common-deployment-issues">Troubleshoot common deployment issues</h2>
+<p>Even with careful preparation, deployments sometimes encounter problems. Here are common issues and how to resolve them:</p>
+<p><strong>Authentication errors</strong>: If you see permission denied or authentication failures, verify that your CLI is configured with <strong>valid credentials</strong>. Check your profile configuration or reauthenticate with your workspace.</p>
+<pre><code class="lang-bash">databricks auth login --host https://adb-1234567890123456.7.azuredatabricks.net
+</code></pre>
+<p><strong>Lock conflicts</strong>: When a deployment is in progress, Azure Databricks acquires a <strong>lock</strong> to prevent concurrent modifications. If a previous deployment was interrupted, you might see lock errors. Use the <code>--force-lock</code> flag to override.</p>
+<pre><code class="lang-bash">databricks bundle deploy --force-lock
+</code></pre>
+<p><strong>Active run conflicts</strong>: If jobs or pipelines from your bundle are <strong>currently running</strong>, deployment fails by default to prevent disruption. You can choose to fail explicitly with the <code>--fail-on-active-runs</code> flag, or handle running resources in your deployment strategy.</p>
+<p><strong>Validation warnings</strong>: If <code>bundle validate</code> reports warnings about unknown properties, your configuration might reference features not available in your current CLI version or workspace. Update your CLI or review the property names against the current schema.</p>
+<p>With these deployment commands, you can reliably move your data engineering work from development through staging to production environments, maintaining control over what gets deployed and when.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>7. Summary</h2>
+            <a href="https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/9-summary">https://learn.microsoft.com/en-us/training/modules/implement-development-lifecycle-processes-in-azure-databricks/9-summary</a>
+        </div>
+        <div class="content"><main class="layout-body-main background-color-body-dark" data-bi-name="content" dir="ltr" id="main" lang="en-us" role="main">
+<div data-main-column="">
+<!-- Article header -->
+
+<!-- Unit navigation menu -->
+
+<!-- Main content area -->
+<div class="content margin-top-md"><div class="modular-content-container has-body-background box">
+<div class="section is-uniform position-relative" id="unit-inner-section">
+<h1 class="margin-right-xxl-desktop" id="module-unit-title">Summary</h1>
+
+
+<div aria-hidden="true" hidden="" id="module-unit-module-assessment-message-container"></div>
+<div hidden="" id="module-unit-notification-container"></div>
+<div id="module-unit-content">
+<p>Implementing development lifecycle processes transforms how your team builds and deploys data engineering solutions in Azure Databricks. Throughout this module, you explored <strong>Git folder integration</strong> for version control, <strong>branching and pull request workflows</strong> for collaboration, <strong>comprehensive testing strategies</strong> to ensure quality, and <strong>Declarative Automation Bundles</strong> with CLI deployment for consistent infrastructure management.</p>
+<p>Effective version control through Git folders enables teams to track changes, collaborate through shared repositories, and maintain organized codebases. By following branching best practices and using pull requests for code review, you reduce integration conflicts and ensure code quality before merging. The <strong>testing pyramid</strong>—with unit tests at the base, integration tests in the middle, and end-to-end tests at the top—provides a structured approach to catching issues early and validating that pipelines deliver expected results.</p>
+<p>Declarative Automation Bundles bring <strong>infrastructure-as-code</strong> principles to your deployment workflow. By defining jobs, pipelines, and resources in YAML configuration files, you create reproducible deployments across development, staging, and production environments. The Databricks CLI commands—<strong>validate</strong>, <strong>plan</strong>, and <strong>deploy</strong>—give you control over the deployment process and help troubleshoot issues before they impact production.</p>
+<p>Apply these development lifecycle practices to your Azure Databricks projects to improve collaboration, reduce deployment risks, and deliver reliable data solutions that meet business requirements.</p>
+</div>
+<div class="modular-content-container" hidden="" id="next-section">
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback area -->
+<div class="modular-content-container margin-block-xs">
+<section class="feedback-section section is-full-height is-uniform padding-block-none position-relative">
+<div class="font-weight-semibold display-none" id="ms--unit-support-message"></div>
+<div id="ms--unit-user-feedback">
+<!-- feedback section -->
+
+<!-- end feedback section -->
+</div>
+</section>
+</div>
+<!-- Interactive footer area -->
+</div>
+</main></div>
+    </div>
+</body>
+</html>
